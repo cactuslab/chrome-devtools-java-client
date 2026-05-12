@@ -22,10 +22,10 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <lombok.version>1.18.2</lombok.version>
+        <lombok.version>1.18.46</lombok.version>
         <java.parser.core.version>3.5.11</java.parser.core.version>
-        <jackson.version>2.11.3</jackson.version>
-        <junit.version>4.13.1</junit.version>
+        <jackson.version>2.19.4</jackson.version>
+        <junit.version>4.13.2</junit.version>
         <jsonassert.version>1.5.0</jsonassert.version>
     </properties>
 
