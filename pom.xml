@@ -54,7 +54,7 @@
         <google.java.format.version>1.5</google.java.format.version>
 
         <junit.version>4.13.2</junit.version>
-        <jacoco.version>0.8.0</jacoco.version>
+        <jacoco.version>0.8.14</jacoco.version>
         <easy.mock.version>3.4</easy.mock.version>
         <jsonassert.version>1.5.0</jsonassert.version>
     </properties>
