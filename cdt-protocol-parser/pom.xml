@@ -17,18 +17,6 @@
     <description>Chrome DevTools protocol parser</description>
     <url>https://github.com/kklisura/chrome-devtools-java-client</url>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-
-        <lombok.version>1.18.46</lombok.version>
-        <java.parser.core.version>3.5.11</java.parser.core.version>
-        <jackson.version>2.19.4</jackson.version>
-        <junit.version>4.13.2</junit.version>
-        <jsonassert.version>1.5.0</jsonassert.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
