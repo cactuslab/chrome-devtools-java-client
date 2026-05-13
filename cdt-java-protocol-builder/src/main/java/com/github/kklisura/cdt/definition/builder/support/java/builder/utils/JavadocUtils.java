@@ -48,12 +48,18 @@ public class JavadocUtils {
   public JavadocComment createJavadocComment(String comment, String indentation) {
     JavadocSnippet javadocSnippet = new JavadocSnippet("");
     if (StringUtils.isNotEmpty(comment)) {
-      javadocSnippet = new JavadocSnippet(comment);
+      javadocSnippet = new JavadocSnippet(escapeJavadoc(comment));
     }
 
     JavadocDescription description = new JavadocDescription();
     description.addElement(javadocSnippet);
     Javadoc javadoc = new Javadoc(description);
     return javadoc.toComment(indentation);
+  }
+
+  private static String escapeJavadoc(String comment) {
+    // "*/" terminates a Javadoc block; escape the slash so the source stays valid Java while the
+    // rendered Javadoc still shows "*/".
+    return comment.replace("*/", "*&#47;");
   }
 }
