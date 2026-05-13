@@ -20,15 +20,14 @@ package com.github.kklisura.cdt.utils;
  * #L%
  */
 
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.mock;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import java.io.Closeable;
 import java.io.IOException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created by Kenan Klisura on 01/02/2018.
@@ -41,27 +40,19 @@ public class ChromeDevToolsUtilsTest {
     Closeable closeable = mock(Closeable.class);
     Closeable closeableWithException = mock(Closeable.class);
 
-    closeable.close();
-
-    closeableWithException.close();
-    expectLastCall().andThrow(new IOException());
-
-    replay(closeable, closeableWithException);
+    doThrow(new IOException()).when(closeableWithException).close();
 
     ChromeDevToolsUtils.closeQuietly(null);
     ChromeDevToolsUtils.closeQuietly(closeable);
     ChromeDevToolsUtils.closeQuietly(closeableWithException);
 
-    verify(closeable, closeableWithException);
+    verify(closeable).close();
+    verify(closeableWithException).close();
   }
 
   @Test
   public void testWaitForEvent() {
     EventListener eventListener = mock(EventListener.class);
-
-    eventListener.unsubscribe();
-
-    replay(eventListener);
 
     ChromeDevToolsUtils.waitForEvent(
         eventHandler -> {
@@ -69,6 +60,6 @@ public class ChromeDevToolsUtilsTest {
           return eventListener;
         });
 
-    verify(eventListener);
+    verify(eventListener).unsubscribe();
   }
 }

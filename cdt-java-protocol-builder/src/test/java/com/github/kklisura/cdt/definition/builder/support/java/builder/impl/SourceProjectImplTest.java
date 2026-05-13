@@ -21,9 +21,10 @@ package com.github.kklisura.cdt.definition.builder.support.java.builder.impl;
  */
 
 import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -35,19 +36,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.easymock.EasyMockRunner;
+import org.easymock.EasyMockExtension;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Created by Kenan Klisura on 06/02/2018.
  *
  * @author Kenan Klisura
  */
-@RunWith(EasyMockRunner.class)
+@ExtendWith(EasyMockExtension.class)
 public class SourceProjectImplTest extends EasyMockSupport {
 
   @Mock private SourceRoot sourceRoot;
@@ -56,7 +57,7 @@ public class SourceProjectImplTest extends EasyMockSupport {
 
   private SourceProjectImpl sourceProject;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     sourceProject = new SourceProjectImpl(sourceRoot);
   }
@@ -86,7 +87,7 @@ public class SourceProjectImplTest extends EasyMockSupport {
             .endsWith("source-project/main/com/github/kklisura/name.java"));
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testAddCompilationUnitThrowsExceptionWhenAddingDuplicateCompilationUnit() {
     CompilationUnit compilationUnit1 = new CompilationUnit();
     CompilationUnit compilationUnit2 = new CompilationUnit();
@@ -104,7 +105,9 @@ public class SourceProjectImplTest extends EasyMockSupport {
     replayAll();
 
     sourceProject.addCompilationUnit("com.github.kklisura", "name", compilationUnit1);
-    sourceProject.addCompilationUnit("com.github.kklisura", "name", compilationUnit2);
+    assertThrows(
+        RuntimeException.class,
+        () -> sourceProject.addCompilationUnit("com.github.kklisura", "name", compilationUnit2));
   }
 
   @Test

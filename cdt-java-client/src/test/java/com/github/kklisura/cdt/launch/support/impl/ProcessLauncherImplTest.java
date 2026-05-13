@@ -20,12 +20,13 @@ package com.github.kklisura.cdt.launch.support.impl;
  * #L%
  */
 
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.mock;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
@@ -33,28 +34,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import org.easymock.Capture;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.easymock.PowerMock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 
 /**
  * Created by Kenan Klisura on 31/01/2018.
  *
  * @author Kenan Klisura
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ProcessBuilder.class, ProcessLauncherImpl.class, Files.class, Paths.class})
 public class ProcessLauncherImplTest {
   private ProcessLauncherImpl processLauncher;
 
-  private ProcessBuilder processBuilder;
-
-  @Before
-  public void setUp() throws Exception {
+  @BeforeEach
+  public void setUp() {
     processLauncher = new ProcessLauncherImpl();
   }
 
@@ -64,100 +58,58 @@ public class ProcessLauncherImplTest {
     args.add("arg1");
     args.add("arg2");
 
-    ProcessBuilder processBuilder = PowerMock.createMock(ProcessBuilder.class);
-
-    PowerMock.expectNew(ProcessBuilder.class, new Class[] {}).andReturn(processBuilder);
-
-    Capture<List<String>> captureCommands = Capture.newInstance();
-    expect(processBuilder.command(capture(captureCommands))).andReturn(processBuilder);
-    expect(processBuilder.redirectErrorStream(true)).andReturn(processBuilder);
-    expect(processBuilder.redirectOutput(Redirect.PIPE)).andReturn(processBuilder);
-
     Process process = mock(Process.class);
-    expect(processBuilder.start()).andReturn(process);
 
-    PowerMock.replayAll(ProcessBuilder.class, processBuilder);
+    try (MockedConstruction<ProcessBuilder> mockedConstruction =
+        mockConstruction(
+            ProcessBuilder.class,
+            (mock, context) -> {
+              when(mock.command(org.mockito.ArgumentMatchers.<List<String>>any())).thenReturn(mock);
+              when(mock.redirectErrorStream(true)).thenReturn(mock);
+              when(mock.redirectOutput(Redirect.PIPE)).thenReturn(mock);
+              when(mock.start()).thenReturn(process);
+            })) {
 
-    assertEquals(process, processLauncher.launch("program-name", args));
+      assertEquals(process, processLauncher.launch("program-name", args));
 
-    PowerMock.verify(ProcessBuilder.class, processBuilder);
+      ProcessBuilder processBuilder = mockedConstruction.constructed().get(0);
+      org.mockito.ArgumentCaptor<List<String>> captureCommands = listCaptor();
+      org.mockito.Mockito.verify(processBuilder).command(captureCommands.capture());
 
-    List<String> commands = captureCommands.getValue();
-    assertEquals(3, commands.size());
-    assertEquals("program-name", commands.get(0));
-    assertEquals("arg1", commands.get(1));
-    assertEquals("arg2", commands.get(2));
+      List<String> commands = captureCommands.getValue();
+      assertEquals(3, commands.size());
+      assertEquals("program-name", commands.get(0));
+      assertEquals("arg1", commands.get(1));
+      assertEquals("arg2", commands.get(2));
+    }
   }
 
   @Test
   public void testIsExecutable() {
-    PowerMock.mockStatic(Paths.class);
-    PowerMock.mockStatic(Files.class);
-
     final Path path = mock(Path.class);
 
-    Paths.get("test-file");
-    PowerMock.expectLastCall().andReturn(path);
+    try (MockedStatic<Paths> mockedPaths = mockStatic(Paths.class);
+        MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
+      mockedPaths.when(() -> Paths.get("test-file")).thenReturn(path);
 
-    Files.isRegularFile(path);
-    PowerMock.expectLastCall().andReturn(false);
+      mockedFiles.when(() -> Files.isRegularFile(path)).thenReturn(false);
+      assertFalse(processLauncher.isExecutable("test-file"));
 
-    PowerMock.replayAll();
-    assertFalse(processLauncher.isExecutable("test-file"));
-    PowerMock.verifyAll();
-    PowerMock.resetAll();
+      mockedFiles.when(() -> Files.isRegularFile(path)).thenReturn(true);
+      mockedFiles.when(() -> Files.isReadable(path)).thenReturn(false);
+      assertFalse(processLauncher.isExecutable("test-file"));
 
-    // --
+      mockedFiles.when(() -> Files.isReadable(path)).thenReturn(true);
+      mockedFiles.when(() -> Files.isExecutable(path)).thenReturn(false);
+      assertFalse(processLauncher.isExecutable("test-file"));
 
-    Paths.get("test-file");
-    PowerMock.expectLastCall().andReturn(path);
+      mockedFiles.when(() -> Files.isExecutable(path)).thenReturn(true);
+      assertTrue(processLauncher.isExecutable("test-file"));
+    }
+  }
 
-    Files.isRegularFile(path);
-    PowerMock.expectLastCall().andReturn(true);
-
-    Files.isReadable(path);
-    PowerMock.expectLastCall().andReturn(false);
-
-    PowerMock.replayAll();
-    assertFalse(processLauncher.isExecutable("test-file"));
-    PowerMock.verifyAll();
-    PowerMock.resetAll();
-
-    // --
-
-    Paths.get("test-file");
-    PowerMock.expectLastCall().andReturn(path);
-
-    Files.isRegularFile(path);
-    PowerMock.expectLastCall().andReturn(true);
-
-    Files.isReadable(path);
-    PowerMock.expectLastCall().andReturn(true);
-
-    Files.isExecutable(path);
-    PowerMock.expectLastCall().andReturn(false);
-
-    PowerMock.replayAll();
-    assertFalse(processLauncher.isExecutable("test-file"));
-    PowerMock.verifyAll();
-    PowerMock.resetAll();
-
-    // --
-
-    Paths.get("test-file");
-    PowerMock.expectLastCall().andReturn(path);
-
-    Files.isRegularFile(path);
-    PowerMock.expectLastCall().andReturn(true);
-
-    Files.isReadable(path);
-    PowerMock.expectLastCall().andReturn(true);
-
-    Files.isExecutable(path);
-    PowerMock.expectLastCall().andReturn(true);
-
-    PowerMock.replayAll();
-    assertTrue(processLauncher.isExecutable("test-file"));
-    PowerMock.verifyAll();
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private static org.mockito.ArgumentCaptor<List<String>> listCaptor() {
+    return org.mockito.ArgumentCaptor.forClass((Class) List.class);
   }
 }

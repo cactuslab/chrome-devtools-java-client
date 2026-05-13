@@ -20,21 +20,20 @@ package com.github.kklisura.cdt.launch;
  * #L%
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.HashMap;
-import org.easymock.EasyMockSupport;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test chrome arguments.
  *
  * @author Kenan Klisura
  */
-public class ChromeArgumentsTest extends EasyMockSupport {
+public class ChromeArgumentsTest {
   @Test
   public void testBuilder() {
     assertNotNull(ChromeArguments.builder());

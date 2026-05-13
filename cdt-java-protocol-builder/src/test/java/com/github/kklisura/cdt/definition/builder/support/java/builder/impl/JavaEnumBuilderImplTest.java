@@ -22,7 +22,7 @@ package com.github.kklisura.cdt.definition.builder.support.java.builder.impl;
 
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.eq;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.kklisura.cdt.definition.builder.support.java.builder.SourceProject;
@@ -30,19 +30,19 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.easymock.Capture;
-import org.easymock.EasyMockRunner;
+import org.easymock.EasyMockExtension;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Java enum builder impl test.
  *
  * @author Kenan Klisura
  */
-@RunWith(EasyMockRunner.class)
+@ExtendWith(EasyMockExtension.class)
 public class JavaEnumBuilderImplTest extends EasyMockSupport {
   private static final String PACKAGE = "com.github.kklisura";
   private static final String NAME = "EnumName";
@@ -53,7 +53,7 @@ public class JavaEnumBuilderImplTest extends EasyMockSupport {
 
   private Path rootPath;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     rootPath = new File("/tmp/test-class-builder").toPath();
     javaEnumBuilder = new JavaEnumBuilderImpl(PACKAGE, NAME);

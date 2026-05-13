@@ -21,34 +21,44 @@ package com.github.kklisura.cdt.services.impl;
  */
 
 import static java.lang.Thread.sleep;
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.github.kklisura.cdt.services.WebSocketService;
 import com.github.kklisura.cdt.services.exceptions.WebSocketServiceException;
 import com.github.kklisura.cdt.services.factory.WebSocketContainerFactory;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.websocket.*;
+import javax.websocket.DeploymentException;
+import javax.websocket.MessageHandler;
+import javax.websocket.OnMessage;
+import javax.websocket.Session;
+import javax.websocket.WebSocketContainer;
 import javax.websocket.server.ServerEndpoint;
-import org.easymock.Capture;
-import org.easymock.EasyMockRunner;
-import org.easymock.EasyMockSupport;
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.server.Server;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 /**
  * Web socket service implementation test. It's more integration test than a unit test.
  *
  * @author Kenan Klisura
  */
-@RunWith(EasyMockRunner.class)
-public class WebSocketServiceImplTest extends EasyMockSupport {
+public class WebSocketServiceImplTest {
 
   private static final Random RANDOM_PORT = new Random();
 
@@ -104,60 +114,56 @@ public class WebSocketServiceImplTest extends EasyMockSupport {
     webSocketService.close();
     server.stop();
 
-    assertTrue("Failed sending/receiving ws messages.", isSuccess.get());
+    assertTrue(isSuccess.get(), "Failed sending/receiving ws messages.");
   }
 
-  @Test(expected = WebSocketServiceException.class)
-  public void testConnectionAndMessageSendFails()
-      throws WebSocketServiceException, InterruptedException {
+  @Test
+  public void testConnectionAndMessageSendFails() throws InterruptedException {
     final Server server = startServer();
 
     final WebSocketService webSocketService =
-        WebSocketServiceImpl.create(createURI(server.getPort()));
+        assertDoesNotThrowConnect(() -> WebSocketServiceImpl.create(createURI(server.getPort())));
     server.stop();
 
     sleep(500);
 
     try {
-      webSocketService.send(PING);
+      assertThrows(WebSocketServiceException.class, () -> webSocketService.send(PING));
     } finally {
       webSocketService.close();
     }
   }
 
-  @Test(expected = WebSocketServiceException.class)
-  public void testConnectionOnNonExistentServer()
-      throws WebSocketServiceException, InterruptedException {
+  @Test
+  public void testConnectionOnNonExistentServer() {
     final int port = randomPort();
-    WebSocketServiceImpl.create(createURI(port));
+    assertThrows(
+        WebSocketServiceException.class, () -> WebSocketServiceImpl.create(createURI(port)));
   }
 
-  @Test(expected = WebSocketServiceException.class)
-  public void testAddMessageHandlerThrowsExceptionIfNotConnected()
-      throws WebSocketServiceException {
+  @Test
+  public void testAddMessageHandlerThrowsExceptionIfNotConnected() {
     WebSocketServiceImpl socketService = new WebSocketServiceImpl(null);
-    socketService.addMessageHandler(message -> {});
+    assertThrows(
+        WebSocketServiceException.class, () -> socketService.addMessageHandler(message -> {}));
   }
 
-  @Test(expected = WebSocketServiceException.class)
-  public void testAddMessageHandlerThrowsExceptionIfHandlerAlreadyAdded()
-      throws WebSocketServiceException {
+  @Test
+  public void testAddMessageHandlerThrowsExceptionIfHandlerAlreadyAdded() {
     Session session = mock(Session.class);
 
     Set<MessageHandler> messageHandlerSet = new HashSet<>();
     messageHandlerSet.add(null);
 
-    expect(session.getMessageHandlers()).andReturn(messageHandlerSet);
-
-    replay(session);
+    when(session.getMessageHandlers()).thenReturn(messageHandlerSet);
 
     WebSocketServiceImpl socketService = new WebSocketServiceImpl(session);
-    socketService.addMessageHandler(message -> {});
-
-    verify(session);
+    assertThrows(
+        WebSocketServiceException.class, () -> socketService.addMessageHandler(message -> {}));
   }
 
   @Test
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void testAddMessageHandlerHandlerIsAdded() throws WebSocketServiceException {
     final String message = "MESSAGE";
 
@@ -165,26 +171,22 @@ public class WebSocketServiceImplTest extends EasyMockSupport {
 
     Set<MessageHandler> messageHandlerSet = new HashSet<>();
 
-    expect(session.getMessageHandlers()).andReturn(messageHandlerSet);
+    when(session.getMessageHandlers()).thenReturn(messageHandlerSet);
+    when(session.getRequestURI()).thenReturn(URI.create("http://github/com"));
 
-    expect(session.getRequestURI()).andReturn(URI.create("http://github/com"));
-
-    Capture<MessageHandler.Whole<String>> handlerCapture = Capture.newInstance();
-    session.addMessageHandler(capture(handlerCapture));
-
-    Capture<String> messageCapture = Capture.newInstance();
-
-    replay(session);
+    final String[] receivedMessage = new String[1];
 
     WebSocketServiceImpl socketService = new WebSocketServiceImpl(session);
-    socketService.addMessageHandler(messageCapture::setValue);
+    socketService.addMessageHandler(value -> receivedMessage[0] = value);
+
+    ArgumentCaptor<MessageHandler.Whole> handlerCapture =
+        ArgumentCaptor.forClass(MessageHandler.Whole.class);
+    verify(session).addMessageHandler(handlerCapture.capture());
 
     assertNotNull(handlerCapture.getValue());
     handlerCapture.getValue().onMessage(message);
 
-    verify(session);
-
-    assertEquals(message, messageCapture.getValue());
+    assertEquals(message, receivedMessage[0]);
   }
 
   @Test
@@ -203,18 +205,18 @@ public class WebSocketServiceImplTest extends EasyMockSupport {
     assertNull(webSocketContainer);
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testGetWebSocketContainerFailsOnUnknownFactoryClass() {
     System.setProperty(WebSocketServiceImpl.WEB_SOCKET_CONTAINER_FACTORY_PROPERTY, "non-existing");
-    WebSocketServiceImpl.getWebSocketContainer();
+    assertThrows(RuntimeException.class, WebSocketServiceImpl::getWebSocketContainer);
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testGetWebSocketContainerFailsOnNonImplementingFactoryClass() {
     System.setProperty(
         WebSocketServiceImpl.WEB_SOCKET_CONTAINER_FACTORY_PROPERTY,
         CustomNonImplementingWebSocketContainerFactory.class.getName());
-    WebSocketServiceImpl.getWebSocketContainer();
+    assertThrows(RuntimeException.class, WebSocketServiceImpl::getWebSocketContainer);
   }
 
   private static Server startServer() {
@@ -238,6 +240,18 @@ public class WebSocketServiceImplTest extends EasyMockSupport {
 
   private static int randomPort() {
     return RESERVED_PORTS + (Math.abs(RANDOM_PORT.nextInt()) % (MAX_PORT - RESERVED_PORTS));
+  }
+
+  private interface CheckedSupplier<T> {
+    T get() throws WebSocketServiceException;
+  }
+
+  private static <T> T assertDoesNotThrowConnect(CheckedSupplier<T> supplier) {
+    try {
+      return supplier.get();
+    } catch (WebSocketServiceException e) {
+      throw new AssertionError(e);
+    }
   }
 
   @ServerEndpoint(value = "/test")

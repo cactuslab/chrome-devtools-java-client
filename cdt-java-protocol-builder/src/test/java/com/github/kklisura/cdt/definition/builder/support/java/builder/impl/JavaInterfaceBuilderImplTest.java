@@ -24,7 +24,7 @@ import static com.github.kklisura.cdt.definition.builder.support.java.builder.im
 import static com.github.kklisura.cdt.definition.builder.support.java.builder.impl.JavaInterfaceBuilderImpl.isClassList;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.eq;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.kklisura.cdt.definition.builder.support.java.builder.SourceProject;
@@ -36,19 +36,19 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.easymock.Capture;
-import org.easymock.EasyMockRunner;
+import org.easymock.EasyMockExtension;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Java interface builder test.
  *
  * @author Kenan Klisura
  */
-@RunWith(EasyMockRunner.class)
+@ExtendWith(EasyMockExtension.class)
 public class JavaInterfaceBuilderImplTest extends EasyMockSupport {
   private static final String NAME = "InterfaceTest";
   private static final String BASE_PACKAGE_NAME = "com.github.kklisura";
@@ -60,7 +60,7 @@ public class JavaInterfaceBuilderImplTest extends EasyMockSupport {
 
   private Path rootPath;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     rootPath = new File("/tmp/test-class-builder").toPath();
     interfaceBuilder =

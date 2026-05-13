@@ -20,7 +20,8 @@ package com.github.kklisura.cdt.definition.builder.support.utils;
  * #L%
  */
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.kklisura.cdt.protocol.definition.DevToolsProtocol;
 import com.github.kklisura.cdt.protocol.definition.types.Domain;
@@ -28,7 +29,7 @@ import com.github.kklisura.cdt.protocol.definition.types.Type;
 import com.github.kklisura.cdt.protocol.definition.types.type.StringType;
 import java.util.Arrays;
 import java.util.Collections;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Domain type utils test.
@@ -36,14 +37,16 @@ import org.junit.Test;
  * @author Kenan Klisura
  */
 public class DomainUtilsTest {
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testDevToolsProtocolResolverOnNonExistingDomain() {
     DevToolsProtocol devToolsProtocol = new DevToolsProtocol();
     devToolsProtocol.setDomains(Collections.emptyList());
-    DomainUtils.devToolsProtocolResolver(devToolsProtocol).resolve("domain", "test");
+    assertThrows(
+        RuntimeException.class,
+        () -> DomainUtils.devToolsProtocolResolver(devToolsProtocol).resolve("domain", "test"));
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testDevToolsProtocolResolverOnNonExistingType() {
     Type type1 = new StringType();
     type1.setId("test-type");
@@ -54,7 +57,9 @@ public class DomainUtilsTest {
     domain.setTypes(Arrays.asList(type1, type2));
     DevToolsProtocol devToolsProtocol = new DevToolsProtocol();
     devToolsProtocol.setDomains(Collections.singletonList(domain));
-    DomainUtils.devToolsProtocolResolver(devToolsProtocol).resolve("domain", "test");
+    assertThrows(
+        RuntimeException.class,
+        () -> DomainUtils.devToolsProtocolResolver(devToolsProtocol).resolve("domain", "test"));
   }
 
   @Test

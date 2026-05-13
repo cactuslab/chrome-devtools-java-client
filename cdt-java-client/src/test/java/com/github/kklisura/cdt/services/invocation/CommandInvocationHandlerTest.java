@@ -20,8 +20,18 @@ package com.github.kklisura.cdt.services.invocation;
  * #L%
  */
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
@@ -34,68 +44,54 @@ import com.github.kklisura.cdt.services.types.MethodInvocation;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
-import org.easymock.Capture;
-import org.easymock.EasyMockRunner;
-import org.easymock.EasyMockSupport;
-import org.easymock.Mock;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Command invocation handler test.
  *
  * @author Kenan Klisura
  */
-@RunWith(EasyMockRunner.class)
-public class CommandInvocationHandlerTest extends EasyMockSupport {
+@ExtendWith(MockitoExtension.class)
+public class CommandInvocationHandlerTest {
 
   @Mock private ChromeDevToolsService chromeDevToolsService;
 
   private CommandInvocationHandler invocationHandler;
 
-  @Before
-  public void setUp() throws Exception {
+  @BeforeEach
+  public void setUp() {
     invocationHandler = new CommandInvocationHandler();
     invocationHandler.setChromeDevToolsService(chromeDevToolsService);
   }
 
   @Test
   public void testInvokeVoidMethod() throws Throwable {
-    Capture<MethodInvocation> methodInvocationCapture = Capture.newInstance();
-    expect(
-            chromeDevToolsService.invoke(
-                eq(null), eq(Void.TYPE), eq(null), capture(methodInvocationCapture)))
-        .andReturn(null);
-
-    replayAll();
-
     assertNull(invocationHandler.invoke(this, getMethodByName("voidMethod"), null));
 
-    verifyAll();
+    ArgumentCaptor<MethodInvocation> methodInvocationCapture =
+        ArgumentCaptor.forClass(MethodInvocation.class);
+    verify(chromeDevToolsService)
+        .invoke(isNull(), eq(Void.TYPE), isNull(), methodInvocationCapture.capture());
 
     MethodInvocation methodInvocation = methodInvocationCapture.getValue();
-
     assertNotNull(methodInvocation.getId());
     assertEquals("CommandInvocationHandlerTest.voidMethod", methodInvocation.getMethod());
     assertTrue(methodInvocation.getParams().isEmpty());
 
-    resetAll();
-
-    methodInvocationCapture = Capture.newInstance();
-    expect(
-            chromeDevToolsService.invoke(
-                eq(null), eq(Void.TYPE), eq(null), capture(methodInvocationCapture)))
-        .andReturn(null);
-
-    replayAll();
+    reset(chromeDevToolsService);
 
     assertNull(invocationHandler.invoke(this, getMethodByName("voidMethod"), new Object[] {}));
 
-    verifyAll();
+    methodInvocationCapture = ArgumentCaptor.forClass(MethodInvocation.class);
+    verify(chromeDevToolsService)
+        .invoke(isNull(), eq(Void.TYPE), isNull(), methodInvocationCapture.capture());
 
     methodInvocation = methodInvocationCapture.getValue();
-
     assertNotNull(methodInvocation.getId());
     assertEquals("CommandInvocationHandlerTest.voidMethod", methodInvocation.getMethod());
     assertTrue(methodInvocation.getParams().isEmpty());
@@ -103,22 +99,16 @@ public class CommandInvocationHandlerTest extends EasyMockSupport {
 
   @Test
   public void testInvokeStringMethodWithParams() throws Throwable {
-    Capture<MethodInvocation> methodInvocationCapture = Capture.newInstance();
-    expect(
-            chromeDevToolsService.invoke(
-                eq(null), eq(String.class), eq(null), capture(methodInvocationCapture)))
-        .andReturn(null);
-
-    replayAll();
-
     assertNull(
         invocationHandler.invoke(
             this, getMethodByName("stringMethodWithParams"), new Object[] {"Test", 1}));
 
-    verifyAll();
+    ArgumentCaptor<MethodInvocation> methodInvocationCapture =
+        ArgumentCaptor.forClass(MethodInvocation.class);
+    verify(chromeDevToolsService)
+        .invoke(isNull(), eq(String.class), isNull(), methodInvocationCapture.capture());
 
     MethodInvocation methodInvocation = methodInvocationCapture.getValue();
-
     assertNotNull(methodInvocation.getId());
     assertEquals(
         "CommandInvocationHandlerTest.stringMethodWithParams", methodInvocation.getMethod());
@@ -130,24 +120,18 @@ public class CommandInvocationHandlerTest extends EasyMockSupport {
 
   @Test
   public void testInvokeStringMethodWithParamsAndReturnsAnnotation() throws Throwable {
-    Capture<MethodInvocation> methodInvocationCapture = Capture.newInstance();
-    expect(
-            chromeDevToolsService.invoke(
-                eq("ReturnsValue"), eq(String.class), eq(null), capture(methodInvocationCapture)))
-        .andReturn(null);
-
-    replayAll();
-
     assertNull(
         invocationHandler.invoke(
             this,
             getMethodByName("stringMethodWithParamsAndAnnotation"),
             new Object[] {"Test", 1}));
 
-    verifyAll();
+    ArgumentCaptor<MethodInvocation> methodInvocationCapture =
+        ArgumentCaptor.forClass(MethodInvocation.class);
+    verify(chromeDevToolsService)
+        .invoke(eq("ReturnsValue"), eq(String.class), isNull(), methodInvocationCapture.capture());
 
     MethodInvocation methodInvocation = methodInvocationCapture.getValue();
-
     assertNotNull(methodInvocation.getId());
     assertEquals(
         "CommandInvocationHandlerTest.stringMethodWithParamsAndAnnotation",
@@ -160,27 +144,22 @@ public class CommandInvocationHandlerTest extends EasyMockSupport {
 
   @Test
   public void testInvokeStringMethodWithParamsAndReturnTypeAnnotation() throws Throwable {
-    Capture<MethodInvocation> methodInvocationCapture = Capture.newInstance();
-    expect(
-            chromeDevToolsService.invoke(
-                eq("ReturnsValue"),
-                eq(List.class),
-                aryEq(new Class[] {String.class}),
-                capture(methodInvocationCapture)))
-        .andReturn(null);
-
-    replayAll();
-
     assertNull(
         invocationHandler.invoke(
             this,
             getMethodByName("stringMethodWithParamsAndReturnTypeAnnotation"),
             new Object[] {"Test", 1}));
 
-    verifyAll();
+    ArgumentCaptor<MethodInvocation> methodInvocationCapture =
+        ArgumentCaptor.forClass(MethodInvocation.class);
+    verify(chromeDevToolsService)
+        .invoke(
+            eq("ReturnsValue"),
+            eq(List.class),
+            aryEq(new Class[] {String.class}),
+            methodInvocationCapture.capture());
 
     MethodInvocation methodInvocation = methodInvocationCapture.getValue();
-
     assertNotNull(methodInvocation.getId());
     assertEquals(
         "CommandInvocationHandlerTest.stringMethodWithParamsAndReturnTypeAnnotation",
@@ -218,19 +197,14 @@ public class CommandInvocationHandlerTest extends EasyMockSupport {
     EventHandler<String> eventHandler = event -> {};
     EventListener eventListener = mock(EventListener.class);
 
-    expect(
-            chromeDevToolsService.addEventListener(
-                "CommandInvocationHandlerTest", "someEventName", eventHandler, String.class))
-        .andReturn(eventListener);
-
-    replayAll();
+    when(chromeDevToolsService.addEventListener(
+            "CommandInvocationHandlerTest", "someEventName", eventHandler, String.class))
+        .thenReturn(eventListener);
 
     assertEquals(
         eventListener,
         invocationHandler.invoke(
             null, getMethodByName("onEventListenerTestMethod4"), new Object[] {eventHandler}));
-
-    verifyAll();
   }
 
   private Method getMethodByName(String name) {

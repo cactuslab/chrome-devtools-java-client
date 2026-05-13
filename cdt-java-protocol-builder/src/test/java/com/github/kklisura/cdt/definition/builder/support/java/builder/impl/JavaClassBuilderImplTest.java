@@ -22,7 +22,7 @@ package com.github.kklisura.cdt.definition.builder.support.java.builder.impl;
 
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.eq;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.kklisura.cdt.definition.builder.support.java.builder.SourceProject;
@@ -30,19 +30,19 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.easymock.Capture;
-import org.easymock.EasyMockRunner;
+import org.easymock.EasyMockExtension;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Java class builder test.
  *
  * @author Kenan Klisura
  */
-@RunWith(EasyMockRunner.class)
+@ExtendWith(EasyMockExtension.class)
 public class JavaClassBuilderImplTest extends EasyMockSupport {
   private static final String PACKAGE_NAME = "com.github.kklisura";
   private static final String CLASS_NAME = "ClassName";
@@ -54,7 +54,7 @@ public class JavaClassBuilderImplTest extends EasyMockSupport {
 
   private JavaClassBuilderImpl javaClassBuilder;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     rootPath = new File("/tmp/test-class-builder").toPath();
     javaClassBuilder = new JavaClassBuilderImpl(PACKAGE_NAME, CLASS_NAME, ANNOTATIONS_PACKAGE_NAME);

@@ -22,8 +22,8 @@ package com.github.kklisura.cdt.definition.builder.support.protocol.builder;
 
 import static com.github.kklisura.cdt.definition.builder.support.protocol.builder.CommandBuilder.buildReturnClasses;
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.kklisura.cdt.definition.builder.support.java.builder.*;
 import com.github.kklisura.cdt.definition.builder.support.java.builder.support.CombinedBuilders;
@@ -44,20 +44,19 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.easymock.Capture;
-import org.easymock.EasyMockRunner;
+import org.easymock.EasyMockExtension;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Command builder test.
  *
  * @author Kenan Klisura
  */
-@RunWith(EasyMockRunner.class)
+@ExtendWith(EasyMockExtension.class)
 public class CommandBuilderTest extends EasyMockSupport {
 
   private static final String BASE_PACKAGE_NAME = "com.github.kklisura.test";
@@ -77,7 +76,7 @@ public class CommandBuilderTest extends EasyMockSupport {
 
   private CommandBuilder commandBuilder;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     commandBuilder =
         new CommandBuilder(
@@ -228,7 +227,7 @@ public class CommandBuilderTest extends EasyMockSupport {
 
     List<MethodParam> params = methodParamCapture.getValue();
     assertEquals(2, params.size());
-    Assert.assertEquals(stringParam.getName(), params.get(0).getName());
+    assertEquals(stringParam.getName(), params.get(0).getName());
     assertEquals("String", params.get(0).getType());
     assertEquals("Deprecated", params.get(0).getAnnotations().get(0).getName());
     assertEquals("ParamName", params.get(0).getAnnotations().get(1).getName());
@@ -356,7 +355,7 @@ public class CommandBuilderTest extends EasyMockSupport {
     assertEquals("ParamName", allParams.get(0).getAnnotations().get(1).getName());
     assertEquals(refParam.getName(), allParams.get(0).getAnnotations().get(1).getValue());
 
-    Assert.assertEquals(arrayProperty.getName(), allParams.get(1).getName());
+    assertEquals(arrayProperty.getName(), allParams.get(1).getName());
     assertEquals("List<EnumParam1>", allParams.get(1).getType());
     assertEquals("Experimental", allParams.get(1).getAnnotations().get(0).getName());
     assertEquals("Optional", allParams.get(1).getAnnotations().get(1).getName());
@@ -416,7 +415,7 @@ public class CommandBuilderTest extends EasyMockSupport {
     List<MethodParam> params = methodParamCapture.getValue();
     assertEquals(1, params.size());
 
-    Assert.assertEquals(arrayProperty.getName(), params.get(0).getName());
+    assertEquals(arrayProperty.getName(), params.get(0).getName());
     assertEquals("List<List<String>>", params.get(0).getType());
     assertEquals("ParamName", params.get(0).getAnnotations().get(0).getName());
     assertEquals(arrayProperty.getName(), params.get(0).getAnnotations().get(0).getValue());
@@ -481,7 +480,7 @@ public class CommandBuilderTest extends EasyMockSupport {
     List<MethodParam> params = methodParamCapture.getValue();
     assertEquals(1, params.size());
 
-    Assert.assertEquals(arrayProperty.getName(), params.get(0).getName());
+    assertEquals(arrayProperty.getName(), params.get(0).getName());
     assertEquals("List<List<String>>", params.get(0).getType());
     assertEquals("ParamName", params.get(0).getAnnotations().get(0).getName());
     assertEquals(arrayProperty.getName(), params.get(0).getAnnotations().get(0).getValue());
@@ -561,7 +560,7 @@ public class CommandBuilderTest extends EasyMockSupport {
     List<MethodParam> params = methodParamCapture.getValue();
     assertEquals(1, params.size());
 
-    Assert.assertEquals(arrayProperty.getName(), params.get(0).getName());
+    assertEquals(arrayProperty.getName(), params.get(0).getName());
     assertEquals("List<List<List<TestRefArrayItem2>>>", params.get(0).getType());
     assertEquals("ParamName", params.get(0).getAnnotations().get(0).getName());
     assertEquals(arrayProperty.getName(), params.get(0).getAnnotations().get(0).getValue());

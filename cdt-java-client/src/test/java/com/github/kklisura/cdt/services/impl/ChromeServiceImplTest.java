@@ -21,9 +21,15 @@ package com.github.kklisura.cdt.services.impl;
  */
 
 import static com.github.kklisura.cdt.services.impl.utils.TestUtils.getFixture;
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kklisura.cdt.protocol.ChromeDevTools;
@@ -41,46 +47,45 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.List;
-import org.easymock.EasyMockRunner;
-import org.easymock.EasyMockSupport;
-import org.easymock.Mock;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * Chrome service impl test.
  *
  * @author Kenan Klisura
  */
-@RunWith(EasyMockRunner.class)
-public class ChromeServiceImplTest extends EasyMockSupport {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+public class ChromeServiceImplTest {
 
   @Mock private WebSocketService webSocketService;
 
   @Mock private WebSocketServiceFactory webSocketServiceFactory;
 
-  @Test(expected = ChromeServiceException.class)
-  public void testGetTabsOnBadHost()
-      throws IOException, ChromeServiceException, InterruptedException {
+  @Test
+  public void testGetTabsOnBadHost() {
     ChromeServiceImpl service = new ChromeServiceImpl("unknown-schema://unknown-host", 9922);
-    service.getTabs();
+    assertThrows(ChromeServiceException.class, service::getTabs);
   }
 
-  @Test(expected = ChromeServiceException.class)
+  @Test
   public void testGetDevToolsFailsConnectToWebSocket()
-      throws ChromeServiceException, IOException, WebSocketServiceException {
+      throws IOException, WebSocketServiceException {
     InputStream fixture = getFixture("chrome/tab.json");
     ObjectMapper objectMapper = new ObjectMapper();
     ChromeTab tab = objectMapper.readerFor(ChromeTab.class).readValue(fixture);
 
-    expect(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
-        .andThrow(new WebSocketServiceException("Failed connecting to websocket."));
-
-    replayAll();
+    when(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
+        .thenThrow(new WebSocketServiceException("Failed connecting to websocket."));
 
     ChromeServiceImpl service = new ChromeServiceImpl(9992);
     service.setWebSocketServiceFactory(webSocketServiceFactory);
-    service.createDevToolsService(tab);
+    assertThrows(ChromeServiceException.class, () -> service.createDevToolsService(tab));
   }
 
   @Test
@@ -217,9 +222,8 @@ public class ChromeServiceImplTest extends EasyMockSupport {
     server.shutdown();
   }
 
-  @Test(expected = ChromeServiceException.class)
-  public void testActivateTabOnNotFoundResponse()
-      throws IOException, ChromeServiceException, InterruptedException {
+  @Test
+  public void testActivateTabOnNotFoundResponse() throws IOException {
     MockWebServer server = new MockWebServer();
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -231,7 +235,7 @@ public class ChromeServiceImplTest extends EasyMockSupport {
 
     try {
       ChromeServiceImpl service = new ChromeServiceImpl(server.getHostName(), server.getPort());
-      service.activateTab(tab);
+      assertThrows(ChromeServiceException.class, () -> service.activateTab(tab));
     } finally {
       server.shutdown();
     }
@@ -249,13 +253,8 @@ public class ChromeServiceImplTest extends EasyMockSupport {
     server.enqueue(new MockResponse());
     server.start();
 
-    expect(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
-        .andReturn(webSocketService);
-
-    webSocketService.addMessageHandler(anyObject());
-    webSocketService.close();
-
-    replayAll();
+    when(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
+        .thenReturn(webSocketService);
 
     ChromeServiceImpl service =
         new ChromeServiceImpl(server.getHostName(), server.getPort(), webSocketServiceFactory);
@@ -271,7 +270,8 @@ public class ChromeServiceImplTest extends EasyMockSupport {
 
     server.shutdown();
 
-    verifyAll();
+    verify(webSocketService).addMessageHandler(org.mockito.ArgumentMatchers.any());
+    verify(webSocketService).close();
   }
 
   @Test
@@ -337,18 +337,13 @@ public class ChromeServiceImplTest extends EasyMockSupport {
     ChromeTab tab =
         objectMapper.readerFor(ChromeTab.class).readValue(getFixture("chrome/tab.json"));
 
-    expect(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
-        .andReturn(webSocketService);
-
-    webSocketService.addMessageHandler(anyObject());
-
-    replayAll();
+    when(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
+        .thenReturn(webSocketService);
 
     ChromeDevTools devTools = service.createDevToolsService(tab);
 
-    verifyAll();
-
     assertNotNull(devTools);
+    verify(webSocketService).addMessageHandler(org.mockito.ArgumentMatchers.any());
   }
 
   @Test
@@ -360,31 +355,20 @@ public class ChromeServiceImplTest extends EasyMockSupport {
     ChromeTab tab =
         objectMapper.readerFor(ChromeTab.class).readValue(getFixture("chrome/tab.json"));
 
-    expect(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
-        .andReturn(webSocketService);
-
-    webSocketService.addMessageHandler(anyObject());
-
-    replayAll();
+    when(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
+        .thenReturn(webSocketService);
 
     ChromeDevTools devTools = service.createDevToolsService(tab);
-    assertTrue(devTools == service.createDevToolsService(tab));
-    assertTrue(devTools == service.createDevToolsService(tab));
-    assertTrue(devTools == service.createDevToolsService(tab));
-
-    verifyAll();
+    assertSame(devTools, service.createDevToolsService(tab));
+    assertSame(devTools, service.createDevToolsService(tab));
+    assertSame(devTools, service.createDevToolsService(tab));
 
     devTools = null;
     System.gc();
 
-    resetAll();
-
-    expect(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
-        .andReturn(webSocketService);
-
-    webSocketService.addMessageHandler(anyObject());
-
-    replayAll();
+    reset(webSocketServiceFactory, webSocketService);
+    when(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
+        .thenReturn(webSocketService);
 
     devTools = service.createDevToolsService(tab);
 
@@ -400,19 +384,14 @@ public class ChromeServiceImplTest extends EasyMockSupport {
     ChromeTab tab =
         objectMapper.readerFor(ChromeTab.class).readValue(getFixture("chrome/tab.json"));
 
-    expect(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
-        .andReturn(webSocketService);
-
-    webSocketService.addMessageHandler(anyObject());
-
-    replayAll();
+    when(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
+        .thenReturn(webSocketService);
 
     Network network = service.createDevToolsService(tab).getNetwork();
-    assertTrue(network == service.createDevToolsService(tab).getNetwork());
-    assertTrue(network == service.createDevToolsService(tab).getNetwork());
-    assertTrue(network == service.createDevToolsService(tab).getNetwork());
+    assertSame(network, service.createDevToolsService(tab).getNetwork());
+    assertSame(network, service.createDevToolsService(tab).getNetwork());
+    assertSame(network, service.createDevToolsService(tab).getNetwork());
 
-    verifyAll();
     assertNotNull(network);
   }
 
@@ -425,19 +404,15 @@ public class ChromeServiceImplTest extends EasyMockSupport {
     ChromeTab tab =
         objectMapper.readerFor(ChromeTab.class).readValue(getFixture("chrome/tab.json"));
 
-    expect(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
-        .andReturn(webSocketService);
-
-    webSocketService.addMessageHandler(anyObject());
-    webSocketService.close();
-
-    replayAll();
+    when(webSocketServiceFactory.createWebSocketService(tab.getWebSocketDebuggerUrl()))
+        .thenReturn(webSocketService);
 
     service.createDevToolsService(tab);
 
     service.clearChromeDevToolsServiceCache(tab);
 
-    verifyAll();
+    verify(webSocketService).addMessageHandler(org.mockito.ArgumentMatchers.any());
+    verify(webSocketService).close();
   }
 
   @Test

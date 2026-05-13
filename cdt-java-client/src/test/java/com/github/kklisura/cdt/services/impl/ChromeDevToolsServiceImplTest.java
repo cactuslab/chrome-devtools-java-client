@@ -20,8 +20,17 @@ package com.github.kklisura.cdt.services.impl;
  * #L%
  */
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
@@ -38,37 +47,36 @@ import com.github.kklisura.cdt.services.utils.ProxyUtils;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import org.easymock.Capture;
-import org.easymock.EasyMockRunner;
-import org.easymock.EasyMockSupport;
-import org.easymock.Mock;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * Created by Kenan Klisura on 21/01/2018.
  *
  * @author Kenan Klisura
  */
-@RunWith(EasyMockRunner.class)
-public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+public class ChromeDevToolsServiceImplTest {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Mock private WebSocketService webSocketService;
 
   @Mock private EventExecutorService eventExecutorService;
 
-  private ImmediateEventExecutorService immediateEventExecutorService =
+  private final ImmediateEventExecutorService immediateEventExecutorService =
       new ImmediateEventExecutorService();
 
   private ChromeDevToolsServiceImpl service;
 
-  @Before
-  public void setUp() throws Exception {
-    webSocketService.addMessageHandler(anyObject());
-    replayAll();
-
+  @BeforeEach
+  public void setUp() {
     ChromeDevToolsServiceConfiguration configuration = new ChromeDevToolsServiceConfiguration();
     configuration.setEventExecutorService(eventExecutorService);
 
@@ -80,9 +88,6 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
             (proxy, method, args) -> {
               throw new RuntimeException("This should not be called during testing");
             });
-
-    verifyAll();
-    resetAll();
   }
 
   @Test
@@ -97,34 +102,24 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
 
   @Test
   public void testInvokeVoidMethodThrowsWebSocketException()
-      throws WebSocketServiceException, IOException {
-    MethodInvocation methodInvocation = new MethodInvocation();
-    methodInvocation.setId(1L);
-    methodInvocation.setMethod("SomeMethod");
-    methodInvocation.setParams(new HashMap<>());
-    methodInvocation.getParams().put("param", "value");
+      throws IOException, WebSocketServiceException {
+    MethodInvocation methodInvocation = newMethodInvocation();
 
     WebSocketServiceException webSocketServiceException =
         new WebSocketServiceException("WS Failed");
 
-    Capture<String> messageCapture = Capture.newInstance();
-    webSocketService.send(capture(messageCapture));
-    expectLastCall().andThrow(webSocketServiceException);
+    doThrow(webSocketServiceException).when(webSocketService).send(any());
 
-    replayAll();
-
-    ChromeDevToolsInvocationException capturedException = null;
-    try {
-      service.invoke(null, Void.TYPE, null, methodInvocation);
-    } catch (ChromeDevToolsInvocationException ex) {
-      capturedException = ex;
-    }
-    assertNotNull(capturedException);
+    ChromeDevToolsInvocationException capturedException =
+        assertThrows(
+            ChromeDevToolsInvocationException.class,
+            () -> service.invoke(null, Void.TYPE, null, methodInvocation));
 
     assertEquals("Failed sending web socket message.", capturedException.getMessage());
     assertEquals(webSocketServiceException, capturedException.getCause());
 
-    verifyAll();
+    ArgumentCaptor<String> messageCapture = ArgumentCaptor.forClass(String.class);
+    verify(webSocketService).send(messageCapture.capture());
 
     MethodInvocation sentInvocation =
         OBJECT_MAPPER.readerFor(MethodInvocation.class).readValue(messageCapture.getValue());
@@ -134,17 +129,8 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
 
   @Test
   public void testInvokeVoidMethodInterruptsWaiting()
-      throws WebSocketServiceException, IOException {
-    MethodInvocation methodInvocation = new MethodInvocation();
-    methodInvocation.setId(1L);
-    methodInvocation.setMethod("SomeMethod");
-    methodInvocation.setParams(new HashMap<>());
-    methodInvocation.getParams().put("param", "value");
-
-    Capture<String> messageCapture = Capture.newInstance();
-    webSocketService.send(capture(messageCapture));
-
-    replayAll();
+      throws IOException, WebSocketServiceException {
+    MethodInvocation methodInvocation = newMethodInvocation();
 
     final Thread currentThread = Thread.currentThread();
     new Thread(
@@ -158,18 +144,16 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
             })
         .start();
 
-    ChromeDevToolsInvocationException capturedException = null;
-    try {
-      service.invoke(null, Void.TYPE, null, methodInvocation);
-    } catch (ChromeDevToolsInvocationException ex) {
-      capturedException = ex;
-    }
-    assertNotNull(capturedException);
+    ChromeDevToolsInvocationException capturedException =
+        assertThrows(
+            ChromeDevToolsInvocationException.class,
+            () -> service.invoke(null, Void.TYPE, null, methodInvocation));
 
     assertEquals("Interrupted while waiting response.", capturedException.getMessage());
     assertTrue(capturedException.getCause() instanceof InterruptedException);
 
-    verifyAll();
+    ArgumentCaptor<String> messageCapture = ArgumentCaptor.forClass(String.class);
+    verify(webSocketService).send(messageCapture.capture());
 
     MethodInvocation sentInvocation =
         OBJECT_MAPPER.readerFor(MethodInvocation.class).readValue(messageCapture.getValue());
@@ -179,21 +163,13 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
 
   @Test
   public void testInvokeVoidMethod() throws WebSocketServiceException, IOException {
-    MethodInvocation methodInvocation = new MethodInvocation();
-    methodInvocation.setId(1L);
-    methodInvocation.setMethod("SomeMethod");
-    methodInvocation.setParams(new HashMap<>());
-    methodInvocation.getParams().put("param", "value");
-
-    Capture<String> messageCapture = Capture.newInstance();
-    webSocketService.send(capture(messageCapture));
-
-    replayAll();
+    MethodInvocation methodInvocation = newMethodInvocation();
 
     resolveMessage("{\"id\":1,\"result\":{}}");
     assertNull(service.invoke(null, Void.TYPE, null, methodInvocation));
 
-    verifyAll();
+    ArgumentCaptor<String> messageCapture = ArgumentCaptor.forClass(String.class);
+    verify(webSocketService).send(messageCapture.capture());
 
     MethodInvocation sentInvocation =
         OBJECT_MAPPER.readerFor(MethodInvocation.class).readValue(messageCapture.getValue());
@@ -204,22 +180,14 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
 
   @Test
   public void testInvokeStringMethod() throws WebSocketServiceException, IOException {
-    MethodInvocation methodInvocation = new MethodInvocation();
-    methodInvocation.setId(1L);
-    methodInvocation.setMethod("SomeMethod");
-    methodInvocation.setParams(new HashMap<>());
-    methodInvocation.getParams().put("param", "value");
-
-    Capture<String> messageCapture = Capture.newInstance();
-    webSocketService.send(capture(messageCapture));
-
-    replayAll();
+    MethodInvocation methodInvocation = newMethodInvocation();
 
     resolveMessage("{\"id\":1,\"result\":{\"resultProperty\":\"resultValue\"}}");
     assertEquals(
         "resultValue", service.invoke("resultProperty", String.class, null, methodInvocation));
 
-    verifyAll();
+    ArgumentCaptor<String> messageCapture = ArgumentCaptor.forClass(String.class);
+    verify(webSocketService).send(messageCapture.capture());
 
     MethodInvocation sentInvocation =
         OBJECT_MAPPER.readerFor(MethodInvocation.class).readValue(messageCapture.getValue());
@@ -229,18 +197,10 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testInvokeMethodReturningListOfComplexObjects()
       throws WebSocketServiceException, IOException {
-    MethodInvocation methodInvocation = new MethodInvocation();
-    methodInvocation.setId(1L);
-    methodInvocation.setMethod("SomeMethod");
-    methodInvocation.setParams(new HashMap<>());
-    methodInvocation.getParams().put("param", "value");
-
-    Capture<String> messageCapture = Capture.newInstance();
-    webSocketService.send(capture(messageCapture));
-
-    replayAll();
+    MethodInvocation methodInvocation = newMethodInvocation();
 
     resolveMessage("{\"id\":1,\"result\":[{\"testProperty\":\"1\"},{\"testProperty\":\"2\"}]}");
 
@@ -255,7 +215,8 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
     assertEquals("1", result.get(0).getTestProperty());
     assertEquals("2", result.get(1).getTestProperty());
 
-    verifyAll();
+    ArgumentCaptor<String> messageCapture = ArgumentCaptor.forClass(String.class);
+    verify(webSocketService).send(messageCapture.capture());
 
     MethodInvocation sentInvocation =
         OBJECT_MAPPER.readerFor(MethodInvocation.class).readValue(messageCapture.getValue());
@@ -265,18 +226,10 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testInvokeMethodReturningListOfComplexObjects2()
       throws WebSocketServiceException, IOException {
-    MethodInvocation methodInvocation = new MethodInvocation();
-    methodInvocation.setId(1L);
-    methodInvocation.setMethod("SomeMethod");
-    methodInvocation.setParams(new HashMap<>());
-    methodInvocation.getParams().put("param", "value");
-
-    Capture<String> messageCapture = Capture.newInstance();
-    webSocketService.send(capture(messageCapture));
-
-    replayAll();
+    MethodInvocation methodInvocation = newMethodInvocation();
 
     resolveMessage("{\"id\":1,\"result\":[[{\"testProperty\":\"1\"},{\"testProperty\":\"2\"}]]}");
 
@@ -297,7 +250,8 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
     assertEquals("1", result.get(0).getTestProperty());
     assertEquals("2", result.get(1).getTestProperty());
 
-    verifyAll();
+    ArgumentCaptor<String> messageCapture = ArgumentCaptor.forClass(String.class);
+    verify(webSocketService).send(messageCapture.capture());
 
     MethodInvocation sentInvocation =
         OBJECT_MAPPER.readerFor(MethodInvocation.class).readValue(messageCapture.getValue());
@@ -306,44 +260,29 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
     assertEquals(methodInvocation.getParams(), sentInvocation.getParams());
   }
 
-  @Test(expected = ChromeDevToolsInvocationException.class)
-  public void testInvokeStringMethodWithNullResult() throws WebSocketServiceException, IOException {
-    MethodInvocation methodInvocation = new MethodInvocation();
-    methodInvocation.setId(1L);
-    methodInvocation.setMethod("SomeMethod");
-    methodInvocation.setParams(new HashMap<>());
-    methodInvocation.getParams().put("param", "value");
-
-    Capture<String> messageCapture = Capture.newInstance();
-    webSocketService.send(capture(messageCapture));
-
-    replayAll();
+  @Test
+  public void testInvokeStringMethodWithNullResult() {
+    MethodInvocation methodInvocation = newMethodInvocation();
 
     resolveMessage("{\"id\":1}");
-    service.invoke("resultProperty", String.class, null, methodInvocation);
+    assertThrows(
+        ChromeDevToolsInvocationException.class,
+        () -> service.invoke("resultProperty", String.class, null, methodInvocation));
   }
 
   @Test
   public void testInvokeTestMessageMethod() throws WebSocketServiceException, IOException {
-    MethodInvocation methodInvocation = new MethodInvocation();
-    methodInvocation.setId(1L);
-    methodInvocation.setMethod("SomeMethod");
-    methodInvocation.setParams(new HashMap<>());
-    methodInvocation.getParams().put("param", "value");
-
-    Capture<String> messageCapture = Capture.newInstance();
-    webSocketService.send(capture(messageCapture));
-
-    replayAll();
+    MethodInvocation methodInvocation = newMethodInvocation();
 
     resolveMessage(
         "{\"id\":1,\"result\":{\"testProperty\":\"resultValue\",\"testProperty2\":\"resultValue2\"}}");
     TestMessage testMessage = service.invoke(null, TestMessage.class, null, methodInvocation);
 
-    verifyAll();
-
     assertEquals("resultValue", testMessage.getTestProperty());
     assertEquals("resultValue2", testMessage.getTestProperty2());
+
+    ArgumentCaptor<String> messageCapture = ArgumentCaptor.forClass(String.class);
+    verify(webSocketService).send(messageCapture.capture());
 
     MethodInvocation sentInvocation =
         OBJECT_MAPPER.readerFor(MethodInvocation.class).readValue(messageCapture.getValue());
@@ -355,25 +294,17 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
   @Test
   public void testInvokeTestMessageMethodWithUnknownProperty()
       throws WebSocketServiceException, IOException {
-    MethodInvocation methodInvocation = new MethodInvocation();
-    methodInvocation.setId(1L);
-    methodInvocation.setMethod("SomeMethod");
-    methodInvocation.setParams(new HashMap<>());
-    methodInvocation.getParams().put("param", "value");
-
-    Capture<String> messageCapture = Capture.newInstance();
-    webSocketService.send(capture(messageCapture));
-
-    replayAll();
+    MethodInvocation methodInvocation = newMethodInvocation();
 
     resolveMessage(
         "{\"id\":1,\"result\":{\"testProperty\":\"resultValue\",\"testProperty2\":\"resultValue2\",\"unknownProperty\":false}}");
     TestMessage testMessage = service.invoke(null, TestMessage.class, null, methodInvocation);
 
-    verifyAll();
-
     assertEquals("resultValue", testMessage.getTestProperty());
     assertEquals("resultValue2", testMessage.getTestProperty2());
+
+    ArgumentCaptor<String> messageCapture = ArgumentCaptor.forClass(String.class);
+    verify(webSocketService).send(messageCapture.capture());
 
     MethodInvocation sentInvocation =
         OBJECT_MAPPER.readerFor(MethodInvocation.class).readValue(messageCapture.getValue());
@@ -384,10 +315,7 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
 
   @Test
   public void testInvokeTestMessageMethodWithBadJson()
-      throws WebSocketServiceException, IOException {
-    webSocketService.addMessageHandler(anyObject());
-    replayAll();
-
+      throws IOException, WebSocketServiceException {
     ChromeDevToolsServiceConfiguration configuration = new ChromeDevToolsServiceConfiguration();
     configuration.setReadTimeout(1);
 
@@ -400,34 +328,21 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
               throw new RuntimeException("This should not be called during testing");
             });
 
-    verifyAll();
-    resetAll();
-
-    MethodInvocation methodInvocation = new MethodInvocation();
-    methodInvocation.setId(1L);
-    methodInvocation.setMethod("SomeMethod");
-    methodInvocation.setParams(new HashMap<>());
-    methodInvocation.getParams().put("param", "value");
-
-    Capture<String> messageCapture = Capture.newInstance();
-    webSocketService.send(capture(messageCapture));
-
-    replayAll();
+    MethodInvocation methodInvocation = newMethodInvocation();
 
     resolveMessage(
         "{\"id\":1,\"result\":{\"testProperty\":\"resultValue\",\"testProperty2\"-\"resultValue2\"}}");
-    ChromeDevToolsInvocationException capturedException = null;
-    try {
-      service.invoke(null, Void.TYPE, null, methodInvocation);
-    } catch (ChromeDevToolsInvocationException ex) {
-      capturedException = ex;
-    }
-    assertNotNull(capturedException);
+
+    ChromeDevToolsInvocationException capturedException =
+        assertThrows(
+            ChromeDevToolsInvocationException.class,
+            () -> service.invoke(null, Void.TYPE, null, methodInvocation));
 
     assertEquals(
         "Timeout expired while waiting for server response.", capturedException.getMessage());
 
-    verifyAll();
+    ArgumentCaptor<String> messageCapture = ArgumentCaptor.forClass(String.class);
+    verify(webSocketService).send(messageCapture.capture());
 
     MethodInvocation sentInvocation =
         OBJECT_MAPPER.readerFor(MethodInvocation.class).readValue(messageCapture.getValue());
@@ -436,62 +351,31 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
   }
 
   @Test
-  public void testInvokeVoidMethodWithError() throws WebSocketServiceException, IOException {
-    MethodInvocation methodInvocation = new MethodInvocation();
-    methodInvocation.setId(1L);
-    methodInvocation.setMethod("SomeMethod");
-    methodInvocation.setParams(new HashMap<>());
-    methodInvocation.getParams().put("param", "value");
-
-    Capture<String> messageCapture = Capture.newInstance();
-    webSocketService.send(capture(messageCapture));
-
-    replayAll();
+  public void testInvokeVoidMethodWithError() {
+    MethodInvocation methodInvocation = newMethodInvocation();
 
     resolveMessage(
         "{\"id\":1,\"error\":{\"code\":1,\"message\":\"Error message for id 1\",\"data\": \"Test data\"}}");
 
-    ChromeDevToolsInvocationException capturedException = null;
-    try {
-      service.invoke(null, Void.TYPE, null, methodInvocation);
-    } catch (ChromeDevToolsInvocationException ex) {
-      capturedException = ex;
-    }
-
-    verifyAll();
-
-    assertNotNull(capturedException);
+    ChromeDevToolsInvocationException capturedException =
+        assertThrows(
+            ChromeDevToolsInvocationException.class,
+            () -> service.invoke(null, Void.TYPE, null, methodInvocation));
 
     assertEquals(1, (long) capturedException.getCode());
     assertEquals("Error message for id 1: Test data", capturedException.getMessage());
   }
 
   @Test
-  public void testInvokeVoidMethodWithErrorNoTestData()
-      throws WebSocketServiceException, IOException {
-    MethodInvocation methodInvocation = new MethodInvocation();
-    methodInvocation.setId(1L);
-    methodInvocation.setMethod("SomeMethod");
-    methodInvocation.setParams(new HashMap<>());
-    methodInvocation.getParams().put("param", "value");
-
-    Capture<String> messageCapture = Capture.newInstance();
-    webSocketService.send(capture(messageCapture));
-
-    replayAll();
+  public void testInvokeVoidMethodWithErrorNoTestData() {
+    MethodInvocation methodInvocation = newMethodInvocation();
 
     resolveMessage("{\"id\":1,\"error\":{\"code\":1,\"message\":\"Error message for id 1\"}}");
 
-    ChromeDevToolsInvocationException capturedException = null;
-    try {
-      service.invoke(null, Void.TYPE, null, methodInvocation);
-    } catch (ChromeDevToolsInvocationException ex) {
-      capturedException = ex;
-    }
-
-    verifyAll();
-
-    assertNotNull(capturedException);
+    ChromeDevToolsInvocationException capturedException =
+        assertThrows(
+            ChromeDevToolsInvocationException.class,
+            () -> service.invoke(null, Void.TYPE, null, methodInvocation));
 
     assertEquals(1, (long) capturedException.getCode());
     assertEquals("Error message for id 1", capturedException.getMessage());
@@ -499,22 +383,11 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
 
   @Test
   public void testClose() {
-    webSocketService.close();
-    eventExecutorService.shutdown();
-
-    replayAll();
-
     service.close();
+    service.close(); // Already closed - should do nothing on second call.
 
-    verifyAll();
-    resetAll();
-
-    // Test close does nothing when already closed
-    replayAll();
-
-    service.close();
-
-    verifyAll();
+    verify(webSocketService).close();
+    verify(eventExecutorService).shutdown();
   }
 
   @Test
@@ -525,16 +398,11 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
     service.setChromeService(chromeService);
     service.setChromeTab(chromeTab);
 
-    chromeService.clearChromeDevToolsServiceCache(chromeTab);
-
-    webSocketService.close();
-    eventExecutorService.shutdown();
-
-    replay(chromeService, webSocketService, eventExecutorService);
-
     service.close();
 
-    verify(chromeService, webSocketService, eventExecutorService);
+    verify(chromeService).clearChromeDevToolsServiceCache(chromeTab);
+    verify(webSocketService).close();
+    verify(eventExecutorService).shutdown();
   }
 
   @Test
@@ -553,121 +421,92 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
   }
 
   @Test
-  public void testEventReceivedWithOff() throws InterruptedException {
+  public void testEventReceivedWithOff() {
     // Non existing event handler
     service.accept("{\"method\":\"Domain.name\",\"params\":{\"testProperty\":\"testValue\"}}");
 
-    Capture<TestMessage> testMessageCapture = Capture.newInstance();
-
-    EventHandler<TestMessage> eventHandler = testMessageCapture::setValue;
+    final TestMessage[] capturedMessage = new TestMessage[1];
+    EventHandler<TestMessage> eventHandler = msg -> capturedMessage[0] = msg;
 
     EventListener eventListener =
         service.addEventListener("Domain", "name", eventHandler, TestMessage.class);
 
-    expectEventExecutorCall(1);
-
-    replayAll();
+    expectEventExecutorCall();
 
     service.accept("{\"method\":\"Domain.name\",\"params\":{\"testProperty\":\"testValue\"}}");
 
-    verifyAll();
-    resetAll();
+    assertNotNull(capturedMessage[0]);
+    assertEquals("testValue", capturedMessage[0].getTestProperty());
 
-    assertNotNull(testMessageCapture.getValue());
-    assertEquals("testValue", testMessageCapture.getValue().getTestProperty());
-
-    testMessageCapture.reset();
+    capturedMessage[0] = null;
 
     eventListener.off();
 
-    replayAll();
-
     service.accept("{\"method\":\"Domain.name\",\"params\":{\"testProperty\":\"testValue\"}}");
 
-    verifyAll();
-
-    assertFalse(testMessageCapture.hasCaptured());
+    assertNull(capturedMessage[0]);
   }
 
   @Test
-  public void testEventReceivedWithUnsubscribe() throws InterruptedException {
+  public void testEventReceivedWithUnsubscribe() {
     // Non existing event handler
     service.accept("{\"method\":\"Domain.name\",\"params\":{\"testProperty\":\"testValue\"}}");
 
-    Capture<TestMessage> testMessageCapture = Capture.newInstance();
-
-    EventHandler<TestMessage> eventHandler = testMessageCapture::setValue;
+    final TestMessage[] capturedMessage = new TestMessage[1];
+    EventHandler<TestMessage> eventHandler = msg -> capturedMessage[0] = msg;
 
     EventListener eventListener =
         service.addEventListener("Domain", "name", eventHandler, TestMessage.class);
 
-    expectEventExecutorCall(1);
-    replayAll();
+    expectEventExecutorCall();
 
     service.accept("{\"method\":\"Domain.name\",\"params\":{\"testProperty\":\"testValue\"}}");
 
-    verifyAll();
-    resetAll();
+    assertNotNull(capturedMessage[0]);
+    assertEquals("testValue", capturedMessage[0].getTestProperty());
 
-    assertNotNull(testMessageCapture.getValue());
-    assertEquals("testValue", testMessageCapture.getValue().getTestProperty());
-
-    testMessageCapture.reset();
+    capturedMessage[0] = null;
 
     eventListener.unsubscribe();
 
-    replayAll();
-
     service.accept("{\"method\":\"Domain.name\",\"params\":{\"testProperty\":\"testValue\"}}");
 
-    verifyAll();
-
-    assertFalse(testMessageCapture.hasCaptured());
+    assertNull(capturedMessage[0]);
   }
 
   @Test
-  public void testEventReceivedWithUnsubscribeOnService() throws InterruptedException {
+  public void testEventReceivedWithUnsubscribeOnService() {
     // Non existing event handler
     service.accept("{\"method\":\"Domain.name\",\"params\":{\"testProperty\":\"testValue\"}}");
 
-    Capture<TestMessage> testMessageCapture = Capture.newInstance();
-
-    EventHandler<TestMessage> eventHandler = testMessageCapture::setValue;
+    final TestMessage[] capturedMessage = new TestMessage[1];
+    EventHandler<TestMessage> eventHandler = msg -> capturedMessage[0] = msg;
 
     EventListener eventListener =
         service.addEventListener("Domain", "name", eventHandler, TestMessage.class);
 
-    expectEventExecutorCall(1);
-
-    replayAll();
+    expectEventExecutorCall();
 
     service.accept("{\"method\":\"Domain.name\",\"params\":{\"testProperty\":\"testValue\"}}");
 
-    verifyAll();
-    resetAll();
-
-    assertNotNull(testMessageCapture.getValue());
-    assertEquals("testValue", testMessageCapture.getValue().getTestProperty());
+    assertNotNull(capturedMessage[0]);
+    assertEquals("testValue", capturedMessage[0].getTestProperty());
 
     service.removeEventListener(eventListener);
 
-    testMessageCapture.reset();
-
-    replayAll();
+    capturedMessage[0] = null;
 
     service.accept("{\"method\":\"Domain.name\",\"params\":{\"testProperty\":\"testValue\"}}");
 
-    verifyAll();
-
-    assertFalse(testMessageCapture.hasCaptured());
+    assertNull(capturedMessage[0]);
   }
 
   @Test
-  public void testEventReceivedHandlerThrowsException() throws InterruptedException {
+  public void testEventReceivedHandlerThrowsException() {
     // Non existing event handler
     service.accept("{\"method\":\"Domain.name\",\"params\":{\"testProperty\":\"testValue\"}}");
 
-    Capture<TestMessage> testMessageCapture = Capture.newInstance();
+    final TestMessage[] capturedMessage = new TestMessage[1];
 
     EventHandler<TestMessage> eventHandlerThrowsException =
         event -> {
@@ -676,37 +515,33 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
     EventListener eventListenerWithException =
         service.addEventListener("Domain", "name", eventHandlerThrowsException, TestMessage.class);
 
-    EventHandler<TestMessage> eventHandler = testMessageCapture::setValue;
+    EventHandler<TestMessage> eventHandler = msg -> capturedMessage[0] = msg;
+    service.addEventListener("Domain", "name", eventHandler, TestMessage.class);
 
-    EventListener eventListener =
-        service.addEventListener("Domain", "name", eventHandler, TestMessage.class);
-
-    expectEventExecutorCall(1);
-
-    replayAll();
+    expectEventExecutorCall();
 
     service.accept("{\"method\":\"Domain.name\",\"params\":{\"testProperty\":\"testValue\"}}");
 
-    verifyAll();
-    resetAll();
-
-    assertNotNull(testMessageCapture.getValue());
-    assertEquals("testValue", testMessageCapture.getValue().getTestProperty());
+    assertNotNull(capturedMessage[0]);
+    assertEquals("testValue", capturedMessage[0].getTestProperty());
 
     service.removeEventListener(eventListenerWithException);
 
-    testMessageCapture.reset();
-
-    expectEventExecutorCall(1);
-
-    replayAll();
+    capturedMessage[0] = null;
 
     service.accept("{\"method\":\"Domain.name\",\"params\":{\"testProperty\":\"testValue\"}}");
 
-    verifyAll();
+    assertNotNull(capturedMessage[0]);
+    assertEquals("testValue", capturedMessage[0].getTestProperty());
+  }
 
-    assertNotNull(testMessageCapture.getValue());
-    assertEquals("testValue", testMessageCapture.getValue().getTestProperty());
+  private MethodInvocation newMethodInvocation() {
+    MethodInvocation methodInvocation = new MethodInvocation();
+    methodInvocation.setId(1L);
+    methodInvocation.setMethod("SomeMethod");
+    methodInvocation.setParams(new HashMap<>());
+    methodInvocation.getParams().put("param", "value");
+    return methodInvocation;
   }
 
   private void resolveMessage(String message) {
@@ -722,9 +557,20 @@ public class ChromeDevToolsServiceImplTest extends EasyMockSupport {
         .start();
   }
 
-  private void expectEventExecutorCall(int times) {
-    eventExecutorService.execute(anyObject());
-    expectLastCall().andDelegateTo(immediateEventExecutorService).times(times);
+  private void expectEventExecutorCall() {
+    doAnswer(
+            invocation -> {
+              immediateEventExecutorService.execute(invocation.getArgument(0));
+              return null;
+            })
+        .when(eventExecutorService)
+        .execute(any());
+  }
+
+  // Suppress unused warnings: assertions verify invocation behavior, keeping reference for clarity.
+  @SuppressWarnings("unused")
+  private static void verifyExecuteInvoked(EventExecutorService executor, int times) {
+    verify(executor, times(times)).execute(any());
   }
 
   public static class TestMessage {

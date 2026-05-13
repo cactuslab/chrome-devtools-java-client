@@ -21,9 +21,10 @@ package com.github.kklisura.cdt.services.utils;
  */
 
 import static com.github.kklisura.cdt.services.utils.ProxyUtils.createProxyFromAbstract;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.kklisura.cdt.services.impl.ChromeDevToolsServiceImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created by Kenan Klisura on 23/01/2018.
@@ -31,12 +32,15 @@ import org.junit.Test;
  * @author Kenan Klisura
  */
 public class ProxyUtilsTest {
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testCreateProxyFromAbstractThrowsException() {
-    createProxyFromAbstract(
-        ChromeDevToolsServiceImpl.class,
-        new Class[] {},
-        new Object[] {},
-        (unused, method, args) -> null);
+    assertThrows(
+        RuntimeException.class,
+        () ->
+            createProxyFromAbstract(
+                ChromeDevToolsServiceImpl.class,
+                new Class[] {},
+                new Object[] {},
+                (unused, method, args) -> null));
   }
 }

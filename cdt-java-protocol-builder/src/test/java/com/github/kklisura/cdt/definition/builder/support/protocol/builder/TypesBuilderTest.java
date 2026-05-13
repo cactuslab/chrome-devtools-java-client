@@ -21,8 +21,8 @@ package com.github.kklisura.cdt.definition.builder.support.protocol.builder;
  */
 
 import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.kklisura.cdt.definition.builder.support.java.builder.Builder;
 import com.github.kklisura.cdt.definition.builder.support.java.builder.JavaBuilderFactory;
@@ -60,20 +60,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.easymock.EasyMockRunner;
+import org.easymock.EasyMockExtension;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Created by Kenan Klisura on 02/01/2018.
  *
  * @author Kenan Klisura
  */
-@RunWith(EasyMockRunner.class)
+@ExtendWith(EasyMockExtension.class)
 public class TypesBuilderTest extends EasyMockSupport {
   private static final String BASE_PACKAGE_NAME = "my.test.package";
 
@@ -91,7 +90,7 @@ public class TypesBuilderTest extends EasyMockSupport {
 
   private TypesBuilder builder;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     builder = new TypesBuilder(BASE_PACKAGE_NAME, javaBuilderFactory);
   }
@@ -329,9 +328,8 @@ public class TypesBuilderTest extends EasyMockSupport {
 
     assertEquals(2, ((CombinedBuilders) builderList.get(0)).getBuilderList().size());
 
-    Assert.assertEquals(
-        javaEnumBuilder1, ((CombinedBuilders) builderList.get(0)).getBuilderList().get(0));
-    Assert.assertEquals(
+    assertEquals(javaEnumBuilder1, ((CombinedBuilders) builderList.get(0)).getBuilderList().get(0));
+    assertEquals(
         javaClassBuilder1, ((CombinedBuilders) builderList.get(0)).getBuilderList().get(1));
   }
 
@@ -1070,9 +1068,8 @@ public class TypesBuilderTest extends EasyMockSupport {
 
     assertEquals(2, ((CombinedBuilders) builderList.get(0)).getBuilderList().size());
 
-    Assert.assertEquals(
-        javaEnumBuilder1, ((CombinedBuilders) builderList.get(0)).getBuilderList().get(0));
-    Assert.assertEquals(
+    assertEquals(javaEnumBuilder1, ((CombinedBuilders) builderList.get(0)).getBuilderList().get(0));
+    assertEquals(
         javaClassBuilder1, ((CombinedBuilders) builderList.get(0)).getBuilderList().get(1));
   }
 

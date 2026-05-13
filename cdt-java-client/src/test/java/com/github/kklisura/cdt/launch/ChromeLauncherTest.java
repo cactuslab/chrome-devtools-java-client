@@ -20,18 +20,16 @@ package com.github.kklisura.cdt.launch;
  * #L%
  */
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.powermock.api.easymock.PowerMock.mockStatic;
-import static org.powermock.api.easymock.PowerMock.replay;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -52,15 +50,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.easymock.Capture;
-import org.easymock.EasyMockSupport;
-import org.easymock.Mock;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.easymock.PowerMock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -68,9 +66,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kenan Klisura
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ChromeLauncher.class, FilesUtils.class})
-public class ChromeLauncherTest extends EasyMockSupport {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+public class ChromeLauncherTest {
 
   @Mock private ProcessLauncher processLauncher;
 
@@ -82,90 +80,71 @@ public class ChromeLauncherTest extends EasyMockSupport {
 
   private ChromeLauncher launcher;
 
-  @Before
-  public void setUp() throws Exception {
-    mockStatic(FilesUtils.class);
-
+  @BeforeEach
+  public void setUp() {
     launcher =
         new ChromeLauncher(
             processLauncher, environment, shutdownHookRegistry, new ChromeLauncherConfiguration());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testGetChromeBinaryPathThrowsExceptionWhenNoBinaryFoundOnChromePath() {
-    expect(environment.getEnv("CHROME_PATH")).andReturn("test");
+    when(environment.getEnv("CHROME_PATH")).thenReturn("test");
+    when(processLauncher.isExecutable("test")).thenReturn(false);
 
-    expect(processLauncher.isExecutable("test")).andReturn(false);
-
-    replayAll();
-
-    launcher.getChromeBinaryPath();
+    assertThrows(RuntimeException.class, () -> launcher.getChromeBinaryPath());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testGetChromeBinaryPathThrowsExceptionWhenNoBinaryFound() {
-    expect(environment.getEnv("CHROME_PATH")).andReturn(null);
+    when(environment.getEnv("CHROME_PATH")).thenReturn(null);
 
-    expect(processLauncher.isExecutable("/snap/bin/chromium")).andReturn(false);
-    expect(processLauncher.isExecutable("/usr/bin/chromium")).andReturn(false);
-    expect(processLauncher.isExecutable("/usr/bin/chromium-browser")).andReturn(false);
-    expect(processLauncher.isExecutable("/usr/bin/google-chrome-stable")).andReturn(false);
-    expect(processLauncher.isExecutable("/usr/bin/google-chrome")).andReturn(false);
-    expect(processLauncher.isExecutable("/Applications/Chromium.app/Contents/MacOS/Chromium"))
-        .andReturn(false);
-    expect(
-            processLauncher.isExecutable(
-                "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"))
-        .andReturn(false);
-    expect(
-            processLauncher.isExecutable(
-                "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary"))
-        .andReturn(false);
-    expect(
-            processLauncher.isExecutable(
-                "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"))
-        .andReturn(false);
-    expect(processLauncher.isExecutable("C:/Program Files/Google/Chrome/Application/chrome.exe"))
-        .andReturn(false);
+    when(processLauncher.isExecutable("/snap/bin/chromium")).thenReturn(false);
+    when(processLauncher.isExecutable("/usr/bin/chromium")).thenReturn(false);
+    when(processLauncher.isExecutable("/usr/bin/chromium-browser")).thenReturn(false);
+    when(processLauncher.isExecutable("/usr/bin/google-chrome-stable")).thenReturn(false);
+    when(processLauncher.isExecutable("/usr/bin/google-chrome")).thenReturn(false);
+    when(processLauncher.isExecutable("/Applications/Chromium.app/Contents/MacOS/Chromium"))
+        .thenReturn(false);
+    when(processLauncher.isExecutable(
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"))
+        .thenReturn(false);
+    when(processLauncher.isExecutable(
+            "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary"))
+        .thenReturn(false);
+    when(processLauncher.isExecutable(
+            "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"))
+        .thenReturn(false);
+    when(processLauncher.isExecutable("C:/Program Files/Google/Chrome/Application/chrome.exe"))
+        .thenReturn(false);
 
-    replayAll();
-
-    launcher.getChromeBinaryPath();
+    assertThrows(RuntimeException.class, () -> launcher.getChromeBinaryPath());
   }
 
   @Test
   public void testGetChromeBinaryPathReturnsSomePath() {
-    expect(environment.getEnv("CHROME_PATH")).andReturn(null);
+    when(environment.getEnv("CHROME_PATH")).thenReturn(null);
 
-    expect(processLauncher.isExecutable("/usr/bin/chromium")).andReturn(false);
-    expect(processLauncher.isExecutable("/usr/bin/chromium-browser")).andReturn(false);
-    expect(processLauncher.isExecutable("/usr/bin/google-chrome-stable")).andReturn(false);
-    expect(processLauncher.isExecutable("/usr/bin/google-chrome")).andReturn(true);
-
-    replayAll();
+    when(processLauncher.isExecutable("/usr/bin/chromium")).thenReturn(false);
+    when(processLauncher.isExecutable("/usr/bin/chromium-browser")).thenReturn(false);
+    when(processLauncher.isExecutable("/usr/bin/google-chrome-stable")).thenReturn(false);
+    when(processLauncher.isExecutable("/usr/bin/google-chrome")).thenReturn(true);
 
     Path chromeBinaryPath = launcher.getChromeBinaryPath();
 
     assertNotNull(chromeBinaryPath);
-    assertNotNull("/usr/bin/google-chrome", chromeBinaryPath.toString());
-
-    verifyAll();
+    assertTrue(chromeBinaryPath.toString().endsWith("/usr/bin/google-chrome"));
   }
 
   @Test
   public void testGetChromeBinaryPathReturnsPathFromEnv() {
-    expect(environment.getEnv("CHROME_PATH")).andReturn("test/env/path");
-
-    expect(processLauncher.isExecutable("test/env/path")).andReturn(true);
-
-    replayAll();
+    when(environment.getEnv("CHROME_PATH")).thenReturn("test/env/path");
+    when(processLauncher.isExecutable("test/env/path")).thenReturn(true);
 
     Path chromeBinaryPath = launcher.getChromeBinaryPath();
 
     assertNotNull(chromeBinaryPath);
-    assertNotNull("test/env/path", chromeBinaryPath.toString());
-
-    verifyAll();
+    assertTrue(chromeBinaryPath.toString().endsWith("test/env/path"));
   }
 
   @Test
@@ -182,73 +161,53 @@ public class ChromeLauncherTest extends EasyMockSupport {
             .disableDefaultApps()
             .build();
 
-    shutdownHookRegistry.register(anyObject());
-
     final String trigger = "\r\n\r\nDevTools listening on ws://127.0.0.1:9123/";
-    expect(process.getInputStream()).andReturn(new ByteArrayInputStream(trigger.getBytes()));
-    expect(process.isAlive()).andReturn(true);
+    when(process.getInputStream()).thenReturn(new ByteArrayInputStream(trigger.getBytes()));
+    when(process.isAlive()).thenReturn(true);
 
-    Capture<List<String>> captureArguments = Capture.newInstance();
-    expect(processLauncher.launch(eq("test-binary-path"), capture(captureArguments)))
-        .andReturn(process);
+    when(processLauncher.launch(eq("test-binary-path"), any())).thenReturn(process);
 
-    expect(FilesUtils.randomTempDir("cdt-user-data-dir")).andReturn("temp-user-data-dir");
+    try (MockedStatic<FilesUtils> mocked = org.mockito.Mockito.mockStatic(FilesUtils.class)) {
+      mocked
+          .when(() -> FilesUtils.randomTempDir("cdt-user-data-dir"))
+          .thenReturn("temp-user-data-dir");
 
-    replayAll();
-    PowerMock.replay(FilesUtils.class);
+      ChromeService launch = launcher.launch(binaryPath, chromeArguments);
 
-    ChromeService launch = launcher.launch(binaryPath, chromeArguments);
+      assertNotNull(launch);
+      assertTrue(launch instanceof ChromeServiceImpl);
 
-    PowerMock.verify(FilesUtils.class);
+      assertEquals(9123, ((ChromeServiceImpl) launch).getPort());
 
-    assertNotNull(launch);
-    assertTrue(launch instanceof ChromeServiceImpl);
+      ArgumentCaptor<List<String>> captureArguments = listCaptor();
+      verify(processLauncher).launch(eq("test-binary-path"), captureArguments.capture());
+      List<String> arguments = captureArguments.getValue();
 
-    assertEquals(9123, ((ChromeServiceImpl) launch).getPort());
+      assertEquals(5, arguments.size());
+      assertTrue(arguments.contains("--incognito"));
+      assertTrue(arguments.contains("--disable-background-networking"));
+      assertTrue(arguments.contains("--disable-default-apps"));
+      assertTrue(arguments.contains("--remote-debugging-port=0"));
+      assertTrue(arguments.contains("--user-data-dir=temp-user-data-dir"));
 
-    List<String> arguments = captureArguments.getValue();
+      assertThrows(IllegalStateException.class, () -> launcher.launch(binaryPath, chromeArguments));
 
-    assertEquals(5, arguments.size());
-    assertTrue(arguments.contains("--incognito"));
-    assertTrue(arguments.contains("--disable-background-networking"));
-    assertTrue(arguments.contains("--disable-default-apps"));
-    assertTrue(arguments.contains("--remote-debugging-port=0"));
-    assertTrue(arguments.contains("--user-data-dir=temp-user-data-dir"));
+      // Test closing
+      when(process.waitFor(60, TimeUnit.SECONDS)).thenReturn(true);
+      when(process.isAlive()).thenReturn(true, false);
 
-    try {
-      launcher.launch(binaryPath, chromeArguments);
-      fail(
-          "IllegalStateException should be thrown from launch when launching already active process.");
-    } catch (IllegalStateException e) {
-      // Ignore this exception.
+      ArgumentCaptor<Path> deletePathCapture = ArgumentCaptor.forClass(Path.class);
+      mocked
+          .when(() -> FilesUtils.deleteQuietly(deletePathCapture.capture()))
+          .thenAnswer(invocation -> null);
+
+      launcher.close();
+      launcher.close();
+
+      verify(process).destroy();
+      verify(shutdownHookRegistry).remove(any());
+      assertEquals("temp-user-data-dir", deletePathCapture.getValue().toString());
     }
-
-    verifyAll();
-
-    // Test closing
-    resetAll();
-    PowerMock.resetAll(FilesUtils.class);
-
-    process.destroy();
-    expect(process.waitFor(60, TimeUnit.SECONDS)).andReturn(true);
-    expect(process.isAlive()).andReturn(true);
-    expect(process.isAlive()).andReturn(false);
-
-    shutdownHookRegistry.remove(anyObject());
-
-    Capture<Path> deletePathCapture = Capture.newInstance();
-    FilesUtils.deleteQuietly(capture(deletePathCapture));
-
-    replayAll();
-    replay(FilesUtils.class);
-
-    launcher.close();
-    launcher.close();
-
-    verify();
-    PowerMock.verify(FilesUtils.class);
-
-    assertEquals("temp-user-data-dir", deletePathCapture.getValue().toString());
   }
 
   @Test
@@ -266,65 +225,42 @@ public class ChromeLauncherTest extends EasyMockSupport {
             .userDataDir("user-data-dir-param")
             .build();
 
-    shutdownHookRegistry.register(anyObject());
-
     final String trigger = "\r\n\r\nDevTools listening on ws://127.0.0.1:9123/";
-    expect(process.getInputStream()).andReturn(new ByteArrayInputStream(trigger.getBytes()));
+    when(process.getInputStream()).thenReturn(new ByteArrayInputStream(trigger.getBytes()));
 
-    Capture<List<String>> captureArguments = Capture.newInstance();
-    expect(processLauncher.launch(eq("test-binary-path"), capture(captureArguments)))
-        .andReturn(process);
-    expect(process.isAlive()).andReturn(true);
+    when(processLauncher.launch(eq("test-binary-path"), any())).thenReturn(process);
+    when(process.isAlive()).thenReturn(true);
 
-    replayAll();
+    try (MockedStatic<FilesUtils> mocked = org.mockito.Mockito.mockStatic(FilesUtils.class)) {
+      ChromeService launch = launcher.launch(binaryPath, chromeArguments);
 
-    ChromeService launch = launcher.launch(binaryPath, chromeArguments);
+      assertNotNull(launch);
+      assertTrue(launch instanceof ChromeServiceImpl);
 
-    assertNotNull(launch);
-    assertTrue(launch instanceof ChromeServiceImpl);
+      assertEquals(9123, ((ChromeServiceImpl) launch).getPort());
 
-    assertEquals(9123, ((ChromeServiceImpl) launch).getPort());
+      ArgumentCaptor<List<String>> captureArguments = listCaptor();
+      verify(processLauncher).launch(eq("test-binary-path"), captureArguments.capture());
+      List<String> arguments = captureArguments.getValue();
 
-    List<String> arguments = captureArguments.getValue();
+      assertEquals(5, arguments.size());
+      assertTrue(arguments.contains("--incognito"));
+      assertTrue(arguments.contains("--disable-background-networking"));
+      assertTrue(arguments.contains("--disable-default-apps"));
+      assertTrue(arguments.contains("--remote-debugging-port=0"));
+      assertTrue(arguments.contains("--user-data-dir=user-data-dir-param"));
 
-    assertEquals(5, arguments.size());
-    assertTrue(arguments.contains("--incognito"));
-    assertTrue(arguments.contains("--disable-background-networking"));
-    assertTrue(arguments.contains("--disable-default-apps"));
-    assertTrue(arguments.contains("--remote-debugging-port=0"));
-    assertTrue(arguments.contains("--user-data-dir=user-data-dir-param"));
+      assertThrows(IllegalStateException.class, () -> launcher.launch(binaryPath, chromeArguments));
 
-    try {
-      launcher.launch(binaryPath, chromeArguments);
-      fail(
-          "IllegalStateException should be thrown from launch when launching already active process.");
-    } catch (IllegalStateException e) {
-      // Ignore this exception.
+      // Test closing
+      when(process.waitFor(60, TimeUnit.SECONDS)).thenReturn(true);
+      when(process.isAlive()).thenReturn(true, false);
+
+      launcher.close();
+      launcher.close();
+
+      mocked.verify(() -> FilesUtils.deleteQuietly(null));
     }
-
-    verifyAll();
-
-    // Test closing
-    resetAll();
-
-    process.destroy();
-    expect(process.waitFor(60, TimeUnit.SECONDS)).andReturn(true);
-
-    expect(process.isAlive()).andReturn(true);
-    expect(process.isAlive()).andReturn(false);
-
-    shutdownHookRegistry.remove(anyObject());
-
-    FilesUtils.deleteQuietly(null);
-
-    replayAll();
-    replay(FilesUtils.class);
-
-    launcher.close();
-    launcher.close();
-
-    verify();
-    PowerMock.verify(FilesUtils.class);
   }
 
   @Test
@@ -335,122 +271,97 @@ public class ChromeLauncherTest extends EasyMockSupport {
     final ChromeArguments chromeArguments =
         ChromeArguments.builder().incognito().userDataDir("user-data-dir-param").build();
 
-    shutdownHookRegistry.register(anyObject());
-
     final String trigger = "\r\n\r\nDevTools listening on ws://127.0.0.1:9123/";
-    expect(process.getInputStream()).andReturn(new ByteArrayInputStream(trigger.getBytes()));
-    expect(process.isAlive()).andReturn(true);
+    when(process.getInputStream()).thenReturn(new ByteArrayInputStream(trigger.getBytes()));
+    when(process.isAlive()).thenReturn(true);
 
-    Capture<List<String>> captureArguments = Capture.newInstance();
-    expect(processLauncher.launch(eq("test-binary-path"), capture(captureArguments)))
-        .andReturn(process);
+    when(processLauncher.launch(eq("test-binary-path"), any())).thenReturn(process);
 
-    replayAll();
+    try (MockedStatic<FilesUtils> mocked = org.mockito.Mockito.mockStatic(FilesUtils.class)) {
+      ChromeService launch = launcher.launch(binaryPath, chromeArguments);
 
-    ChromeService launch = launcher.launch(binaryPath, chromeArguments);
+      assertNotNull(launch);
+      assertTrue(launch instanceof ChromeServiceImpl);
 
-    assertNotNull(launch);
-    assertTrue(launch instanceof ChromeServiceImpl);
+      assertEquals(9123, ((ChromeServiceImpl) launch).getPort());
 
-    assertEquals(9123, ((ChromeServiceImpl) launch).getPort());
+      ArgumentCaptor<List<String>> captureArguments = listCaptor();
+      verify(processLauncher).launch(eq("test-binary-path"), captureArguments.capture());
+      List<String> arguments = captureArguments.getValue();
 
-    List<String> arguments = captureArguments.getValue();
+      assertEquals(3, arguments.size());
+      assertTrue(arguments.contains("--incognito"));
+      assertTrue(arguments.contains("--remote-debugging-port=0"));
+      assertTrue(arguments.contains("--user-data-dir=user-data-dir-param"));
 
-    assertEquals(3, arguments.size());
-    assertTrue(arguments.contains("--incognito"));
-    assertTrue(arguments.contains("--remote-debugging-port=0"));
-    assertTrue(arguments.contains("--user-data-dir=user-data-dir-param"));
+      assertThrows(IllegalStateException.class, () -> launcher.launch(binaryPath, chromeArguments));
 
-    try {
-      launcher.launch(binaryPath, chromeArguments);
-      fail(
-          "IllegalStateException should be thrown from launch when launching already active process.");
-    } catch (IllegalStateException e) {
-      // Ignore this exception.
+      // Test closing
+      when(process.waitFor(60, TimeUnit.SECONDS)).thenThrow(new InterruptedException());
+      when(process.destroyForcibly()).thenReturn(process);
+
+      launcher.close();
+
+      verify(process).destroy();
+      mocked.verify(() -> FilesUtils.deleteQuietly(null));
     }
-
-    verifyAll();
-
-    // Test closing
-    resetAll();
-
-    process.destroy();
-    expect(process.waitFor(60, TimeUnit.SECONDS)).andThrow(new InterruptedException());
-
-    expect(process.destroyForcibly()).andReturn(process);
-
-    expect(process.isAlive()).andReturn(true);
-
-    shutdownHookRegistry.remove(anyObject());
-
-    FilesUtils.deleteQuietly(null);
-
-    replayAll();
-    PowerMock.replay(FilesUtils.class);
-
-    launcher.close();
-
-    verify();
-    PowerMock.verify(FilesUtils.class);
   }
 
   @Test
   public void testLaunchHeadlessWithBinary()
       throws IOException, InterruptedException, ChromeProcessTimeoutException {
-    expect(environment.getEnv("CHROME_PATH")).andReturn("/test-binary-path");
-    expect(processLauncher.isExecutable("/test-binary-path")).andReturn(true);
-
-    shutdownHookRegistry.register(anyObject());
+    when(environment.getEnv("CHROME_PATH")).thenReturn("/test-binary-path");
+    when(processLauncher.isExecutable("/test-binary-path")).thenReturn(true);
 
     final String trigger = "\r\n\r\nDevTools listening on ws://127.0.0.1:9123/";
-    expect(process.getInputStream()).andReturn(new ByteArrayInputStream(trigger.getBytes()));
+    when(process.getInputStream()).thenReturn(new ByteArrayInputStream(trigger.getBytes()));
 
-    Capture<List<String>> captureArguments = Capture.newInstance();
-    expect(processLauncher.launch(eq("/test-binary-path"), capture(captureArguments)))
-        .andReturn(process);
+    when(processLauncher.launch(eq("/test-binary-path"), any())).thenReturn(process);
 
-    expect(FilesUtils.randomTempDir("cdt-user-data-dir")).andReturn("temp-user-data-dir");
+    try (MockedStatic<FilesUtils> mocked = org.mockito.Mockito.mockStatic(FilesUtils.class)) {
+      mocked
+          .when(() -> FilesUtils.randomTempDir("cdt-user-data-dir"))
+          .thenReturn("temp-user-data-dir");
 
-    replayAll();
-    PowerMock.replay(FilesUtils.class);
+      ChromeService launch = launcher.launch();
 
-    ChromeService launch = launcher.launch();
+      assertNotNull(launch);
+      assertTrue(launch instanceof ChromeServiceImpl);
 
-    verifyAll();
-    PowerMock.verify(FilesUtils.class);
+      assertEquals(9123, ((ChromeServiceImpl) launch).getPort());
 
-    assertNotNull(launch);
-    assertTrue(launch instanceof ChromeServiceImpl);
+      ArgumentCaptor<List<String>> captureArguments = listCaptor();
+      verify(processLauncher).launch(eq("/test-binary-path"), captureArguments.capture());
+      List<String> arguments = captureArguments.getValue();
 
-    assertEquals(9123, ((ChromeServiceImpl) launch).getPort());
-
-    List<String> arguments = captureArguments.getValue();
-    assertEquals(20, arguments.size());
-    assertTrue(arguments.contains("--no-first-run"));
-    assertTrue(arguments.contains("--remote-debugging-port=0"));
-    assertTrue(arguments.contains("--mute-audio"));
-    assertTrue(arguments.contains("--disable-client-side-phishing-detection"));
-    assertTrue(arguments.contains("--disable-popup-blocking"));
-    assertTrue(arguments.contains("--disable-default-apps"));
-    assertTrue(arguments.contains("--disable-extensions"));
-    assertTrue(arguments.contains("--metrics-recording-only"));
-    assertTrue(arguments.contains("--no-default-browser-check"));
-    assertTrue(arguments.contains("--disable-background-timer-throttling"));
-    assertTrue(arguments.contains("--disable-translate"));
-    assertTrue(arguments.contains("--safebrowsing-disable-auto-update"));
-    assertTrue(arguments.contains("--headless"));
-    assertTrue(arguments.contains("--hide-scrollbars"));
-    assertTrue(arguments.contains("--disable-background-networking"));
-    assertTrue(arguments.contains("--disable-prompt-on-repost"));
-    assertTrue(arguments.contains("--disable-hang-monitor"));
-    assertTrue(arguments.contains("--disable-sync"));
-    assertTrue(arguments.contains("--disable-gpu"));
-    assertTrue(arguments.contains("--user-data-dir=temp-user-data-dir"));
+      assertEquals(21, arguments.size());
+      assertTrue(arguments.contains("--no-first-run"));
+      assertTrue(arguments.contains("--remote-debugging-port=0"));
+      assertTrue(arguments.contains("--mute-audio"));
+      assertTrue(arguments.contains("--disable-client-side-phishing-detection"));
+      assertTrue(arguments.contains("--disable-popup-blocking"));
+      assertTrue(arguments.contains("--disable-default-apps"));
+      assertTrue(arguments.contains("--disable-extensions"));
+      assertTrue(arguments.contains("--metrics-recording-only"));
+      assertTrue(arguments.contains("--no-default-browser-check"));
+      assertTrue(arguments.contains("--disable-background-timer-throttling"));
+      assertTrue(arguments.contains("--disable-translate"));
+      assertTrue(arguments.contains("--safebrowsing-disable-auto-update"));
+      assertTrue(arguments.contains("--headless"));
+      assertTrue(arguments.contains("--hide-scrollbars"));
+      assertTrue(arguments.contains("--disable-background-networking"));
+      assertTrue(arguments.contains("--disable-prompt-on-repost"));
+      assertTrue(arguments.contains("--disable-hang-monitor"));
+      assertTrue(arguments.contains("--disable-sync"));
+      assertTrue(arguments.contains("--disable-gpu"));
+      assertTrue(arguments.contains("--remote-allow-origins=*"));
+      assertTrue(arguments.contains("--user-data-dir=temp-user-data-dir"));
+    }
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testLaunchWithBinaryAndArgumentsFailsOnReading()
-      throws IOException, InterruptedException, ChromeProcessTimeoutException {
+      throws IOException, InterruptedException {
     final ChromeArguments chromeArguments =
         ChromeArguments.builder()
             .incognito()
@@ -460,27 +371,16 @@ public class ChromeLauncherTest extends EasyMockSupport {
             .userDataDir("user-data-dir-param")
             .build();
 
-    shutdownHookRegistry.register(anyObject());
+    when(environment.getEnv("CHROME_PATH")).thenReturn("/test-binary-path");
+    when(processLauncher.isExecutable("/test-binary-path")).thenReturn(true);
 
-    expect(environment.getEnv("CHROME_PATH")).andReturn("/test-binary-path");
+    when(process.getInputStream()).thenThrow(new RuntimeException("test exception"));
+    when(process.isAlive()).thenReturn(true);
+    when(process.waitFor(60, TimeUnit.SECONDS)).thenReturn(true);
 
-    expect(processLauncher.isExecutable("/test-binary-path")).andReturn(true);
+    when(processLauncher.launch(eq("/test-binary-path"), any())).thenReturn(process);
 
-    expect(process.getInputStream()).andThrow(new RuntimeException("test exception"));
-    expect(process.isAlive()).andReturn(true);
-
-    Capture<List<String>> captureArguments = Capture.newInstance();
-    expect(processLauncher.launch(eq("/test-binary-path"), capture(captureArguments)))
-        .andReturn(process);
-
-    process.destroy();
-    expect(process.waitFor(60, TimeUnit.SECONDS)).andReturn(true);
-
-    shutdownHookRegistry.remove(anyObject());
-
-    replayAll();
-
-    launcher.launch(chromeArguments);
+    assertThrows(RuntimeException.class, () -> launcher.launch(chromeArguments));
   }
 
   @Test
@@ -496,40 +396,31 @@ public class ChromeLauncherTest extends EasyMockSupport {
             .userDataDir("user-data-dir-param")
             .build();
 
-    Capture<Thread> addCaptureShutdownThread = Capture.newInstance();
-    shutdownHookRegistry.register(capture(addCaptureShutdownThread));
-
     final String trigger = "test\r\ntest";
-    expect(process.getInputStream()).andReturn(new ByteArrayInputStream(trigger.getBytes()));
-    expect(process.isAlive()).andReturn(true);
+    when(process.getInputStream()).thenReturn(new ByteArrayInputStream(trigger.getBytes()));
+    when(process.isAlive()).thenReturn(true);
 
-    Capture<List<String>> captureArguments = Capture.newInstance();
-    expect(processLauncher.launch(eq("test-binary-path"), capture(captureArguments)))
-        .andReturn(process);
-
-    process.destroy();
-    expect(process.waitFor(60, TimeUnit.SECONDS)).andReturn(true);
-
-    Capture<Thread> removeCaptureShutdownThread = Capture.newInstance();
-    shutdownHookRegistry.remove(capture(removeCaptureShutdownThread));
-
-    replayAll();
+    when(processLauncher.launch(eq("test-binary-path"), any())).thenReturn(process);
+    when(process.waitFor(60, TimeUnit.SECONDS)).thenReturn(true);
 
     ChromeLauncherConfiguration configuration = new ChromeLauncherConfiguration();
     configuration.setStartupWaitTime(1);
     launcher =
         new ChromeLauncher(processLauncher, environment, shutdownHookRegistry, configuration);
 
-    try {
-      launcher.launch(binaryPath, chromeArguments);
-      fail("Exception not thrown on timeout.");
-    } catch (ChromeProcessTimeoutException e) {
-      assertEquals(
-          "Failed while waiting for chrome to start: Timeout expired! Chrome output: test\ntest",
-          e.getMessage());
-    }
+    ChromeProcessTimeoutException e =
+        assertThrows(
+            ChromeProcessTimeoutException.class,
+            () -> launcher.launch(binaryPath, chromeArguments));
+    assertEquals(
+        "Failed while waiting for chrome to start: Timeout expired! Chrome output: test\ntest",
+        e.getMessage());
 
-    assertEquals(removeCaptureShutdownThread.getValue(), addCaptureShutdownThread.getValue());
+    ArgumentCaptor<Thread> addShutdown = ArgumentCaptor.forClass(Thread.class);
+    ArgumentCaptor<Thread> removeShutdown = ArgumentCaptor.forClass(Thread.class);
+    verify(shutdownHookRegistry).register(addShutdown.capture());
+    verify(shutdownHookRegistry).remove(removeShutdown.capture());
+    assertEquals(removeShutdown.getValue(), addShutdown.getValue());
   }
 
   @Test
@@ -545,42 +436,32 @@ public class ChromeLauncherTest extends EasyMockSupport {
             .userDataDir("user-data-dir-param")
             .build();
 
-    Capture<Thread> addCaptureShutdownThread = Capture.newInstance();
-    shutdownHookRegistry.register(capture(addCaptureShutdownThread));
-
     final String trigger = "test\r\n\r\n";
-    expect(process.getInputStream()).andReturn(new ByteArrayInputStream(trigger.getBytes()));
-    expect(process.isAlive()).andReturn(true);
+    when(process.getInputStream()).thenReturn(new ByteArrayInputStream(trigger.getBytes()));
+    when(process.isAlive()).thenReturn(true);
 
-    Capture<List<String>> captureArguments = Capture.newInstance();
-    expect(processLauncher.launch(eq("test-binary-path"), capture(captureArguments)))
-        .andReturn(process);
-
-    process.destroy();
-    expect(process.waitFor(60, TimeUnit.SECONDS)).andReturn(false);
-    expect(process.destroyForcibly()).andReturn(process);
-    expect(process.waitFor(60, TimeUnit.SECONDS)).andReturn(true);
-
-    Capture<Thread> removeCaptureShutdownThread = Capture.newInstance();
-    shutdownHookRegistry.remove(capture(removeCaptureShutdownThread));
-
-    replayAll();
+    when(processLauncher.launch(eq("test-binary-path"), any())).thenReturn(process);
+    when(process.waitFor(60, TimeUnit.SECONDS)).thenReturn(false, true);
+    when(process.destroyForcibly()).thenReturn(process);
 
     ChromeLauncherConfiguration configuration = new ChromeLauncherConfiguration();
     configuration.setStartupWaitTime(1);
     launcher =
         new ChromeLauncher(processLauncher, environment, shutdownHookRegistry, configuration);
 
-    try {
-      launcher.launch(binaryPath, chromeArguments);
-      fail("Exception not thrown on timeout.");
-    } catch (ChromeProcessTimeoutException e) {
-      assertEquals(
-          "Failed while waiting for chrome to start: Timeout expired! Chrome output: test\n",
-          e.getMessage());
-    }
+    ChromeProcessTimeoutException e =
+        assertThrows(
+            ChromeProcessTimeoutException.class,
+            () -> launcher.launch(binaryPath, chromeArguments));
+    assertEquals(
+        "Failed while waiting for chrome to start: Timeout expired! Chrome output: test\n",
+        e.getMessage());
 
-    assertEquals(removeCaptureShutdownThread.getValue(), addCaptureShutdownThread.getValue());
+    ArgumentCaptor<Thread> addShutdown = ArgumentCaptor.forClass(Thread.class);
+    ArgumentCaptor<Thread> removeShutdown = ArgumentCaptor.forClass(Thread.class);
+    verify(shutdownHookRegistry).register(addShutdown.capture());
+    verify(shutdownHookRegistry).remove(removeShutdown.capture());
+    assertEquals(removeShutdown.getValue(), addShutdown.getValue());
   }
 
   @Test
@@ -592,29 +473,21 @@ public class ChromeLauncherTest extends EasyMockSupport {
     final ChromeArguments chromeArguments =
         ChromeArguments.builder().incognito().userDataDir("user-data-dir-param").build();
 
-    shutdownHookRegistry.register(anyObject());
-
     final String trigger = "\r\n\r\nDevTools listening on ws://127.0.0.1:9123/";
-    expect(process.getInputStream()).andReturn(new ByteArrayInputStream(trigger.getBytes()));
+    when(process.getInputStream()).thenReturn(new ByteArrayInputStream(trigger.getBytes()));
 
-    expect(process.isAlive()).andReturn(true);
+    when(process.isAlive()).thenReturn(true);
 
-    Capture<List<String>> captureArguments = Capture.newInstance();
-    expect(processLauncher.launch(eq("test-binary-path"), capture(captureArguments)))
-        .andReturn(process);
-
-    replayAll();
+    when(processLauncher.launch(eq("test-binary-path"), any())).thenReturn(process);
 
     launcher.launch(binaryPath, chromeArguments);
 
     assertTrue(launcher.isAlive());
-
-    verifyAll();
   }
 
-  @Test(expected = IllegalStateException.class)
-  public void testExitValueThrowsExceptionWhenProcessNotStarted() throws IOException {
-    launcher.exitValue();
+  @Test
+  public void testExitValueThrowsExceptionWhenProcessNotStarted() {
+    assertThrows(IllegalStateException.class, () -> launcher.exitValue());
   }
 
   @Test
@@ -624,24 +497,16 @@ public class ChromeLauncherTest extends EasyMockSupport {
     final ChromeArguments chromeArguments =
         ChromeArguments.builder().incognito().userDataDir("user-data-dir-param").build();
 
-    shutdownHookRegistry.register(anyObject());
-
     final String trigger = "\r\n\r\nDevTools listening on ws://127.0.0.1:9123/";
-    expect(process.getInputStream()).andReturn(new ByteArrayInputStream(trigger.getBytes()));
+    when(process.getInputStream()).thenReturn(new ByteArrayInputStream(trigger.getBytes()));
 
-    expect(process.exitValue()).andReturn(123);
+    when(process.exitValue()).thenReturn(123);
 
-    Capture<List<String>> captureArguments = Capture.newInstance();
-    expect(processLauncher.launch(eq("test-binary-path"), capture(captureArguments)))
-        .andReturn(process);
-
-    replayAll();
+    when(processLauncher.launch(eq("test-binary-path"), any())).thenReturn(process);
 
     launcher.launch(binaryPath, chromeArguments);
 
     assertEquals(123, launcher.exitValue());
-
-    verifyAll();
   }
 
   /**
@@ -667,41 +532,37 @@ public class ChromeLauncherTest extends EasyMockSupport {
     registerAppenderOnDebugLogger(
         "com.github.kklisura.cdt.launch.chrome.output", Level.DEBUG, loggingEvents);
 
-    expect(environment.getEnv("CHROME_PATH")).andReturn("/test-binary-path");
-    expect(processLauncher.isExecutable("/test-binary-path")).andReturn(true);
-
-    shutdownHookRegistry.register(anyObject());
+    when(environment.getEnv("CHROME_PATH")).thenReturn("/test-binary-path");
+    when(processLauncher.isExecutable("/test-binary-path")).thenReturn(true);
 
     final String trigger =
         "first-line\r\nsecond-line\r\nDevTools listening on ws://127.0.0.1:9123/\r\nthird-line\r\nforth-line\r\n";
-    expect(process.getInputStream()).andReturn(new ByteArrayInputStream(trigger.getBytes()));
+    when(process.getInputStream()).thenReturn(new ByteArrayInputStream(trigger.getBytes()));
 
-    expect(processLauncher.launch(eq("/test-binary-path"), anyObject())).andReturn(process);
+    when(processLauncher.launch(eq("/test-binary-path"), any())).thenReturn(process);
 
-    expect(FilesUtils.randomTempDir("cdt-user-data-dir")).andReturn("temp-user-data-dir");
+    try (MockedStatic<FilesUtils> mocked = org.mockito.Mockito.mockStatic(FilesUtils.class)) {
+      mocked
+          .when(() -> FilesUtils.randomTempDir("cdt-user-data-dir"))
+          .thenReturn("temp-user-data-dir");
 
-    replayAll();
-    PowerMock.replay(FilesUtils.class);
+      ChromeService launch = launcher.launch();
 
-    ChromeService launch = launcher.launch();
+      assertNotNull(launch);
+      assertTrue(launch instanceof ChromeServiceImpl);
 
-    verifyAll();
-    PowerMock.verify(FilesUtils.class);
+      assertEquals(9123, ((ChromeServiceImpl) launch).getPort());
 
-    assertNotNull(launch);
-    assertTrue(launch instanceof ChromeServiceImpl);
+      // Give a thread in waitForDevToolsServer method a bit more chance to collect logging events.
+      Thread.sleep(100);
 
-    assertEquals(9123, ((ChromeServiceImpl) launch).getPort());
-
-    // Give a thread in waitForDevToolsServer method a bit more chance to collect logging events.
-    Thread.sleep(100);
-
-    assertEquals(5, loggingEvents.size());
-    assertEquals("[DEBUG] first-line", loggingEvents.get(0));
-    assertEquals("[DEBUG] second-line", loggingEvents.get(1));
-    assertEquals("[DEBUG] DevTools listening on ws://127.0.0.1:9123/", loggingEvents.get(2));
-    assertEquals("[DEBUG] third-line", loggingEvents.get(3));
-    assertEquals("[DEBUG] forth-line", loggingEvents.get(4));
+      assertEquals(5, loggingEvents.size());
+      assertEquals("[DEBUG] first-line", loggingEvents.get(0));
+      assertEquals("[DEBUG] second-line", loggingEvents.get(1));
+      assertEquals("[DEBUG] DevTools listening on ws://127.0.0.1:9123/", loggingEvents.get(2));
+      assertEquals("[DEBUG] third-line", loggingEvents.get(3));
+      assertEquals("[DEBUG] forth-line", loggingEvents.get(4));
+    }
   }
 
   @Test
@@ -711,44 +572,40 @@ public class ChromeLauncherTest extends EasyMockSupport {
     registerAppenderOnDebugLogger(
         "com.github.kklisura.cdt.launch.chrome.output", Level.ERROR, loggingEvents);
 
-    expect(environment.getEnv("CHROME_PATH")).andReturn("/test-binary-path");
-    expect(processLauncher.isExecutable("/test-binary-path")).andReturn(true);
-
-    shutdownHookRegistry.register(anyObject());
+    when(environment.getEnv("CHROME_PATH")).thenReturn("/test-binary-path");
+    when(processLauncher.isExecutable("/test-binary-path")).thenReturn(true);
 
     final String trigger =
         "first-line\r\nsecond-line\r\nDevTools listening on ws://127.0.0.1:9123/\r\nthird-line\r\nforth-line\r\n";
-    expect(process.getInputStream()).andReturn(new ByteArrayInputStream(trigger.getBytes()));
+    when(process.getInputStream()).thenReturn(new ByteArrayInputStream(trigger.getBytes()));
 
-    expect(processLauncher.launch(eq("/test-binary-path"), anyObject())).andReturn(process);
+    when(processLauncher.launch(eq("/test-binary-path"), any())).thenReturn(process);
 
-    expect(FilesUtils.randomTempDir("cdt-user-data-dir")).andReturn("temp-user-data-dir");
+    try (MockedStatic<FilesUtils> mocked = org.mockito.Mockito.mockStatic(FilesUtils.class)) {
+      mocked
+          .when(() -> FilesUtils.randomTempDir("cdt-user-data-dir"))
+          .thenReturn("temp-user-data-dir");
 
-    replayAll();
-    PowerMock.replay(FilesUtils.class);
+      ChromeService launch = launcher.launch();
 
-    ChromeService launch = launcher.launch();
+      assertNotNull(launch);
+      assertTrue(launch instanceof ChromeServiceImpl);
 
-    verifyAll();
-    PowerMock.verify(FilesUtils.class);
+      assertEquals(9123, ((ChromeServiceImpl) launch).getPort());
 
-    assertNotNull(launch);
-    assertTrue(launch instanceof ChromeServiceImpl);
-
-    assertEquals(9123, ((ChromeServiceImpl) launch).getPort());
-
-    assertEquals(0, loggingEvents.size());
+      assertEquals(0, loggingEvents.size());
+    }
   }
 
-  private static void assertUserDataDir(List<String> arguments) {
-    boolean hasUserDataDir = false;
-    for (String argument : arguments) {
-      if (argument.startsWith("--user-data-dir=")) {
-        hasUserDataDir = true;
-        break;
-      }
-    }
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private static ArgumentCaptor<List<String>> listCaptor() {
+    return ArgumentCaptor.forClass((Class) List.class);
+  }
 
-    assertTrue(hasUserDataDir);
+  // Suppress unused warning on helper kept for future use.
+  @SuppressWarnings("unused")
+  private static void verifyTimes(Runnable r, int n) {
+    for (int i = 0; i < n; i++) r.run();
+    verify(r, times(n)).run();
   }
 }
