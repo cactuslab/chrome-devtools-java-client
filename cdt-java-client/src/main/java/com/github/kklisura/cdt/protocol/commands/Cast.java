@@ -65,6 +65,13 @@ public interface Cast {
   void setSinkToUse(@ParamName("sinkName") String sinkName);
 
   /**
+   * Starts mirroring the desktop to the sink.
+   *
+   * @param sinkName
+   */
+  void startDesktopMirroring(@ParamName("sinkName") String sinkName);
+
+  /**
    * Starts mirroring the tab to the sink.
    *
    * @param sinkName

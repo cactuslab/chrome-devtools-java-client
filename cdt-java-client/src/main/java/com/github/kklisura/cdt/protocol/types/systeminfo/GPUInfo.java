@@ -39,8 +39,6 @@ public class GPUInfo {
 
   private List<VideoEncodeAcceleratorCapability> videoEncoding;
 
-  private List<ImageDecodeAcceleratorCapability> imageDecoding;
-
   /** The graphics devices on the system. Element 0 is the primary GPU. */
   public List<GPUDevice> getDevices() {
     return devices;
@@ -99,15 +97,5 @@ public class GPUInfo {
   /** Supported accelerated video encoding capabilities. */
   public void setVideoEncoding(List<VideoEncodeAcceleratorCapability> videoEncoding) {
     this.videoEncoding = videoEncoding;
-  }
-
-  /** Supported accelerated image decoding capabilities. */
-  public List<ImageDecodeAcceleratorCapability> getImageDecoding() {
-    return imageDecoding;
-  }
-
-  /** Supported accelerated image decoding capabilities. */
-  public void setImageDecoding(List<ImageDecodeAcceleratorCapability> imageDecoding) {
-    this.imageDecoding = imageDecoding;
   }
 }

@@ -58,6 +58,8 @@ public enum ResourceType {
   CSP_VIOLATION_REPORT,
   @JsonProperty("Preflight")
   PREFLIGHT,
+  @JsonProperty("FedCM")
+  FED_CM,
   @JsonProperty("Other")
   OTHER
 }

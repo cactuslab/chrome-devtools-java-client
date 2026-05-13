@@ -22,8 +22,10 @@ package com.github.kklisura.cdt.protocol.events.network;
 
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
-import com.github.kklisura.cdt.protocol.types.network.BlockedCookieWithReason;
+import com.github.kklisura.cdt.protocol.types.network.AssociatedCookie;
 import com.github.kklisura.cdt.protocol.types.network.ClientSecurityState;
+import com.github.kklisura.cdt.protocol.types.network.ConnectTiming;
+import com.github.kklisura.cdt.protocol.types.network.DeviceBoundSessionWithUsage;
 import java.util.List;
 import java.util.Map;
 
@@ -38,11 +40,19 @@ public class RequestWillBeSentExtraInfo {
 
   private String requestId;
 
-  private List<BlockedCookieWithReason> associatedCookies;
+  private List<AssociatedCookie> associatedCookies;
 
   private Map<String, Object> headers;
 
+  @Experimental private ConnectTiming connectTiming;
+
+  @Optional private List<DeviceBoundSessionWithUsage> deviceBoundSessionUsages;
+
   @Optional private ClientSecurityState clientSecurityState;
+
+  @Optional private Boolean siteHasCookieInOtherPartition;
+
+  @Optional private String appliedNetworkConditionsId;
 
   /** Request identifier. Used to match this information to an existing requestWillBeSent event. */
   public String getRequestId() {
@@ -56,19 +66,19 @@ public class RequestWillBeSentExtraInfo {
 
   /**
    * A list of cookies potentially associated to the requested URL. This includes both cookies sent
-   * with the request and the ones not sent; the latter are distinguished by having blockedReason
+   * with the request and the ones not sent; the latter are distinguished by having blockedReasons
    * field set.
    */
-  public List<BlockedCookieWithReason> getAssociatedCookies() {
+  public List<AssociatedCookie> getAssociatedCookies() {
     return associatedCookies;
   }
 
   /**
    * A list of cookies potentially associated to the requested URL. This includes both cookies sent
-   * with the request and the ones not sent; the latter are distinguished by having blockedReason
+   * with the request and the ones not sent; the latter are distinguished by having blockedReasons
    * field set.
    */
-  public void setAssociatedCookies(List<BlockedCookieWithReason> associatedCookies) {
+  public void setAssociatedCookies(List<AssociatedCookie> associatedCookies) {
     this.associatedCookies = associatedCookies;
   }
 
@@ -82,6 +92,27 @@ public class RequestWillBeSentExtraInfo {
     this.headers = headers;
   }
 
+  /** Connection timing information for the request. */
+  public ConnectTiming getConnectTiming() {
+    return connectTiming;
+  }
+
+  /** Connection timing information for the request. */
+  public void setConnectTiming(ConnectTiming connectTiming) {
+    this.connectTiming = connectTiming;
+  }
+
+  /** How the request site's device bound sessions were used during this request. */
+  public List<DeviceBoundSessionWithUsage> getDeviceBoundSessionUsages() {
+    return deviceBoundSessionUsages;
+  }
+
+  /** How the request site's device bound sessions were used during this request. */
+  public void setDeviceBoundSessionUsages(
+      List<DeviceBoundSessionWithUsage> deviceBoundSessionUsages) {
+    this.deviceBoundSessionUsages = deviceBoundSessionUsages;
+  }
+
   /** The client security state set for the request. */
   public ClientSecurityState getClientSecurityState() {
     return clientSecurityState;
@@ -90,5 +121,35 @@ public class RequestWillBeSentExtraInfo {
   /** The client security state set for the request. */
   public void setClientSecurityState(ClientSecurityState clientSecurityState) {
     this.clientSecurityState = clientSecurityState;
+  }
+
+  /**
+   * Whether the site has partitioned cookies stored in a partition different than the current one.
+   */
+  public Boolean getSiteHasCookieInOtherPartition() {
+    return siteHasCookieInOtherPartition;
+  }
+
+  /**
+   * Whether the site has partitioned cookies stored in a partition different than the current one.
+   */
+  public void setSiteHasCookieInOtherPartition(Boolean siteHasCookieInOtherPartition) {
+    this.siteHasCookieInOtherPartition = siteHasCookieInOtherPartition;
+  }
+
+  /**
+   * The network conditions id if this request was affected by network conditions configured via
+   * emulateNetworkConditionsByRule.
+   */
+  public String getAppliedNetworkConditionsId() {
+    return appliedNetworkConditionsId;
+  }
+
+  /**
+   * The network conditions id if this request was affected by network conditions configured via
+   * emulateNetworkConditionsByRule.
+   */
+  public void setAppliedNetworkConditionsId(String appliedNetworkConditionsId) {
+    this.appliedNetworkConditionsId = appliedNetworkConditionsId;
   }
 }

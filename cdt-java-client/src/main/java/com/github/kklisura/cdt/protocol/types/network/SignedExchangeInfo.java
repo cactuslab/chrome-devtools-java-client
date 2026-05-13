@@ -30,6 +30,8 @@ public class SignedExchangeInfo {
 
   private Response outerResponse;
 
+  private Boolean hasExtraInfo;
+
   @Optional private SignedExchangeHeader header;
 
   @Optional private SecurityDetails securityDetails;
@@ -44,6 +46,16 @@ public class SignedExchangeInfo {
   /** The outer response of signed HTTP exchange which was received from network. */
   public void setOuterResponse(Response outerResponse) {
     this.outerResponse = outerResponse;
+  }
+
+  /** Whether network response for the signed exchange was accompanied by extra headers. */
+  public Boolean getHasExtraInfo() {
+    return hasExtraInfo;
+  }
+
+  /** Whether network response for the signed exchange was accompanied by extra headers. */
+  public void setHasExtraInfo(Boolean hasExtraInfo) {
+    this.hasExtraInfo = hasExtraInfo;
   }
 
   /** Information about the signed exchange header. */
@@ -66,12 +78,12 @@ public class SignedExchangeInfo {
     this.securityDetails = securityDetails;
   }
 
-  /** Errors occurred while handling the signed exchagne. */
+  /** Errors occurred while handling the signed exchange. */
   public List<SignedExchangeError> getErrors() {
     return errors;
   }
 
-  /** Errors occurred while handling the signed exchagne. */
+  /** Errors occurred while handling the signed exchange. */
   public void setErrors(List<SignedExchangeError> errors) {
     this.errors = errors;
   }

@@ -38,6 +38,8 @@ public class RemoteObject {
 
   @Optional private String description;
 
+  @Experimental @Optional private DeepSerializedValue deepSerializedValue;
+
   @Optional private String objectId;
 
   @Experimental @Optional private ObjectPreview preview;
@@ -114,6 +116,16 @@ public class RemoteObject {
   /** String representation of the object. */
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  /** Deep serialized value. */
+  public DeepSerializedValue getDeepSerializedValue() {
+    return deepSerializedValue;
+  }
+
+  /** Deep serialized value. */
+  public void setDeepSerializedValue(DeepSerializedValue deepSerializedValue) {
+    this.deepSerializedValue = deepSerializedValue;
   }
 
   /** Unique object identifier (for non-primitive values). */

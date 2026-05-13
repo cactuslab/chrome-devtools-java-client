@@ -72,6 +72,12 @@ public enum CorsError {
   HEADER_DISALLOWED_BY_PREFLIGHT_RESPONSE,
   @JsonProperty("RedirectContainsCredentials")
   REDIRECT_CONTAINS_CREDENTIALS,
-  @JsonProperty("InsecurePrivateNetwork")
-  INSECURE_PRIVATE_NETWORK
+  @JsonProperty("InsecureLocalNetwork")
+  INSECURE_LOCAL_NETWORK,
+  @JsonProperty("InvalidLocalNetworkAccess")
+  INVALID_LOCAL_NETWORK_ACCESS,
+  @JsonProperty("NoCorsRedirectModeNotFollow")
+  NO_CORS_REDIRECT_MODE_NOT_FOLLOW,
+  @JsonProperty("LocalNetworkAccessPermissionDenied")
+  LOCAL_NETWORK_ACCESS_PERMISSION_DENIED
 }

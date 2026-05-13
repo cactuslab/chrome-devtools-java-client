@@ -45,6 +45,8 @@ public class ScriptFailedToParse {
 
   private String hash;
 
+  private String buildId;
+
   @Optional private Map<String, Object> executionContextAuxData;
 
   @Optional private String sourceMapURL;
@@ -133,22 +135,44 @@ public class ScriptFailedToParse {
     this.executionContextId = executionContextId;
   }
 
-  /** Content hash of the script. */
+  /** Content hash of the script, SHA-256. */
   public String getHash() {
     return hash;
   }
 
-  /** Content hash of the script. */
+  /** Content hash of the script, SHA-256. */
   public void setHash(String hash) {
     this.hash = hash;
   }
 
-  /** Embedder-specific auxiliary data. */
+  /**
+   * For Wasm modules, the content of the `build_id` custom section. For JavaScript the `debugId`
+   * magic comment.
+   */
+  public String getBuildId() {
+    return buildId;
+  }
+
+  /**
+   * For Wasm modules, the content of the `build_id` custom section. For JavaScript the `debugId`
+   * magic comment.
+   */
+  public void setBuildId(String buildId) {
+    this.buildId = buildId;
+  }
+
+  /**
+   * Embedder-specific auxiliary data likely matching {isDefault: boolean, type:
+   * 'default'|'isolated'|'worker', frameId: string}
+   */
   public Map<String, Object> getExecutionContextAuxData() {
     return executionContextAuxData;
   }
 
-  /** Embedder-specific auxiliary data. */
+  /**
+   * Embedder-specific auxiliary data likely matching {isDefault: boolean, type:
+   * 'default'|'isolated'|'worker', frameId: string}
+   */
   public void setExecutionContextAuxData(Map<String, Object> executionContextAuxData) {
     this.executionContextAuxData = executionContextAuxData;
   }

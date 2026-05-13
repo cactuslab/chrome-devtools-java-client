@@ -38,6 +38,14 @@ public class Credential {
 
   @Optional private String largeBlob;
 
+  @Optional private Boolean backupEligibility;
+
+  @Optional private Boolean backupState;
+
+  @Optional private String userName;
+
+  @Optional private String userDisplayName;
+
   public String getCredentialId() {
     return credentialId;
   }
@@ -128,5 +136,69 @@ public class Credential {
    */
   public void setLargeBlob(String largeBlob) {
     this.largeBlob = largeBlob;
+  }
+
+  /**
+   * Assertions returned by this credential will have the backup eligibility (BE) flag set to this
+   * value. Defaults to the authenticator's defaultBackupEligibility value.
+   */
+  public Boolean getBackupEligibility() {
+    return backupEligibility;
+  }
+
+  /**
+   * Assertions returned by this credential will have the backup eligibility (BE) flag set to this
+   * value. Defaults to the authenticator's defaultBackupEligibility value.
+   */
+  public void setBackupEligibility(Boolean backupEligibility) {
+    this.backupEligibility = backupEligibility;
+  }
+
+  /**
+   * Assertions returned by this credential will have the backup state (BS) flag set to this value.
+   * Defaults to the authenticator's defaultBackupState value.
+   */
+  public Boolean getBackupState() {
+    return backupState;
+  }
+
+  /**
+   * Assertions returned by this credential will have the backup state (BS) flag set to this value.
+   * Defaults to the authenticator's defaultBackupState value.
+   */
+  public void setBackupState(Boolean backupState) {
+    this.backupState = backupState;
+  }
+
+  /**
+   * The credential's user.name property. Equivalent to empty if not set.
+   * https://w3c.github.io/webauthn/#dom-publickeycredentialentity-name
+   */
+  public String getUserName() {
+    return userName;
+  }
+
+  /**
+   * The credential's user.name property. Equivalent to empty if not set.
+   * https://w3c.github.io/webauthn/#dom-publickeycredentialentity-name
+   */
+  public void setUserName(String userName) {
+    this.userName = userName;
+  }
+
+  /**
+   * The credential's user.displayName property. Equivalent to empty if not set.
+   * https://w3c.github.io/webauthn/#dom-publickeycredentialuserentity-displayname
+   */
+  public String getUserDisplayName() {
+    return userDisplayName;
+  }
+
+  /**
+   * The credential's user.displayName property. Equivalent to empty if not set.
+   * https://w3c.github.io/webauthn/#dom-publickeycredentialuserentity-displayname
+   */
+  public void setUserDisplayName(String userDisplayName) {
+    this.userDisplayName = userDisplayName;
   }
 }

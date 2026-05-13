@@ -35,7 +35,9 @@ import com.github.kklisura.cdt.protocol.events.page.FrameRequestedNavigation;
 import com.github.kklisura.cdt.protocol.events.page.FrameResized;
 import com.github.kklisura.cdt.protocol.events.page.FrameScheduledNavigation;
 import com.github.kklisura.cdt.protocol.events.page.FrameStartedLoading;
+import com.github.kklisura.cdt.protocol.events.page.FrameStartedNavigating;
 import com.github.kklisura.cdt.protocol.events.page.FrameStoppedLoading;
+import com.github.kklisura.cdt.protocol.events.page.FrameSubtreeWillBeDetached;
 import com.github.kklisura.cdt.protocol.events.page.InterstitialHidden;
 import com.github.kklisura.cdt.protocol.events.page.InterstitialShown;
 import com.github.kklisura.cdt.protocol.events.page.JavascriptDialogClosed;
@@ -55,6 +57,8 @@ import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.debugger.SearchMatch;
+import com.github.kklisura.cdt.protocol.types.network.AdAncestry;
+import com.github.kklisura.cdt.protocol.types.page.AppId;
 import com.github.kklisura.cdt.protocol.types.page.AppManifest;
 import com.github.kklisura.cdt.protocol.types.page.CaptureScreenshotFormat;
 import com.github.kklisura.cdt.protocol.types.page.CaptureSnapshotFormat;
@@ -67,12 +71,16 @@ import com.github.kklisura.cdt.protocol.types.page.InstallabilityError;
 import com.github.kklisura.cdt.protocol.types.page.LayoutMetrics;
 import com.github.kklisura.cdt.protocol.types.page.Navigate;
 import com.github.kklisura.cdt.protocol.types.page.NavigationHistory;
+import com.github.kklisura.cdt.protocol.types.page.OriginTrial;
 import com.github.kklisura.cdt.protocol.types.page.PermissionsPolicyFeatureState;
 import com.github.kklisura.cdt.protocol.types.page.PrintToPDF;
 import com.github.kklisura.cdt.protocol.types.page.PrintToPDFTransferMode;
 import com.github.kklisura.cdt.protocol.types.page.ReferrerPolicy;
 import com.github.kklisura.cdt.protocol.types.page.ResourceContent;
+import com.github.kklisura.cdt.protocol.types.page.ScriptFontFamilies;
 import com.github.kklisura.cdt.protocol.types.page.SetDownloadBehaviorBehavior;
+import com.github.kklisura.cdt.protocol.types.page.SetRPHRegistrationModeMode;
+import com.github.kklisura.cdt.protocol.types.page.SetSPCTransactionModeMode;
 import com.github.kklisura.cdt.protocol.types.page.SetWebLifecycleStateState;
 import com.github.kklisura.cdt.protocol.types.page.StartScreencastFormat;
 import com.github.kklisura.cdt.protocol.types.page.TransitionType;
@@ -107,11 +115,17 @@ public interface Page {
    * @param worldName If specified, creates an isolated world with the given name and evaluates
    *     given script in it. This world name will be used as the ExecutionContextDescription::name
    *     when the corresponding event is emitted.
+   * @param includeCommandLineAPI Specifies whether command line API should be available to the
+   *     script, defaults to false.
+   * @param runImmediately If true, runs the script immediately on existing execution contexts or
+   *     worlds. Default: false.
    */
   @Returns("identifier")
   String addScriptToEvaluateOnNewDocument(
       @ParamName("source") String source,
-      @Experimental @Optional @ParamName("worldName") String worldName);
+      @Experimental @Optional @ParamName("worldName") String worldName,
+      @Experimental @Optional @ParamName("includeCommandLineAPI") Boolean includeCommandLineAPI,
+      @Experimental @Optional @ParamName("runImmediately") Boolean runImmediately);
 
   /** Brings page to front (activates tab). */
   void bringToFront();
@@ -129,6 +143,8 @@ public interface Page {
    * @param fromSurface Capture the screenshot from the surface, rather than the view. Defaults to
    *     true.
    * @param captureBeyondViewport Capture the screenshot beyond the viewport. Defaults to false.
+   * @param optimizeForSpeed Optimize image encoding for speed, not for resulting size (defaults to
+   *     false)
    */
   @Returns("data")
   String captureScreenshot(
@@ -136,7 +152,8 @@ public interface Page {
       @Optional @ParamName("quality") Integer quality,
       @Optional @ParamName("clip") Viewport clip,
       @Experimental @Optional @ParamName("fromSurface") Boolean fromSurface,
-      @Experimental @Optional @ParamName("captureBeyondViewport") Boolean captureBeyondViewport);
+      @Experimental @Optional @ParamName("captureBeyondViewport") Boolean captureBeyondViewport,
+      @Experimental @Optional @ParamName("optimizeForSpeed") Boolean optimizeForSpeed);
 
   /**
    * Returns a snapshot of the page as a string. For MHTML format, the serialization includes
@@ -184,16 +201,58 @@ public interface Page {
   /** Enables page domain notifications. */
   void enable();
 
+  /**
+   * Enables page domain notifications.
+   *
+   * @param enableFileChooserOpenedEvent If true, the `Page.fileChooserOpened` event will be emitted
+   *     regardless of the state set by `Page.setInterceptFileChooserDialog` command (default:
+   *     false).
+   */
+  void enable(
+      @Experimental @Optional @ParamName("enableFileChooserOpenedEvent")
+          Boolean enableFileChooserOpenedEvent);
+
+  /**
+   * Gets the processed manifest for this current document. This API always waits for the manifest
+   * to be loaded. If manifestId is provided, and it does not match the manifest of the current
+   * document, this API errors out. If there is not a loaded page, this API errors out immediately.
+   */
   AppManifest getAppManifest();
+
+  /**
+   * Gets the processed manifest for this current document. This API always waits for the manifest
+   * to be loaded. If manifestId is provided, and it does not match the manifest of the current
+   * document, this API errors out. If there is not a loaded page, this API errors out immediately.
+   *
+   * @param manifestId
+   */
+  AppManifest getAppManifest(@Optional @ParamName("manifestId") String manifestId);
 
   @Experimental
   @Returns("installabilityErrors")
   @ReturnTypeParameter(InstallabilityError.class)
   List<InstallabilityError> getInstallabilityErrors();
 
+  /**
+   * Deprecated because it's not guaranteed that the returned icon is in fact the one used for PWA
+   * installation.
+   */
+  @Deprecated
   @Experimental
   @Returns("primaryIcon")
   String getManifestIcons();
+
+  /**
+   * Returns the unique (PWA) app id. Only returns values if the feature flag
+   * 'WebAppEnableManifestId' is enabled
+   */
+  @Experimental
+  AppId getAppId();
+
+  /** @param frameId */
+  @Experimental
+  @Returns("adScriptAncestry")
+  AdAncestry getAdScriptAncestry(@ParamName("frameId") String frameId);
 
   /** Returns present frame tree structure. */
   @Returns("frameTree")
@@ -286,10 +345,12 @@ public interface Page {
    * @param marginBottom Bottom margin in inches. Defaults to 1cm (~0.4 inches).
    * @param marginLeft Left margin in inches. Defaults to 1cm (~0.4 inches).
    * @param marginRight Right margin in inches. Defaults to 1cm (~0.4 inches).
-   * @param pageRanges Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty string,
-   *     which means print all pages.
-   * @param ignoreInvalidPageRanges Whether to silently ignore invalid but successfully parsed page
-   *     ranges, such as '3-2'. Defaults to false.
+   * @param pageRanges Paper ranges to print, one based, e.g., '1-5, 8, 11-13'. Pages are printed in
+   *     the document order, not in the order specified, and no more than once. Defaults to empty
+   *     string, which implies the entire document is printed. The page numbers are quietly capped
+   *     to actual page count of the document, and ranges beyond the end of the document are
+   *     ignored. If this results in no pages to print, an error is reported. It is an error to
+   *     specify a range with start greater than end.
    * @param headerTemplate HTML template for the print header. Should be valid HTML markup with
    *     following classes used to inject printing values into them: - `date`: formatted print date
    *     - `title`: document title - `url`: document location - `pageNumber`: current page number -
@@ -300,6 +361,9 @@ public interface Page {
    * @param preferCSSPageSize Whether or not to prefer page size as defined by css. Defaults to
    *     false, in which case the content will be scaled to fit the paper size.
    * @param transferMode return as stream
+   * @param generateTaggedPDF Whether or not to generate tagged (accessible) PDF. Defaults to
+   *     embedder choice.
+   * @param generateDocumentOutline Whether or not to embed the document outline into the PDF.
    */
   PrintToPDF printToPDF(
       @Optional @ParamName("landscape") Boolean landscape,
@@ -313,11 +377,13 @@ public interface Page {
       @Optional @ParamName("marginLeft") Double marginLeft,
       @Optional @ParamName("marginRight") Double marginRight,
       @Optional @ParamName("pageRanges") String pageRanges,
-      @Optional @ParamName("ignoreInvalidPageRanges") Boolean ignoreInvalidPageRanges,
       @Optional @ParamName("headerTemplate") String headerTemplate,
       @Optional @ParamName("footerTemplate") String footerTemplate,
       @Optional @ParamName("preferCSSPageSize") Boolean preferCSSPageSize,
-      @Experimental @Optional @ParamName("transferMode") PrintToPDFTransferMode transferMode);
+      @Experimental @Optional @ParamName("transferMode") PrintToPDFTransferMode transferMode,
+      @Experimental @Optional @ParamName("generateTaggedPDF") Boolean generateTaggedPDF,
+      @Experimental @Optional @ParamName("generateDocumentOutline")
+          Boolean generateDocumentOutline);
 
   /** Reloads given page optionally ignoring the cache. */
   void reload();
@@ -328,10 +394,14 @@ public interface Page {
    * @param ignoreCache If true, browser cache is ignored (as if the user pressed Shift+refresh).
    * @param scriptToEvaluateOnLoad If set, the script will be injected into all frames of the
    *     inspected page after reload. Argument will be ignored if reloading dataURL origin.
+   * @param loaderId If set, an error will be thrown if the target page's main frame's loader id
+   *     does not match the provided id. This prevents accidentally reloading an unintended target
+   *     in case there's a racing navigation.
    */
   void reload(
       @Optional @ParamName("ignoreCache") Boolean ignoreCache,
-      @Optional @ParamName("scriptToEvaluateOnLoad") String scriptToEvaluateOnLoad);
+      @Optional @ParamName("scriptToEvaluateOnLoad") String scriptToEvaluateOnLoad,
+      @Experimental @Optional @ParamName("loaderId") String loaderId);
 
   /**
    * Deprecated, please use removeScriptToEvaluateOnNewDocument instead.
@@ -404,7 +474,6 @@ public interface Page {
    *
    * @param enabled Whether to bypass page CSP.
    */
-  @Experimental
   void setBypassCSP(@ParamName("enabled") Boolean enabled);
 
   /**
@@ -419,6 +488,16 @@ public interface Page {
       @ParamName("frameId") String frameId);
 
   /**
+   * Get Origin Trials on given frame.
+   *
+   * @param frameId
+   */
+  @Experimental
+  @Returns("originTrials")
+  @ReturnTypeParameter(OriginTrial.class)
+  List<OriginTrial> getOriginTrials(@ParamName("frameId") String frameId);
+
+  /**
    * Set generic font families.
    *
    * @param fontFamilies Specifies font families to set. If a font family is not specified, it won't
@@ -426,6 +505,18 @@ public interface Page {
    */
   @Experimental
   void setFontFamilies(@ParamName("fontFamilies") FontFamilies fontFamilies);
+
+  /**
+   * Set generic font families.
+   *
+   * @param fontFamilies Specifies font families to set. If a font family is not specified, it won't
+   *     be changed.
+   * @param forScripts Specifies font families to set for individual scripts.
+   */
+  @Experimental
+  void setFontFamilies(
+      @ParamName("fontFamilies") FontFamilies fontFamilies,
+      @Optional @ParamName("forScripts") List<ScriptFontFamilies> forScripts);
 
   /**
    * Set default font sizes.
@@ -473,7 +564,6 @@ public interface Page {
    *
    * @param enabled If true, starts emitting lifecycle events.
    */
-  @Experimental
   void setLifecycleEventsEnabled(@ParamName("enabled") Boolean enabled);
 
   /** Starts sending each frame using the `screencastFrame` event. */
@@ -505,7 +595,6 @@ public interface Page {
   void crash();
 
   /** Tries to close page, running its beforeunload hooks, if any. */
-  @Experimental
   void close();
 
   /**
@@ -522,22 +611,11 @@ public interface Page {
   void stopScreencast();
 
   /**
-   * Forces compilation cache to be generated for every subresource script. See also:
-   * `Page.produceCompilationCache`.
-   *
-   * @param enabled
-   */
-  @Experimental
-  void setProduceCompilationCache(@ParamName("enabled") Boolean enabled);
-
-  /**
-   * Requests backend to produce compilation cache for the specified scripts. Unlike
-   * setProduceCompilationCache, this allows client to only produce cache for specific scripts.
-   * `scripts` are appeneded to the list of scripts for which the cache for would produced.
-   * Disabling compilation cache with `setProduceCompilationCache` would reset all pending cache
-   * requests. The list may also be reset during page navigation. When script with a matching URL is
-   * encountered, the cache is optionally produced upon backend discretion, based on internal
-   * heuristics. See also: `Page.compilationCacheProduced`.
+   * Requests backend to produce compilation cache for the specified scripts. `scripts` are appended
+   * to the list of scripts for which the cache would be produced. The list may be reset during page
+   * navigation. When script with a matching URL is encountered, the cache is optionally produced
+   * upon backend discretion, based on internal heuristics. See also:
+   * `Page.compilationCacheProduced`.
    *
    * @param scripts
    */
@@ -557,6 +635,24 @@ public interface Page {
   /** Clears seeded compilation cache. */
   @Experimental
   void clearCompilationCache();
+
+  /**
+   * Sets the Secure Payment Confirmation transaction mode.
+   * https://w3c.github.io/secure-payment-confirmation/#sctn-automation-set-spc-transaction-mode
+   *
+   * @param mode
+   */
+  @Experimental
+  void setSPCTransactionMode(@ParamName("mode") SetSPCTransactionModeMode mode);
+
+  /**
+   * Extensions for Custom Handlers API:
+   * https://html.spec.whatwg.org/multipage/system-state.html#rph-automation
+   *
+   * @param mode
+   */
+  @Experimental
+  void setRPHRegistrationMode(@ParamName("mode") SetRPHRegistrationModeMode mode);
 
   /**
    * Generates a report for testing.
@@ -587,8 +683,54 @@ public interface Page {
    *
    * @param enabled
    */
-  @Experimental
   void setInterceptFileChooserDialog(@ParamName("enabled") Boolean enabled);
+
+  /**
+   * Intercept file chooser requests and transfer control to protocol clients. When file chooser
+   * interception is enabled, native file chooser dialog is not shown. Instead, a protocol event
+   * `Page.fileChooserOpened` is emitted.
+   *
+   * @param enabled
+   * @param cancel If true, cancels the dialog by emitting relevant events (if any) in addition to
+   *     not showing it if the interception is enabled (default: false).
+   */
+  void setInterceptFileChooserDialog(
+      @ParamName("enabled") Boolean enabled,
+      @Experimental @Optional @ParamName("cancel") Boolean cancel);
+
+  /**
+   * Enable/disable prerendering manually.
+   *
+   * <p>This command is a short-term solution for https://crbug.com/1440085. See
+   * https://docs.google.com/document/d/12HVmFxYj5Jc-eJr5OmWsa2bqTJsbgGLKI6ZIyx0_wpA for more
+   * details.
+   *
+   * <p>TODO(https://crbug.com/1440085): Remove this once Puppeteer supports tab targets.
+   *
+   * @param isAllowed
+   */
+  @Experimental
+  void setPrerenderingAllowed(@ParamName("isAllowed") Boolean isAllowed);
+
+  /**
+   * Get the annotated page content for the main frame. This is an experimental command that is
+   * subject to change.
+   */
+  @Experimental
+  @Returns("content")
+  String getAnnotatedPageContent();
+
+  /**
+   * Get the annotated page content for the main frame. This is an experimental command that is
+   * subject to change.
+   *
+   * @param includeActionableInformation Whether to include actionable information. Defaults to
+   *     true.
+   */
+  @Experimental
+  @Returns("content")
+  String getAnnotatedPageContent(
+      @Optional @ParamName("includeActionableInformation") Boolean includeActionableInformation);
 
   @EventName("domContentEventFired")
   EventListener onDomContentEventFired(EventHandler<DomContentEventFired> eventListener);
@@ -612,6 +754,15 @@ public interface Page {
   EventListener onFrameDetached(EventHandler<FrameDetached> eventListener);
 
   /**
+   * Fired before frame subtree is detached. Emitted before any frame of the subtree is actually
+   * detached.
+   */
+  @EventName("frameSubtreeWillBeDetached")
+  @Experimental
+  EventListener onFrameSubtreeWillBeDetached(
+      EventHandler<FrameSubtreeWillBeDetached> eventListener);
+
+  /**
    * Fired once navigation of the frame has completed. Frame is now associated with the new loader.
    */
   @EventName("frameNavigated")
@@ -625,6 +776,17 @@ public interface Page {
   @EventName("frameResized")
   @Experimental
   EventListener onFrameResized(EventHandler<FrameResized> eventListener);
+
+  /**
+   * Fired when a navigation starts. This event is fired for both renderer-initiated and
+   * browser-initiated navigations. For renderer-initiated navigations, the event is fired after
+   * `frameRequestedNavigation`. Navigation may still be cancelled after the event is issued.
+   * Multiple events can be fired for a single navigation, for example, when a same-document
+   * navigation becomes a cross-document navigation (such as in the case of a frameset).
+   */
+  @EventName("frameStartedNavigating")
+  @Experimental
+  EventListener onFrameStartedNavigating(EventHandler<FrameStartedNavigating> eventListener);
 
   /**
    * Fired when a renderer-initiated navigation is requested. Navigation may still be cancelled
@@ -689,7 +851,10 @@ public interface Page {
   @EventName("javascriptDialogOpening")
   EventListener onJavascriptDialogOpening(EventHandler<JavascriptDialogOpening> eventListener);
 
-  /** Fired for top level page lifecycle events such as navigation, load, paint, etc. */
+  /**
+   * Fired for lifecycle events (navigation, load, paint, etc) in the current target (including
+   * local frames).
+   */
   @EventName("lifecycleEvent")
   EventListener onLifecycleEvent(EventHandler<LifecycleEvent> eventListener);
 
@@ -732,10 +897,7 @@ public interface Page {
   @EventName("windowOpen")
   EventListener onWindowOpen(EventHandler<WindowOpen> eventListener);
 
-  /**
-   * Issued for every compilation cache generated. Is only available if
-   * Page.setGenerateCompilationCache is enabled.
-   */
+  /** Issued for every compilation cache generated. */
   @EventName("compilationCacheProduced")
   @Experimental
   EventListener onCompilationCacheProduced(EventHandler<CompilationCacheProduced> eventListener);

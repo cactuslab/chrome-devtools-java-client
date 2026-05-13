@@ -32,16 +32,16 @@ public class RequestPattern {
   @Optional private RequestStage requestStage;
 
   /**
-   * Wildcards ('*' -> zero or more, '?' -> exactly one) are allowed. Escape character is backslash.
-   * Omitting is equivalent to "*".
+   * Wildcards (`'*'` -> zero or more, `'?'` -> exactly one) are allowed. Escape character is
+   * backslash. Omitting is equivalent to `"*"`.
    */
   public String getUrlPattern() {
     return urlPattern;
   }
 
   /**
-   * Wildcards ('*' -> zero or more, '?' -> exactly one) are allowed. Escape character is backslash.
-   * Omitting is equivalent to "*".
+   * Wildcards (`'*'` -> zero or more, `'?'` -> exactly one) are allowed. Escape character is
+   * backslash. Omitting is equivalent to `"*"`.
    */
   public void setUrlPattern(String urlPattern) {
     this.urlPattern = urlPattern;

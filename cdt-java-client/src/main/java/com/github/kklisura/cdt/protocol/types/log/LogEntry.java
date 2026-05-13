@@ -34,6 +34,8 @@ public class LogEntry {
 
   private String text;
 
+  @Optional private LogEntryCategory category;
+
   private Double timestamp;
 
   @Optional private String url;
@@ -76,6 +78,14 @@ public class LogEntry {
   /** Logged text. */
   public void setText(String text) {
     this.text = text;
+  }
+
+  public LogEntryCategory getCategory() {
+    return category;
+  }
+
+  public void setCategory(LogEntryCategory category) {
+    this.category = category;
   }
 
   /** Timestamp when this entry was added. */

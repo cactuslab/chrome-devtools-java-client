@@ -40,25 +40,32 @@ import com.github.kklisura.cdt.protocol.types.tracing.TraceConfig;
 import com.github.kklisura.cdt.protocol.types.tracing.TracingBackend;
 import java.util.List;
 
-@Experimental
 public interface Tracing {
 
   /** Stop trace events collection. */
   void end();
 
   /** Gets supported tracing categories. */
+  @Experimental
   @Returns("categories")
   @ReturnTypeParameter(String.class)
   List<String> getCategories();
+
+  /** Return a descriptor for all available tracing categories. */
+  @Experimental
+  @Returns("descriptor")
+  String getTrackEventDescriptor();
 
   /**
    * Record a clock sync marker in the trace.
    *
    * @param syncId The ID of this clock sync marker
    */
+  @Experimental
   void recordClockSyncMarker(@ParamName("syncId") String syncId);
 
   /** Request a global memory dump. */
+  @Experimental
   RequestMemoryDump requestMemoryDump();
 
   /**
@@ -67,6 +74,7 @@ public interface Tracing {
    * @param deterministic Enables more deterministic results by forcing garbage collection
    * @param levelOfDetail Specifies level of details in memory dump. Defaults to "detailed".
    */
+  @Experimental
   RequestMemoryDump requestMemoryDump(
       @Optional @ParamName("deterministic") Boolean deterministic,
       @Optional @ParamName("levelOfDetail") MemoryDumpLevelOfDetail levelOfDetail);
@@ -94,24 +102,27 @@ public interface Tracing {
    * @param tracingBackend Backend type (defaults to `auto`)
    */
   void start(
-      @Deprecated @Optional @ParamName("categories") String categories,
-      @Deprecated @Optional @ParamName("options") String options,
-      @Optional @ParamName("bufferUsageReportingInterval") Double bufferUsageReportingInterval,
+      @Deprecated @Experimental @Optional @ParamName("categories") String categories,
+      @Deprecated @Experimental @Optional @ParamName("options") String options,
+      @Experimental @Optional @ParamName("bufferUsageReportingInterval")
+          Double bufferUsageReportingInterval,
       @Optional @ParamName("transferMode") StartTransferMode transferMode,
       @Optional @ParamName("streamFormat") StreamFormat streamFormat,
-      @Optional @ParamName("streamCompression") StreamCompression streamCompression,
+      @Experimental @Optional @ParamName("streamCompression") StreamCompression streamCompression,
       @Optional @ParamName("traceConfig") TraceConfig traceConfig,
-      @Optional @ParamName("perfettoConfig") String perfettoConfig,
-      @Optional @ParamName("tracingBackend") TracingBackend tracingBackend);
+      @Experimental @Optional @ParamName("perfettoConfig") String perfettoConfig,
+      @Experimental @Optional @ParamName("tracingBackend") TracingBackend tracingBackend);
 
   @EventName("bufferUsage")
+  @Experimental
   EventListener onBufferUsage(EventHandler<BufferUsage> eventListener);
 
   /**
-   * Contains an bucket of collected trace events. When tracing is stopped collected events will be
-   * send as a sequence of dataCollected events followed by tracingComplete event.
+   * Contains a bucket of collected trace events. When tracing is stopped collected events will be
+   * sent as a sequence of dataCollected events followed by tracingComplete event.
    */
   @EventName("dataCollected")
+  @Experimental
   EventListener onDataCollected(EventHandler<DataCollected> eventListener);
 
   /**

@@ -41,12 +41,12 @@ public class ChildNodeInserted {
     this.parentNodeId = parentNodeId;
   }
 
-  /** If of the previous siblint. */
+  /** Id of the previous sibling. */
   public Integer getPreviousNodeId() {
     return previousNodeId;
   }
 
-  /** If of the previous siblint. */
+  /** Id of the previous sibling. */
   public void setPreviousNodeId(Integer previousNodeId) {
     this.previousNodeId = previousNodeId;
   }

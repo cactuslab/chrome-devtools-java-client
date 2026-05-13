@@ -24,8 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** Enum of possible storage types. */
 public enum StorageType {
-  @JsonProperty("appcache")
-  APPCACHE,
   @JsonProperty("cookies")
   COOKIES,
   @JsonProperty("file_systems")
@@ -42,6 +40,12 @@ public enum StorageType {
   SERVICE_WORKERS,
   @JsonProperty("cache_storage")
   CACHE_STORAGE,
+  @JsonProperty("interest_groups")
+  INTEREST_GROUPS,
+  @JsonProperty("shared_storage")
+  SHARED_STORAGE,
+  @JsonProperty("storage_buckets")
+  STORAGE_BUCKETS,
   @JsonProperty("all")
   ALL,
   @JsonProperty("other")

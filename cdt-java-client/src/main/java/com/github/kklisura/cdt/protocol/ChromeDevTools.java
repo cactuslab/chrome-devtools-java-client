@@ -22,23 +22,29 @@ package com.github.kklisura.cdt.protocol;
 
 import com.github.kklisura.cdt.protocol.commands.Accessibility;
 import com.github.kklisura.cdt.protocol.commands.Animation;
-import com.github.kklisura.cdt.protocol.commands.ApplicationCache;
 import com.github.kklisura.cdt.protocol.commands.Audits;
+import com.github.kklisura.cdt.protocol.commands.Autofill;
 import com.github.kklisura.cdt.protocol.commands.BackgroundService;
+import com.github.kklisura.cdt.protocol.commands.BluetoothEmulation;
 import com.github.kklisura.cdt.protocol.commands.Browser;
 import com.github.kklisura.cdt.protocol.commands.CSS;
 import com.github.kklisura.cdt.protocol.commands.CacheStorage;
 import com.github.kklisura.cdt.protocol.commands.Cast;
 import com.github.kklisura.cdt.protocol.commands.Console;
+import com.github.kklisura.cdt.protocol.commands.CrashReportContext;
 import com.github.kklisura.cdt.protocol.commands.DOM;
 import com.github.kklisura.cdt.protocol.commands.DOMDebugger;
 import com.github.kklisura.cdt.protocol.commands.DOMSnapshot;
 import com.github.kklisura.cdt.protocol.commands.DOMStorage;
-import com.github.kklisura.cdt.protocol.commands.Database;
 import com.github.kklisura.cdt.protocol.commands.Debugger;
+import com.github.kklisura.cdt.protocol.commands.DeviceAccess;
 import com.github.kklisura.cdt.protocol.commands.DeviceOrientation;
 import com.github.kklisura.cdt.protocol.commands.Emulation;
+import com.github.kklisura.cdt.protocol.commands.EventBreakpoints;
+import com.github.kklisura.cdt.protocol.commands.Extensions;
+import com.github.kklisura.cdt.protocol.commands.FedCm;
 import com.github.kklisura.cdt.protocol.commands.Fetch;
+import com.github.kklisura.cdt.protocol.commands.FileSystem;
 import com.github.kklisura.cdt.protocol.commands.HeadlessExperimental;
 import com.github.kklisura.cdt.protocol.commands.HeapProfiler;
 import com.github.kklisura.cdt.protocol.commands.IO;
@@ -51,14 +57,17 @@ import com.github.kklisura.cdt.protocol.commands.Media;
 import com.github.kklisura.cdt.protocol.commands.Memory;
 import com.github.kklisura.cdt.protocol.commands.Network;
 import com.github.kklisura.cdt.protocol.commands.Overlay;
+import com.github.kklisura.cdt.protocol.commands.PWA;
 import com.github.kklisura.cdt.protocol.commands.Page;
 import com.github.kklisura.cdt.protocol.commands.Performance;
 import com.github.kklisura.cdt.protocol.commands.PerformanceTimeline;
+import com.github.kklisura.cdt.protocol.commands.Preload;
 import com.github.kklisura.cdt.protocol.commands.Profiler;
 import com.github.kklisura.cdt.protocol.commands.Runtime;
 import com.github.kklisura.cdt.protocol.commands.Schema;
 import com.github.kklisura.cdt.protocol.commands.Security;
 import com.github.kklisura.cdt.protocol.commands.ServiceWorker;
+import com.github.kklisura.cdt.protocol.commands.SmartCardEmulation;
 import com.github.kklisura.cdt.protocol.commands.Storage;
 import com.github.kklisura.cdt.protocol.commands.SystemInfo;
 import com.github.kklisura.cdt.protocol.commands.Target;
@@ -66,6 +75,7 @@ import com.github.kklisura.cdt.protocol.commands.Tethering;
 import com.github.kklisura.cdt.protocol.commands.Tracing;
 import com.github.kklisura.cdt.protocol.commands.WebAudio;
 import com.github.kklisura.cdt.protocol.commands.WebAuthn;
+import com.github.kklisura.cdt.protocol.commands.WebMCP;
 
 public interface ChromeDevTools {
 
@@ -93,14 +103,17 @@ public interface ChromeDevTools {
   /** Returns the Animation command. */
   Animation getAnimation();
 
-  /** Returns the ApplicationCache command. */
-  ApplicationCache getApplicationCache();
-
   /** Returns the Audits command. */
   Audits getAudits();
 
+  /** Returns the Autofill command. */
+  Autofill getAutofill();
+
   /** Returns the BackgroundService command. */
   BackgroundService getBackgroundService();
+
+  /** Returns the BluetoothEmulation command. */
+  BluetoothEmulation getBluetoothEmulation();
 
   /** Returns the Browser command. */
   Browser getBrowser();
@@ -114,6 +127,9 @@ public interface ChromeDevTools {
   /** Returns the Cast command. */
   Cast getCast();
 
+  /** Returns the CrashReportContext command. */
+  CrashReportContext getCrashReportContext();
+
   /** Returns the DOM command. */
   DOM getDOM();
 
@@ -126,14 +142,29 @@ public interface ChromeDevTools {
   /** Returns the DOMStorage command. */
   DOMStorage getDOMStorage();
 
-  /** Returns the Database command. */
-  Database getDatabase();
+  /** Returns the DeviceAccess command. */
+  DeviceAccess getDeviceAccess();
 
   /** Returns the DeviceOrientation command. */
   DeviceOrientation getDeviceOrientation();
 
   /** Returns the Emulation command. */
   Emulation getEmulation();
+
+  /** Returns the EventBreakpoints command. */
+  EventBreakpoints getEventBreakpoints();
+
+  /** Returns the Extensions command. */
+  Extensions getExtensions();
+
+  /** Returns the FedCm command. */
+  FedCm getFedCm();
+
+  /** Returns the Fetch command. */
+  Fetch getFetch();
+
+  /** Returns the FileSystem command. */
+  FileSystem getFileSystem();
 
   /** Returns the HeadlessExperimental command. */
   HeadlessExperimental getHeadlessExperimental();
@@ -156,6 +187,9 @@ public interface ChromeDevTools {
   /** Returns the Log command. */
   Log getLog();
 
+  /** Returns the Media command. */
+  Media getMedia();
+
   /** Returns the Memory command. */
   Memory getMemory();
 
@@ -164,6 +198,9 @@ public interface ChromeDevTools {
 
   /** Returns the Overlay command. */
   Overlay getOverlay();
+
+  /** Returns the PWA command. */
+  PWA getPWA();
 
   /** Returns the Page command. */
   Page getPage();
@@ -174,11 +211,17 @@ public interface ChromeDevTools {
   /** Returns the PerformanceTimeline command. */
   PerformanceTimeline getPerformanceTimeline();
 
+  /** Returns the Preload command. */
+  Preload getPreload();
+
   /** Returns the Security command. */
   Security getSecurity();
 
   /** Returns the ServiceWorker command. */
   ServiceWorker getServiceWorker();
+
+  /** Returns the SmartCardEmulation command. */
+  SmartCardEmulation getSmartCardEmulation();
 
   /** Returns the Storage command. */
   Storage getStorage();
@@ -195,15 +238,12 @@ public interface ChromeDevTools {
   /** Returns the Tracing command. */
   Tracing getTracing();
 
-  /** Returns the Fetch command. */
-  Fetch getFetch();
-
   /** Returns the WebAudio command. */
   WebAudio getWebAudio();
 
   /** Returns the WebAuthn command. */
   WebAuthn getWebAuthn();
 
-  /** Returns the Media command. */
-  Media getMedia();
+  /** Returns the WebMCP command. */
+  WebMCP getWebMCP();
 }

@@ -22,10 +22,7 @@ package com.github.kklisura.cdt.protocol.events.page;
 
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 
-/**
- * Issued for every compilation cache generated. Is only available if
- * Page.setGenerateCompilationCache is enabled.
- */
+/** Issued for every compilation cache generated. */
 @Experimental
 public class CompilationCacheProduced {
 

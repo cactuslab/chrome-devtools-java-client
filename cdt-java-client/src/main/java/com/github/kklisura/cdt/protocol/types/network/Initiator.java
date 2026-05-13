@@ -48,12 +48,18 @@ public class Initiator {
     this.type = type;
   }
 
-  /** Initiator JavaScript stack trace, set for Script only. */
+  /**
+   * Initiator JavaScript stack trace, set for Script only. Requires the Debugger domain to be
+   * enabled.
+   */
   public StackTrace getStack() {
     return stack;
   }
 
-  /** Initiator JavaScript stack trace, set for Script only. */
+  /**
+   * Initiator JavaScript stack trace, set for Script only. Requires the Debugger domain to be
+   * enabled.
+   */
   public void setStack(StackTrace stack) {
     this.stack = stack;
   }

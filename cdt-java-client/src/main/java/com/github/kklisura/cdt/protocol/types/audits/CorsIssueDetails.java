@@ -36,6 +36,8 @@ public class CorsIssueDetails {
 
   private AffectedRequest request;
 
+  @Optional private SourceCodeLocation location;
+
   @Optional private String initiatorOrigin;
 
   @Optional private IPAddressSpace resourceIPAddressSpace;
@@ -64,6 +66,14 @@ public class CorsIssueDetails {
 
   public void setRequest(AffectedRequest request) {
     this.request = request;
+  }
+
+  public SourceCodeLocation getLocation() {
+    return location;
+  }
+
+  public void setLocation(SourceCodeLocation location) {
+    this.location = location;
   }
 
   public String getInitiatorOrigin() {

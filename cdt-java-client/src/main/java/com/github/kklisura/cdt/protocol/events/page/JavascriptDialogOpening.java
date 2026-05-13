@@ -20,6 +20,7 @@ package com.github.kklisura.cdt.protocol.events.page;
  * #L%
  */
 
+import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.types.page.DialogType;
 
@@ -30,6 +31,8 @@ import com.github.kklisura.cdt.protocol.types.page.DialogType;
 public class JavascriptDialogOpening {
 
   private String url;
+
+  @Experimental private String frameId;
 
   private String message;
 
@@ -47,6 +50,16 @@ public class JavascriptDialogOpening {
   /** Frame url. */
   public void setUrl(String url) {
     this.url = url;
+  }
+
+  /** Frame id. */
+  public String getFrameId() {
+    return frameId;
+  }
+
+  /** Frame id. */
+  public void setFrameId(String frameId) {
+    this.frameId = frameId;
   }
 
   /** Message that will be displayed by the dialog. */

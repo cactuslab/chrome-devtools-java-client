@@ -31,7 +31,7 @@ public class AnimationEffect {
 
   private Double iterationStart;
 
-  private Double iterations;
+  @Optional private Double iterations;
 
   private Double duration;
 
@@ -75,22 +75,28 @@ public class AnimationEffect {
     this.iterationStart = iterationStart;
   }
 
-  /** `AnimationEffect`'s iterations. */
+  /** `AnimationEffect`'s iterations. Omitted if the value is infinite. */
   public Double getIterations() {
     return iterations;
   }
 
-  /** `AnimationEffect`'s iterations. */
+  /** `AnimationEffect`'s iterations. Omitted if the value is infinite. */
   public void setIterations(Double iterations) {
     this.iterations = iterations;
   }
 
-  /** `AnimationEffect`'s iteration duration. */
+  /**
+   * `AnimationEffect`'s iteration duration. Milliseconds for time based animations and percentage
+   * [0 - 100] for scroll driven animations (i.e. when viewOrScrollTimeline exists).
+   */
   public Double getDuration() {
     return duration;
   }
 
-  /** `AnimationEffect`'s iteration duration. */
+  /**
+   * `AnimationEffect`'s iteration duration. Milliseconds for time based animations and percentage
+   * [0 - 100] for scroll driven animations (i.e. when viewOrScrollTimeline exists).
+   */
   public void setDuration(Double duration) {
     this.duration = duration;
   }

@@ -25,6 +25,10 @@ public class IndexedDBContentUpdated {
 
   private String origin;
 
+  private String storageKey;
+
+  private String bucketId;
+
   private String databaseName;
 
   private String objectStoreName;
@@ -37,6 +41,26 @@ public class IndexedDBContentUpdated {
   /** Origin to update. */
   public void setOrigin(String origin) {
     this.origin = origin;
+  }
+
+  /** Storage key to update. */
+  public String getStorageKey() {
+    return storageKey;
+  }
+
+  /** Storage key to update. */
+  public void setStorageKey(String storageKey) {
+    this.storageKey = storageKey;
+  }
+
+  /** Storage bucket to update. */
+  public String getBucketId() {
+    return bucketId;
+  }
+
+  /** Storage bucket to update. */
+  public void setBucketId(String bucketId) {
+    this.bucketId = bucketId;
   }
 
   /** Database to update. */

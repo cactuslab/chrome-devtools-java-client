@@ -25,7 +25,7 @@ import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import java.util.List;
 
 /**
- * Used to specify User Agent Cient Hints to emulate. See https://wicg.github.io/ua-client-hints
+ * Used to specify User Agent Client Hints to emulate. See https://wicg.github.io/ua-client-hints
  * Missing optional values will be filled in by the target with what it would normally use.
  */
 @Experimental
@@ -33,7 +33,9 @@ public class UserAgentMetadata {
 
   @Optional private List<UserAgentBrandVersion> brands;
 
-  @Optional private String fullVersion;
+  @Optional private List<UserAgentBrandVersion> fullVersionList;
+
+  @Deprecated @Optional private String fullVersion;
 
   private String platform;
 
@@ -45,12 +47,30 @@ public class UserAgentMetadata {
 
   private Boolean mobile;
 
+  @Optional private String bitness;
+
+  @Optional private Boolean wow64;
+
+  @Optional private List<String> formFactors;
+
+  /** Brands appearing in Sec-CH-UA. */
   public List<UserAgentBrandVersion> getBrands() {
     return brands;
   }
 
+  /** Brands appearing in Sec-CH-UA. */
   public void setBrands(List<UserAgentBrandVersion> brands) {
     this.brands = brands;
+  }
+
+  /** Brands appearing in Sec-CH-UA-Full-Version-List. */
+  public List<UserAgentBrandVersion> getFullVersionList() {
+    return fullVersionList;
+  }
+
+  /** Brands appearing in Sec-CH-UA-Full-Version-List. */
+  public void setFullVersionList(List<UserAgentBrandVersion> fullVersionList) {
+    this.fullVersionList = fullVersionList;
   }
 
   public String getFullVersion() {
@@ -99,5 +119,37 @@ public class UserAgentMetadata {
 
   public void setMobile(Boolean mobile) {
     this.mobile = mobile;
+  }
+
+  public String getBitness() {
+    return bitness;
+  }
+
+  public void setBitness(String bitness) {
+    this.bitness = bitness;
+  }
+
+  public Boolean getWow64() {
+    return wow64;
+  }
+
+  public void setWow64(Boolean wow64) {
+    this.wow64 = wow64;
+  }
+
+  /**
+   * Used to specify User Agent form-factor values. See
+   * https://wicg.github.io/ua-client-hints/#sec-ch-ua-form-factors
+   */
+  public List<String> getFormFactors() {
+    return formFactors;
+  }
+
+  /**
+   * Used to specify User Agent form-factor values. See
+   * https://wicg.github.io/ua-client-hints/#sec-ch-ua-form-factors
+   */
+  public void setFormFactors(List<String> formFactors) {
+    this.formFactors = formFactors;
   }
 }

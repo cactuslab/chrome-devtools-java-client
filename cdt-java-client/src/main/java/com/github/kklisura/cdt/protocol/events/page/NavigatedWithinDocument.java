@@ -32,6 +32,8 @@ public class NavigatedWithinDocument {
 
   private String url;
 
+  private NavigatedWithinDocumentNavigationType navigationType;
+
   /** Id of the frame. */
   public String getFrameId() {
     return frameId;
@@ -50,5 +52,15 @@ public class NavigatedWithinDocument {
   /** Frame's new url. */
   public void setUrl(String url) {
     this.url = url;
+  }
+
+  /** Navigation type */
+  public NavigatedWithinDocumentNavigationType getNavigationType() {
+    return navigationType;
+  }
+
+  /** Navigation type */
+  public void setNavigationType(NavigatedWithinDocumentNavigationType navigationType) {
+    this.navigationType = navigationType;
   }
 }

@@ -32,22 +32,22 @@ import java.util.List;
 @Experimental
 public class TrustTokenParams {
 
-  private TrustTokenOperationType type;
+  private TrustTokenOperationType operation;
 
   private TrustTokenParamsRefreshPolicy refreshPolicy;
 
   @Optional private List<String> issuers;
 
-  public TrustTokenOperationType getType() {
-    return type;
+  public TrustTokenOperationType getOperation() {
+    return operation;
   }
 
-  public void setType(TrustTokenOperationType type) {
-    this.type = type;
+  public void setOperation(TrustTokenOperationType operation) {
+    this.operation = operation;
   }
 
   /**
-   * Only set for "token-redemption" type and determine whether to request a fresh SRR or use a
+   * Only set for "token-redemption" operation and determine whether to request a fresh SRR or use a
    * still valid cached SRR.
    */
   public TrustTokenParamsRefreshPolicy getRefreshPolicy() {
@@ -55,7 +55,7 @@ public class TrustTokenParams {
   }
 
   /**
-   * Only set for "token-redemption" type and determine whether to request a fresh SRR or use a
+   * Only set for "token-redemption" operation and determine whether to request a fresh SRR or use a
    * still valid cached SRR.
    */
   public void setRefreshPolicy(TrustTokenParamsRefreshPolicy refreshPolicy) {

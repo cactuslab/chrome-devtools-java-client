@@ -23,6 +23,7 @@ package com.github.kklisura.cdt.protocol.commands;
 import com.github.kklisura.cdt.protocol.events.animation.AnimationCanceled;
 import com.github.kklisura.cdt.protocol.events.animation.AnimationCreated;
 import com.github.kklisura.cdt.protocol.events.animation.AnimationStarted;
+import com.github.kklisura.cdt.protocol.events.animation.AnimationUpdated;
 import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
@@ -117,4 +118,8 @@ public interface Animation {
   /** Event for animation that has been started. */
   @EventName("animationStarted")
   EventListener onAnimationStarted(EventHandler<AnimationStarted> eventListener);
+
+  /** Event for animation that has been updated. */
+  @EventName("animationUpdated")
+  EventListener onAnimationUpdated(EventHandler<AnimationUpdated> eventListener);
 }

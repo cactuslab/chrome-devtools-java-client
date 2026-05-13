@@ -20,15 +20,29 @@ package com.github.kklisura.cdt.protocol.events.page;
  * #L%
  */
 
+import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
+
 /**
  * Fired when a JavaScript initiated dialog (alert, confirm, prompt, or onbeforeunload) has been
  * closed.
  */
 public class JavascriptDialogClosed {
 
+  @Experimental private String frameId;
+
   private Boolean result;
 
   private String userInput;
+
+  /** Frame id. */
+  public String getFrameId() {
+    return frameId;
+  }
+
+  /** Frame id. */
+  public void setFrameId(String frameId) {
+    this.frameId = frameId;
+  }
 
   /** Whether dialog was confirmed. */
   public Boolean getResult() {

@@ -29,5 +29,7 @@ public enum ContextState {
   @JsonProperty("running")
   RUNNING,
   @JsonProperty("closed")
-  CLOSED
+  CLOSED,
+  @JsonProperty("interrupted")
+  INTERRUPTED
 }

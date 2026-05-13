@@ -20,12 +20,14 @@ package com.github.kklisura.cdt.protocol.events.tracing;
  * #L%
  */
 
+import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import java.util.List;
 
 /**
- * Contains an bucket of collected trace events. When tracing is stopped collected events will be
- * send as a sequence of dataCollected events followed by tracingComplete event.
+ * Contains a bucket of collected trace events. When tracing is stopped collected events will be
+ * sent as a sequence of dataCollected events followed by tracingComplete event.
  */
+@Experimental
 public class DataCollected {
 
   private List<Object> value;

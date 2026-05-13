@@ -20,6 +20,7 @@ package com.github.kklisura.cdt.protocol.types.page;
  * #L%
  */
 
+import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 
 public class Navigate {
@@ -29,6 +30,8 @@ public class Navigate {
   @Optional private String loaderId;
 
   @Optional private String errorText;
+
+  @Experimental @Optional private Boolean isDownload;
 
   /** Frame id that has navigated (or failed to navigate) */
   public String getFrameId() {
@@ -40,12 +43,18 @@ public class Navigate {
     this.frameId = frameId;
   }
 
-  /** Loader identifier. */
+  /**
+   * Loader identifier. This is omitted in case of same-document navigation, as the previously
+   * committed loaderId would not change.
+   */
   public String getLoaderId() {
     return loaderId;
   }
 
-  /** Loader identifier. */
+  /**
+   * Loader identifier. This is omitted in case of same-document navigation, as the previously
+   * committed loaderId would not change.
+   */
   public void setLoaderId(String loaderId) {
     this.loaderId = loaderId;
   }
@@ -58,5 +67,15 @@ public class Navigate {
   /** User friendly error message, present if and only if navigation has failed. */
   public void setErrorText(String errorText) {
     this.errorText = errorText;
+  }
+
+  /** Whether the navigation resulted in a download. */
+  public Boolean getIsDownload() {
+    return isDownload;
+  }
+
+  /** Whether the navigation resulted in a download. */
+  public void setIsDownload(Boolean isDownload) {
+    this.isDownload = isDownload;
   }
 }

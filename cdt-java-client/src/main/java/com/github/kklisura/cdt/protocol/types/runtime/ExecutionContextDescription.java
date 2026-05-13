@@ -74,7 +74,7 @@ public class ExecutionContextDescription {
   }
 
   /**
-   * A system-unique execution context identifier. Unlike the id, this is unique accross multiple
+   * A system-unique execution context identifier. Unlike the id, this is unique across multiple
    * processes, so can be reliably used to identify specific context while backend performs a
    * cross-process navigation.
    */
@@ -83,7 +83,7 @@ public class ExecutionContextDescription {
   }
 
   /**
-   * A system-unique execution context identifier. Unlike the id, this is unique accross multiple
+   * A system-unique execution context identifier. Unlike the id, this is unique across multiple
    * processes, so can be reliably used to identify specific context while backend performs a
    * cross-process navigation.
    */
@@ -91,12 +91,18 @@ public class ExecutionContextDescription {
     this.uniqueId = uniqueId;
   }
 
-  /** Embedder-specific auxiliary data. */
+  /**
+   * Embedder-specific auxiliary data likely matching {isDefault: boolean, type:
+   * 'default'|'isolated'|'worker', frameId: string}
+   */
   public Map<String, Object> getAuxData() {
     return auxData;
   }
 
-  /** Embedder-specific auxiliary data. */
+  /**
+   * Embedder-specific auxiliary data likely matching {isDefault: boolean, type:
+   * 'default'|'isolated'|'worker', frameId: string}
+   */
   public void setAuxData(Map<String, Object> auxData) {
     this.auxData = auxData;
   }

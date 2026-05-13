@@ -20,10 +20,14 @@ package com.github.kklisura.cdt.protocol.events.runtime;
  * #L%
  */
 
+import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
+
 /** Issued when execution context is destroyed. */
 public class ExecutionContextDestroyed {
 
-  private Integer executionContextId;
+  @Deprecated private Integer executionContextId;
+
+  @Experimental private String executionContextUniqueId;
 
   /** Id of the destroyed context */
   public Integer getExecutionContextId() {
@@ -33,5 +37,15 @@ public class ExecutionContextDestroyed {
   /** Id of the destroyed context */
   public void setExecutionContextId(Integer executionContextId) {
     this.executionContextId = executionContextId;
+  }
+
+  /** Unique Id of the destroyed context */
+  public String getExecutionContextUniqueId() {
+    return executionContextUniqueId;
+  }
+
+  /** Unique Id of the destroyed context */
+  public void setExecutionContextUniqueId(String executionContextUniqueId) {
+    this.executionContextUniqueId = executionContextUniqueId;
   }
 }

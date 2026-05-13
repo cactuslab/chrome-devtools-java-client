@@ -21,6 +21,7 @@ package com.github.kklisura.cdt.protocol.commands;
  */
 
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.types.systeminfo.Info;
@@ -33,6 +34,14 @@ public interface SystemInfo {
 
   /** Returns information about the system. */
   Info getInfo();
+
+  /**
+   * Returns information about the feature state.
+   *
+   * @param featureState
+   */
+  @Returns("featureEnabled")
+  Boolean getFeatureState(@ParamName("featureState") String featureState);
 
   /** Returns information about all running processes. */
   @Returns("processInfo")

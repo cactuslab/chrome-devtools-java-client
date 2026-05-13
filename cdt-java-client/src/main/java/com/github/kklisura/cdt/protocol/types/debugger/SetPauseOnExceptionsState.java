@@ -26,6 +26,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public enum SetPauseOnExceptionsState {
   @JsonProperty("none")
   NONE,
+  @JsonProperty("caught")
+  CAUGHT,
   @JsonProperty("uncaught")
   UNCAUGHT,
   @JsonProperty("all")

@@ -52,6 +52,10 @@ public class SecurityDetails {
 
   private CertificateTransparencyCompliance certificateTransparencyCompliance;
 
+  @Optional private Integer serverSignatureAlgorithm;
+
+  private Boolean encryptedClientHello;
+
   /** Protocol name (e.g. "TLS 1.2" or "QUIC"). */
   public String getProtocol() {
     return protocol;
@@ -182,5 +186,31 @@ public class SecurityDetails {
   public void setCertificateTransparencyCompliance(
       CertificateTransparencyCompliance certificateTransparencyCompliance) {
     this.certificateTransparencyCompliance = certificateTransparencyCompliance;
+  }
+
+  /**
+   * The signature algorithm used by the server in the TLS server signature, represented as a TLS
+   * SignatureScheme code point. Omitted if not applicable or not known.
+   */
+  public Integer getServerSignatureAlgorithm() {
+    return serverSignatureAlgorithm;
+  }
+
+  /**
+   * The signature algorithm used by the server in the TLS server signature, represented as a TLS
+   * SignatureScheme code point. Omitted if not applicable or not known.
+   */
+  public void setServerSignatureAlgorithm(Integer serverSignatureAlgorithm) {
+    this.serverSignatureAlgorithm = serverSignatureAlgorithm;
+  }
+
+  /** Whether the connection used Encrypted ClientHello */
+  public Boolean getEncryptedClientHello() {
+    return encryptedClientHello;
+  }
+
+  /** Whether the connection used Encrypted ClientHello */
+  public void setEncryptedClientHello(Boolean encryptedClientHello) {
+    this.encryptedClientHello = encryptedClientHello;
   }
 }

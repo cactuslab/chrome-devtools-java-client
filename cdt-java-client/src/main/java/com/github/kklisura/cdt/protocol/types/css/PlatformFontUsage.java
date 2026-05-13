@@ -25,6 +25,8 @@ public class PlatformFontUsage {
 
   private String familyName;
 
+  private String postScriptName;
+
   private Boolean isCustomFont;
 
   private Double glyphCount;
@@ -37,6 +39,16 @@ public class PlatformFontUsage {
   /** Font's family name reported by platform. */
   public void setFamilyName(String familyName) {
     this.familyName = familyName;
+  }
+
+  /** Font's PostScript name reported by platform. */
+  public String getPostScriptName() {
+    return postScriptName;
+  }
+
+  /** Font's PostScript name reported by platform. */
+  public void setPostScriptName(String postScriptName) {
+    this.postScriptName = postScriptName;
   }
 
   /** Indicates if the font was downloaded or resolved locally. */

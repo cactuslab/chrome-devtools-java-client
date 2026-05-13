@@ -36,6 +36,7 @@ import com.github.kklisura.cdt.protocol.types.browser.Histogram;
 import com.github.kklisura.cdt.protocol.types.browser.PermissionDescriptor;
 import com.github.kklisura.cdt.protocol.types.browser.PermissionSetting;
 import com.github.kklisura.cdt.protocol.types.browser.PermissionType;
+import com.github.kklisura.cdt.protocol.types.browser.PrivacySandboxAPI;
 import com.github.kklisura.cdt.protocol.types.browser.SetDownloadBehaviorBehavior;
 import com.github.kklisura.cdt.protocol.types.browser.Version;
 import com.github.kklisura.cdt.protocol.types.browser.WindowForTarget;
@@ -45,7 +46,7 @@ import java.util.List;
 public interface Browser {
 
   /**
-   * Set permission settings for given origin.
+   * Set permission settings for given embedding and embedded origins.
    *
    * @param permission Descriptor of permission to override.
    * @param setting Setting of the permission.
@@ -56,11 +57,14 @@ public interface Browser {
       @ParamName("setting") PermissionSetting setting);
 
   /**
-   * Set permission settings for given origin.
+   * Set permission settings for given embedding and embedded origins.
    *
    * @param permission Descriptor of permission to override.
    * @param setting Setting of the permission.
-   * @param origin Origin the permission applies to, all origins if not specified.
+   * @param origin Embedding origin the permission applies to, all origins if not specified.
+   * @param embeddedOrigin Embedded origin the permission applies to. It is ignored unless the
+   *     embedding origin is present and valid. If the embedding origin is provided but the embedded
+   *     origin isn't, the embedding origin is used as the embedded origin.
    * @param browserContextId Context to override. When omitted, default browser context is used.
    */
   @Experimental
@@ -68,24 +72,29 @@ public interface Browser {
       @ParamName("permission") PermissionDescriptor permission,
       @ParamName("setting") PermissionSetting setting,
       @Optional @ParamName("origin") String origin,
+      @Optional @ParamName("embeddedOrigin") String embeddedOrigin,
       @Optional @ParamName("browserContextId") String browserContextId);
 
   /**
-   * Grant specific permissions to the given origin and reject all others.
+   * Grant specific permissions to the given origin and reject all others. Deprecated. Use
+   * setPermission instead.
    *
    * @param permissions
    */
+  @Deprecated
   @Experimental
   void grantPermissions(@ParamName("permissions") List<PermissionType> permissions);
 
   /**
-   * Grant specific permissions to the given origin and reject all others.
+   * Grant specific permissions to the given origin and reject all others. Deprecated. Use
+   * setPermission instead.
    *
    * @param permissions
    * @param origin Origin the permission applies to, all origins if not specified.
    * @param browserContextId BrowserContext to override permissions. When omitted, default browser
    *     context is used.
    */
+  @Deprecated
   @Experimental
   void grantPermissions(
       @ParamName("permissions") List<PermissionType> permissions,
@@ -93,7 +102,6 @@ public interface Browser {
       @Optional @ParamName("browserContextId") String browserContextId);
 
   /** Reset all permission management for all origins. */
-  @Experimental
   void resetPermissions();
 
   /**
@@ -102,7 +110,6 @@ public interface Browser {
    * @param browserContextId BrowserContext to reset permissions. When omitted, default browser
    *     context is used.
    */
-  @Experimental
   void resetPermissions(@Optional @ParamName("browserContextId") String browserContextId);
 
   /**
@@ -110,7 +117,7 @@ public interface Browser {
    *
    * @param behavior Whether to allow all or deny all download requests, or use default Chrome
    *     behavior if available (otherwise deny). |allowAndName| allows download and names files
-   *     according to their dowmload guids.
+   *     according to their download guids.
    */
   @Experimental
   void setDownloadBehavior(@ParamName("behavior") SetDownloadBehaviorBehavior behavior);
@@ -120,7 +127,7 @@ public interface Browser {
    *
    * @param behavior Whether to allow all or deny all download requests, or use default Chrome
    *     behavior if available (otherwise deny). |allowAndName| allows download and names files
-   *     according to their dowmload guids.
+   *     according to their download guids.
    * @param browserContextId BrowserContext to set download behavior. When omitted, default browser
    *     context is used.
    * @param downloadPath The default path to save downloaded files to. This is required if behavior
@@ -188,7 +195,7 @@ public interface Browser {
    *
    * @param query Requested substring in name. Only histograms which have query as a substring in
    *     their name are extracted. An empty or absent query returns all histograms.
-   * @param delta If true, retrieve delta since last call.
+   * @param delta If true, retrieve delta since last delta call.
    */
   @Experimental
   @Returns("histograms")
@@ -209,7 +216,7 @@ public interface Browser {
    * Get a Chrome histogram by name.
    *
    * @param name Requested histogram name.
-   * @param delta If true, retrieve delta since last call.
+   * @param delta If true, retrieve delta since last delta call.
    */
   @Experimental
   @Returns("histogram")
@@ -248,6 +255,29 @@ public interface Browser {
   @Experimental
   void setWindowBounds(@ParamName("windowId") Integer windowId, @ParamName("bounds") Bounds bounds);
 
+  /**
+   * Set size of the browser contents resizing browser window as necessary.
+   *
+   * @param windowId Browser window id.
+   */
+  @Experimental
+  void setContentsSize(@ParamName("windowId") Integer windowId);
+
+  /**
+   * Set size of the browser contents resizing browser window as necessary.
+   *
+   * @param windowId Browser window id.
+   * @param width The window contents width in DIP. Assumes current width if omitted. Must be
+   *     specified if 'height' is omitted.
+   * @param height The window contents height in DIP. Assumes current height if omitted. Must be
+   *     specified if 'width' is omitted.
+   */
+  @Experimental
+  void setContentsSize(
+      @ParamName("windowId") Integer windowId,
+      @Optional @ParamName("width") Integer width,
+      @Optional @ParamName("height") Integer height);
+
   /** Set dock tile details, platform-specific. */
   @Experimental
   void setDockTile();
@@ -270,6 +300,45 @@ public interface Browser {
    */
   @Experimental
   void executeBrowserCommand(@ParamName("commandId") BrowserCommandId commandId);
+
+  /**
+   * Allows a site to use privacy sandbox features that require enrollment without the site actually
+   * being enrolled. Only supported on page targets.
+   *
+   * @param url
+   */
+  void addPrivacySandboxEnrollmentOverride(@ParamName("url") String url);
+
+  /**
+   * Configures encryption keys used with a given privacy sandbox API to talk to a trusted
+   * coordinator. Since this is intended for test automation only, coordinatorOrigin must be a .test
+   * domain. No existing coordinator configuration for the origin may exist.
+   *
+   * @param api
+   * @param coordinatorOrigin
+   * @param keyConfig
+   */
+  void addPrivacySandboxCoordinatorKeyConfig(
+      @ParamName("api") PrivacySandboxAPI api,
+      @ParamName("coordinatorOrigin") String coordinatorOrigin,
+      @ParamName("keyConfig") String keyConfig);
+
+  /**
+   * Configures encryption keys used with a given privacy sandbox API to talk to a trusted
+   * coordinator. Since this is intended for test automation only, coordinatorOrigin must be a .test
+   * domain. No existing coordinator configuration for the origin may exist.
+   *
+   * @param api
+   * @param coordinatorOrigin
+   * @param keyConfig
+   * @param browserContextId BrowserContext to perform the action in. When omitted, default browser
+   *     context is used.
+   */
+  void addPrivacySandboxCoordinatorKeyConfig(
+      @ParamName("api") PrivacySandboxAPI api,
+      @ParamName("coordinatorOrigin") String coordinatorOrigin,
+      @ParamName("keyConfig") String keyConfig,
+      @Optional @ParamName("browserContextId") String browserContextId);
 
   /** Fired when page is about to start a download. */
   @EventName("downloadWillBegin")

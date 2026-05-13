@@ -27,6 +27,8 @@ public enum ColorFormat {
   RGB,
   @JsonProperty("hsl")
   HSL,
+  @JsonProperty("hwb")
+  HWB,
   @JsonProperty("hex")
   HEX
 }

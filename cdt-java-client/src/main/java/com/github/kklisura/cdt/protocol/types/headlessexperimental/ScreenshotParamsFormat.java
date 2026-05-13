@@ -27,5 +27,7 @@ public enum ScreenshotParamsFormat {
   @JsonProperty("jpeg")
   JPEG,
   @JsonProperty("png")
-  PNG
+  PNG,
+  @JsonProperty("webp")
+  WEBP
 }

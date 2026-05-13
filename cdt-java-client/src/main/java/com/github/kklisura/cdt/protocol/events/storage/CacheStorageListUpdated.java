@@ -25,6 +25,10 @@ public class CacheStorageListUpdated {
 
   private String origin;
 
+  private String storageKey;
+
+  private String bucketId;
+
   /** Origin to update. */
   public String getOrigin() {
     return origin;
@@ -33,5 +37,25 @@ public class CacheStorageListUpdated {
   /** Origin to update. */
   public void setOrigin(String origin) {
     this.origin = origin;
+  }
+
+  /** Storage key to update. */
+  public String getStorageKey() {
+    return storageKey;
+  }
+
+  /** Storage key to update. */
+  public void setStorageKey(String storageKey) {
+    this.storageKey = storageKey;
+  }
+
+  /** Storage bucket to update. */
+  public String getBucketId() {
+    return bucketId;
+  }
+
+  /** Storage bucket to update. */
+  public void setBucketId(String bucketId) {
+    this.bucketId = bucketId;
   }
 }

@@ -43,11 +43,13 @@ public class Frame {
 
   private String securityOrigin;
 
+  @Experimental @Optional private SecurityOriginDetails securityOriginDetails;
+
   private String mimeType;
 
   @Experimental @Optional private String unreachableUrl;
 
-  @Experimental @Optional private AdFrameType adFrameType;
+  @Experimental @Optional private AdFrameStatus adFrameStatus;
 
   @Experimental private SecureContextType secureContextType;
 
@@ -143,6 +145,16 @@ public class Frame {
     this.securityOrigin = securityOrigin;
   }
 
+  /** Additional details about the frame document's security origin. */
+  public SecurityOriginDetails getSecurityOriginDetails() {
+    return securityOriginDetails;
+  }
+
+  /** Additional details about the frame document's security origin. */
+  public void setSecurityOriginDetails(SecurityOriginDetails securityOriginDetails) {
+    this.securityOriginDetails = securityOriginDetails;
+  }
+
   /** Frame document's mimeType as determined by the browser. */
   public String getMimeType() {
     return mimeType;
@@ -169,14 +181,14 @@ public class Frame {
     this.unreachableUrl = unreachableUrl;
   }
 
-  /** Indicates whether this frame was tagged as an ad. */
-  public AdFrameType getAdFrameType() {
-    return adFrameType;
+  /** Indicates whether this frame was tagged as an ad and why. */
+  public AdFrameStatus getAdFrameStatus() {
+    return adFrameStatus;
   }
 
-  /** Indicates whether this frame was tagged as an ad. */
-  public void setAdFrameType(AdFrameType adFrameType) {
-    this.adFrameType = adFrameType;
+  /** Indicates whether this frame was tagged as an ad and why. */
+  public void setAdFrameStatus(AdFrameStatus adFrameStatus) {
+    this.adFrameStatus = adFrameStatus;
   }
 
   /** Indicates whether the main document is a secure context and explains why that is the case. */

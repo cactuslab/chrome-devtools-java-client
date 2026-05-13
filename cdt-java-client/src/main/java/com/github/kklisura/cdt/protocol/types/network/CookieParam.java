@@ -46,11 +46,11 @@ public class CookieParam {
 
   @Experimental @Optional private CookiePriority priority;
 
-  @Experimental @Optional private Boolean sameParty;
-
   @Experimental @Optional private CookieSourceScheme sourceScheme;
 
   @Experimental @Optional private Integer sourcePort;
+
+  @Experimental @Optional private CookiePartitionKey partitionKey;
 
   /** Cookie name. */
   public String getName() {
@@ -158,16 +158,6 @@ public class CookieParam {
     this.priority = priority;
   }
 
-  /** True if cookie is SameParty. */
-  public Boolean getSameParty() {
-    return sameParty;
-  }
-
-  /** True if cookie is SameParty. */
-  public void setSameParty(Boolean sameParty) {
-    this.sameParty = sameParty;
-  }
-
   /** Cookie source scheme type. */
   public CookieSourceScheme getSourceScheme() {
     return sourceScheme;
@@ -194,5 +184,15 @@ public class CookieParam {
    */
   public void setSourcePort(Integer sourcePort) {
     this.sourcePort = sourcePort;
+  }
+
+  /** Cookie partition key. If not set, the cookie will be set as not partitioned. */
+  public CookiePartitionKey getPartitionKey() {
+    return partitionKey;
+  }
+
+  /** Cookie partition key. If not set, the cookie will be set as not partitioned. */
+  public void setPartitionKey(CookiePartitionKey partitionKey) {
+    this.partitionKey = partitionKey;
   }
 }

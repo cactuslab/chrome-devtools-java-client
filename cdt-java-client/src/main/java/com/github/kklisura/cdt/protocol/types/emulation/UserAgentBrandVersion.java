@@ -22,7 +22,9 @@ package com.github.kklisura.cdt.protocol.types.emulation;
 
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 
-/** Used to specify User Agent Cient Hints to emulate. See https://wicg.github.io/ua-client-hints */
+/**
+ * Used to specify User Agent Client Hints to emulate. See https://wicg.github.io/ua-client-hints
+ */
 @Experimental
 public class UserAgentBrandVersion {
 

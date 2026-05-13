@@ -61,5 +61,7 @@ public enum PropertyPreviewSubtype {
   @JsonProperty("webassemblymemory")
   WEBASSEMBLYMEMORY,
   @JsonProperty("wasmvalue")
-  WASMVALUE
+  WASMVALUE,
+  @JsonProperty("trustedtype")
+  TRUSTEDTYPE
 }

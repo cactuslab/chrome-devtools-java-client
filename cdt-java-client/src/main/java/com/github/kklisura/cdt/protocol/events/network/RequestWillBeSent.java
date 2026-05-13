@@ -20,8 +20,10 @@ package com.github.kklisura.cdt.protocol.events.network;
  * #L%
  */
 
+import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.types.network.Initiator;
+import com.github.kklisura.cdt.protocol.types.network.RenderBlockingBehavior;
 import com.github.kklisura.cdt.protocol.types.network.Request;
 import com.github.kklisura.cdt.protocol.types.network.ResourceType;
 import com.github.kklisura.cdt.protocol.types.network.Response;
@@ -43,6 +45,8 @@ public class RequestWillBeSent {
 
   private Initiator initiator;
 
+  @Experimental private Boolean redirectHasExtraInfo;
+
   @Optional private Response redirectResponse;
 
   @Optional private ResourceType type;
@@ -50,6 +54,8 @@ public class RequestWillBeSent {
   @Optional private String frameId;
 
   @Optional private Boolean hasUserGesture;
+
+  @Experimental @Optional private RenderBlockingBehavior renderBlockingBehavior;
 
   /** Request identifier. */
   public String getRequestId() {
@@ -121,6 +127,24 @@ public class RequestWillBeSent {
     this.initiator = initiator;
   }
 
+  /**
+   * In the case that redirectResponse is populated, this flag indicates whether
+   * requestWillBeSentExtraInfo and responseReceivedExtraInfo events will be or were emitted for the
+   * request which was just redirected.
+   */
+  public Boolean getRedirectHasExtraInfo() {
+    return redirectHasExtraInfo;
+  }
+
+  /**
+   * In the case that redirectResponse is populated, this flag indicates whether
+   * requestWillBeSentExtraInfo and responseReceivedExtraInfo events will be or were emitted for the
+   * request which was just redirected.
+   */
+  public void setRedirectHasExtraInfo(Boolean redirectHasExtraInfo) {
+    this.redirectHasExtraInfo = redirectHasExtraInfo;
+  }
+
   /** Redirect response data. */
   public Response getRedirectResponse() {
     return redirectResponse;
@@ -159,5 +183,15 @@ public class RequestWillBeSent {
   /** Whether the request is initiated by a user gesture. Defaults to false. */
   public void setHasUserGesture(Boolean hasUserGesture) {
     this.hasUserGesture = hasUserGesture;
+  }
+
+  /** The render-blocking behavior of the request. */
+  public RenderBlockingBehavior getRenderBlockingBehavior() {
+    return renderBlockingBehavior;
+  }
+
+  /** The render-blocking behavior of the request. */
+  public void setRenderBlockingBehavior(RenderBlockingBehavior renderBlockingBehavior) {
+    this.renderBlockingBehavior = renderBlockingBehavior;
   }
 }

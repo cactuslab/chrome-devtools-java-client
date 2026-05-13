@@ -23,6 +23,7 @@ package com.github.kklisura.cdt.protocol.commands;
 import com.github.kklisura.cdt.protocol.events.inspector.Detached;
 import com.github.kklisura.cdt.protocol.events.inspector.TargetCrashed;
 import com.github.kklisura.cdt.protocol.events.inspector.TargetReloadedAfterCrash;
+import com.github.kklisura.cdt.protocol.events.inspector.WorkerScriptLoaded;
 import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
@@ -48,4 +49,11 @@ public interface Inspector {
   /** Fired when debugging target has reloaded after crash */
   @EventName("targetReloadedAfterCrash")
   EventListener onTargetReloadedAfterCrash(EventHandler<TargetReloadedAfterCrash> eventListener);
+
+  /**
+   * Fired on worker targets when main worker script and any imported scripts have been evaluated.
+   */
+  @EventName("workerScriptLoaded")
+  @Experimental
+  EventListener onWorkerScriptLoaded(EventHandler<WorkerScriptLoaded> eventListener);
 }

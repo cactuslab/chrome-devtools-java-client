@@ -22,7 +22,11 @@ package com.github.kklisura.cdt.protocol.events.debugger;
 
 import com.github.kklisura.cdt.protocol.types.debugger.Location;
 
-/** Fired when breakpoint is resolved to an actual script and location. */
+/**
+ * Fired when breakpoint is resolved to an actual script and location. Deprecated in favor of
+ * `resolvedBreakpoints` in the `scriptParsed` event.
+ */
+@Deprecated
 public class BreakpointResolved {
 
   private String breakpointId;

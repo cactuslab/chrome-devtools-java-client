@@ -40,6 +40,8 @@ public class FontFace {
 
   private String fontStretch;
 
+  private String fontDisplay;
+
   private String unicodeRange;
 
   private String src;
@@ -96,6 +98,16 @@ public class FontFace {
   /** The font-stretch. */
   public void setFontStretch(String fontStretch) {
     this.fontStretch = fontStretch;
+  }
+
+  /** The font-display. */
+  public String getFontDisplay() {
+    return fontDisplay;
+  }
+
+  /** The font-display. */
+  public void setFontDisplay(String fontDisplay) {
+    this.fontDisplay = fontDisplay;
   }
 
   /** The unicode-range. */

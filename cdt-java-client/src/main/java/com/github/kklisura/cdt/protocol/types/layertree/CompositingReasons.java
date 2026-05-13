@@ -24,7 +24,7 @@ import java.util.List;
 
 public class CompositingReasons {
 
-  @Deprecated private List<String> compositingReasons;
+  private List<String> compositingReasons;
 
   private List<String> compositingReasonIds;
 

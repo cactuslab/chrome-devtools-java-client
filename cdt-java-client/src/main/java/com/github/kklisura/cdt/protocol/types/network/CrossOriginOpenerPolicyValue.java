@@ -27,8 +27,14 @@ public enum CrossOriginOpenerPolicyValue {
   SAME_ORIGIN,
   @JsonProperty("SameOriginAllowPopups")
   SAME_ORIGIN_ALLOW_POPUPS,
+  @JsonProperty("RestrictProperties")
+  RESTRICT_PROPERTIES,
   @JsonProperty("UnsafeNone")
   UNSAFE_NONE,
   @JsonProperty("SameOriginPlusCoep")
-  SAME_ORIGIN_PLUS_COEP
+  SAME_ORIGIN_PLUS_COEP,
+  @JsonProperty("RestrictPropertiesPlusCoep")
+  RESTRICT_PROPERTIES_PLUS_COEP,
+  @JsonProperty("NoopenerAllowPopups")
+  NOOPENER_ALLOW_POPUPS
 }

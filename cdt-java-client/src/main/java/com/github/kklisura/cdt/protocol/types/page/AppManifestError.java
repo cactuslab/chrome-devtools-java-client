@@ -41,12 +41,12 @@ public class AppManifestError {
     this.message = message;
   }
 
-  /** If criticial, this is a non-recoverable parse error. */
+  /** If critical, this is a non-recoverable parse error. */
   public Integer getCritical() {
     return critical;
   }
 
-  /** If criticial, this is a non-recoverable parse error. */
+  /** If critical, this is a non-recoverable parse error. */
   public void setCritical(Integer critical) {
     this.critical = critical;
   }

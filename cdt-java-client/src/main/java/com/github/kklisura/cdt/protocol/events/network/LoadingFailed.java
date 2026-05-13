@@ -72,12 +72,18 @@ public class LoadingFailed {
     this.type = type;
   }
 
-  /** User friendly error message. */
+  /**
+   * Error message. List of network errors:
+   * https://cs.chromium.org/chromium/src/net/base/net_error_list.h
+   */
   public String getErrorText() {
     return errorText;
   }
 
-  /** User friendly error message. */
+  /**
+   * Error message. List of network errors:
+   * https://cs.chromium.org/chromium/src/net/base/net_error_list.h
+   */
   public void setErrorText(String errorText) {
     this.errorText = errorText;
   }

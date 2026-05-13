@@ -47,5 +47,7 @@ public enum PausedReason {
   @JsonProperty("promiseRejection")
   PROMISE_REJECTION,
   @JsonProperty("XHR")
-  XHR
+  XHR,
+  @JsonProperty("step")
+  STEP
 }

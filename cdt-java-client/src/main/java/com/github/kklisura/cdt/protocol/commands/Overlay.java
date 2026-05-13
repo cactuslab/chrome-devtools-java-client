@@ -22,6 +22,8 @@ package com.github.kklisura.cdt.protocol.commands;
 
 import com.github.kklisura.cdt.protocol.events.overlay.InspectModeCanceled;
 import com.github.kklisura.cdt.protocol.events.overlay.InspectNodeRequested;
+import com.github.kklisura.cdt.protocol.events.overlay.InspectPanelShowRequested;
+import com.github.kklisura.cdt.protocol.events.overlay.InspectedElementWindowRestored;
 import com.github.kklisura.cdt.protocol.events.overlay.NodeHighlightRequested;
 import com.github.kklisura.cdt.protocol.events.overlay.ScreenshotRequested;
 import com.github.kklisura.cdt.protocol.support.annotations.EventName;
@@ -33,13 +35,17 @@ import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.dom.RGBA;
 import com.github.kklisura.cdt.protocol.types.overlay.ColorFormat;
+import com.github.kklisura.cdt.protocol.types.overlay.ContainerQueryHighlightConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.FlexNodeHighlightConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.GridNodeHighlightConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.HighlightConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.HingeConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.InspectMode;
+import com.github.kklisura.cdt.protocol.types.overlay.InspectedElementAnchorConfig;
+import com.github.kklisura.cdt.protocol.types.overlay.IsolatedElementHighlightConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.ScrollSnapHighlightConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.SourceOrderConfig;
+import com.github.kklisura.cdt.protocol.types.overlay.WindowControlsOverlayConfig;
 import java.util.List;
 import java.util.Map;
 
@@ -98,19 +104,25 @@ public interface Overlay {
   void hideHighlight();
 
   /**
-   * Highlights owner element of the frame with given id.
+   * Highlights owner element of the frame with given id. Deprecated: Doesn't work reliably and
+   * cannot be fixed due to process separation (the owner node might be in a different process).
+   * Determine the owner node in the client and use highlightNode.
    *
    * @param frameId Identifier of the frame to highlight.
    */
+  @Deprecated
   void highlightFrame(@ParamName("frameId") String frameId);
 
   /**
-   * Highlights owner element of the frame with given id.
+   * Highlights owner element of the frame with given id. Deprecated: Doesn't work reliably and
+   * cannot be fixed due to process separation (the owner node might be in a different process).
+   * Determine the owner node in the client and use highlightNode.
    *
    * @param frameId Identifier of the frame to highlight.
    * @param contentColor The content box highlight fill color (default: transparent).
    * @param contentOutlineColor The content box highlight outline color (default: transparent).
    */
+  @Deprecated
   void highlightFrame(
       @ParamName("frameId") String frameId,
       @Optional @ParamName("contentColor") RGBA contentColor,
@@ -162,6 +174,8 @@ public interface Overlay {
 
   /**
    * Highlights given rectangle. Coordinates are absolute with respect to the main frame viewport.
+   * Issue: the method does not handle device pixel ratio (DPR) correctly. The coordinates currently
+   * have to be adjusted by the client if DPR is not 1 (see crbug.com/437807128).
    *
    * @param x X coordinate
    * @param y Y coordinate
@@ -176,6 +190,8 @@ public interface Overlay {
 
   /**
    * Highlights given rectangle. Coordinates are absolute with respect to the main frame viewport.
+   * Issue: the method does not handle device pixel ratio (DPR) correctly. The coordinates currently
+   * have to be adjusted by the client if DPR is not 1 (see crbug.com/437807128).
    *
    * @param x X coordinate
    * @param y Y coordinate
@@ -288,6 +304,19 @@ public interface Overlay {
           List<ScrollSnapHighlightConfig> scrollSnapHighlightConfigs);
 
   /**
+   * @param containerQueryHighlightConfigs An array of node identifiers and descriptors for the
+   *     highlight appearance.
+   */
+  void setShowContainerQueryOverlays(
+      @ParamName("containerQueryHighlightConfigs")
+          List<ContainerQueryHighlightConfig> containerQueryHighlightConfigs);
+
+  /** @param inspectedElementAnchorConfig Node identifier for which to show an anchor for. */
+  void setShowInspectedElementAnchor(
+      @ParamName("inspectedElementAnchorConfig")
+          InspectedElementAnchorConfig inspectedElementAnchorConfig);
+
+  /**
    * Requests that backend shows paint rectangles
    *
    * @param result True for showing paint rectangles
@@ -309,17 +338,19 @@ public interface Overlay {
   void setShowScrollBottleneckRects(@ParamName("show") Boolean show);
 
   /**
-   * Requests that backend shows hit-test borders on layers
+   * Deprecated, no longer has any effect.
    *
    * @param show True for showing hit-test borders
    */
+  @Deprecated
   void setShowHitTestBorders(@ParamName("show") Boolean show);
 
   /**
-   * Request that backend shows an overlay with web vital metrics.
+   * Deprecated, no longer has any effect.
    *
    * @param show
    */
+  @Deprecated
   void setShowWebVitals(@ParamName("show") Boolean show);
 
   /**
@@ -340,6 +371,29 @@ public interface Overlay {
   void setShowHinge(@Optional @ParamName("hingeConfig") HingeConfig hingeConfig);
 
   /**
+   * Show elements in isolation mode with overlays.
+   *
+   * @param isolatedElementHighlightConfigs An array of node identifiers and descriptors for the
+   *     highlight appearance.
+   */
+  void setShowIsolatedElements(
+      @ParamName("isolatedElementHighlightConfigs")
+          List<IsolatedElementHighlightConfig> isolatedElementHighlightConfigs);
+
+  /** Show Window Controls Overlay for PWA */
+  void setShowWindowControlsOverlay();
+
+  /**
+   * Show Window Controls Overlay for PWA
+   *
+   * @param windowControlsOverlayConfig Window Controls Overlay data, null means hide Window
+   *     Controls Overlay
+   */
+  void setShowWindowControlsOverlay(
+      @Optional @ParamName("windowControlsOverlayConfig")
+          WindowControlsOverlayConfig windowControlsOverlayConfig);
+
+  /**
    * Fired when the node should be inspected. This happens after call to `setInspectMode` or when
    * user manually inspects an element.
    */
@@ -353,6 +407,15 @@ public interface Overlay {
   /** Fired when user asks to capture screenshot of some area on the page. */
   @EventName("screenshotRequested")
   EventListener onScreenshotRequested(EventHandler<ScreenshotRequested> eventListener);
+
+  /** Fired when user asks to show the Inspect panel. */
+  @EventName("inspectPanelShowRequested")
+  EventListener onInspectPanelShowRequested(EventHandler<InspectPanelShowRequested> eventListener);
+
+  /** Fired when user asks to restore the Inspected Element floating window. */
+  @EventName("inspectedElementWindowRestored")
+  EventListener onInspectedElementWindowRestored(
+      EventHandler<InspectedElementWindowRestored> eventListener);
 
   /** Fired when user cancels the inspect mode. */
   @EventName("inspectModeCanceled")

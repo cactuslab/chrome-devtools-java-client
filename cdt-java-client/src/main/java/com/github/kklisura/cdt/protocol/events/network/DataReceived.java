@@ -20,6 +20,9 @@ package com.github.kklisura.cdt.protocol.events.network;
  * #L%
  */
 
+import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
+import com.github.kklisura.cdt.protocol.support.annotations.Optional;
+
 /** Fired when data chunk was received over the network. */
 public class DataReceived {
 
@@ -30,6 +33,8 @@ public class DataReceived {
   private Integer dataLength;
 
   private Integer encodedDataLength;
+
+  @Experimental @Optional private String data;
 
   /** Request identifier. */
   public String getRequestId() {
@@ -69,5 +74,15 @@ public class DataReceived {
   /** Actual bytes received (might be less than dataLength for compressed encodings). */
   public void setEncodedDataLength(Integer encodedDataLength) {
     this.encodedDataLength = encodedDataLength;
+  }
+
+  /** Data that was received. (Encoded as a base64 string when passed over JSON) */
+  public String getData() {
+    return data;
+  }
+
+  /** Data that was received. (Encoded as a base64 string when passed over JSON) */
+  public void setData(String data) {
+    this.data = data;
   }
 }

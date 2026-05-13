@@ -64,5 +64,7 @@ public enum RemoteObjectSubtype {
   @JsonProperty("webassemblymemory")
   WEBASSEMBLYMEMORY,
   @JsonProperty("wasmvalue")
-  WASMVALUE
+  WASMVALUE,
+  @JsonProperty("trustedtype")
+  TRUSTEDTYPE
 }

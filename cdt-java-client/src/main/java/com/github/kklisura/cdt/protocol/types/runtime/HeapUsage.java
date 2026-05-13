@@ -26,23 +26,47 @@ public class HeapUsage {
 
   private Double totalSize;
 
-  /** Used heap size in bytes. */
+  private Double embedderHeapUsedSize;
+
+  private Double backingStorageSize;
+
+  /** Used JavaScript heap size in bytes. */
   public Double getUsedSize() {
     return usedSize;
   }
 
-  /** Used heap size in bytes. */
+  /** Used JavaScript heap size in bytes. */
   public void setUsedSize(Double usedSize) {
     this.usedSize = usedSize;
   }
 
-  /** Allocated heap size in bytes. */
+  /** Allocated JavaScript heap size in bytes. */
   public Double getTotalSize() {
     return totalSize;
   }
 
-  /** Allocated heap size in bytes. */
+  /** Allocated JavaScript heap size in bytes. */
   public void setTotalSize(Double totalSize) {
     this.totalSize = totalSize;
+  }
+
+  /** Used size in bytes in the embedder's garbage-collected heap. */
+  public Double getEmbedderHeapUsedSize() {
+    return embedderHeapUsedSize;
+  }
+
+  /** Used size in bytes in the embedder's garbage-collected heap. */
+  public void setEmbedderHeapUsedSize(Double embedderHeapUsedSize) {
+    this.embedderHeapUsedSize = embedderHeapUsedSize;
+  }
+
+  /** Size in bytes of backing storage for array buffers and external strings. */
+  public Double getBackingStorageSize() {
+    return backingStorageSize;
+  }
+
+  /** Size in bytes of backing storage for array buffers and external strings. */
+  public void setBackingStorageSize(Double backingStorageSize) {
+    this.backingStorageSize = backingStorageSize;
   }
 }

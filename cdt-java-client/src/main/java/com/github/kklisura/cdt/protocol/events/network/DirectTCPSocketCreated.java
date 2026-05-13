@@ -1,0 +1,93 @@
+package com.github.kklisura.cdt.protocol.events.network;
+
+/*-
+ * #%L
+ * cdt-java-client
+ * %%
+ * Copyright (C) 2018 - 2026 Kenan Klisura
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
+import com.github.kklisura.cdt.protocol.support.annotations.Optional;
+import com.github.kklisura.cdt.protocol.types.network.DirectTCPSocketOptions;
+import com.github.kklisura.cdt.protocol.types.network.Initiator;
+
+/** Fired upon direct_socket.TCPSocket creation. */
+@Experimental
+public class DirectTCPSocketCreated {
+
+  private String identifier;
+
+  private String remoteAddr;
+
+  private Integer remotePort;
+
+  private DirectTCPSocketOptions options;
+
+  private Double timestamp;
+
+  @Optional private Initiator initiator;
+
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }
+
+  public String getRemoteAddr() {
+    return remoteAddr;
+  }
+
+  public void setRemoteAddr(String remoteAddr) {
+    this.remoteAddr = remoteAddr;
+  }
+
+  /** Unsigned int 16. */
+  public Integer getRemotePort() {
+    return remotePort;
+  }
+
+  /** Unsigned int 16. */
+  public void setRemotePort(Integer remotePort) {
+    this.remotePort = remotePort;
+  }
+
+  public DirectTCPSocketOptions getOptions() {
+    return options;
+  }
+
+  public void setOptions(DirectTCPSocketOptions options) {
+    this.options = options;
+  }
+
+  public Double getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(Double timestamp) {
+    this.timestamp = timestamp;
+  }
+
+  public Initiator getInitiator() {
+    return initiator;
+  }
+
+  public void setInitiator(Initiator initiator) {
+    this.initiator = initiator;
+  }
+}

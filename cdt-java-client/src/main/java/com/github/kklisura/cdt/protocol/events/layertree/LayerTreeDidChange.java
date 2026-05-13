@@ -28,12 +28,12 @@ public class LayerTreeDidChange {
 
   @Optional private List<Layer> layers;
 
-  /** Layer tree, absent if not in the comspositing mode. */
+  /** Layer tree, absent if not in the compositing mode. */
   public List<Layer> getLayers() {
     return layers;
   }
 
-  /** Layer tree, absent if not in the comspositing mode. */
+  /** Layer tree, absent if not in the compositing mode. */
   public void setLayers(List<Layer> layers) {
     this.layers = layers;
   }

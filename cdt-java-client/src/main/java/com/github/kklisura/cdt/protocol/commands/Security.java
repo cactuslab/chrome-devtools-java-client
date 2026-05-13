@@ -30,7 +30,6 @@ import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.security.CertificateErrorAction;
 
-/** Security */
 public interface Security {
 
   /** Disables tracking security state changes. */
@@ -44,7 +43,6 @@ public interface Security {
    *
    * @param ignore If true, all certificate errors will be ignored.
    */
-  @Experimental
   void setIgnoreCertificateErrors(@ParamName("ignore") Boolean ignore);
 
   /**
@@ -83,7 +81,8 @@ public interface Security {
   EventListener onVisibleSecurityStateChanged(
       EventHandler<VisibleSecurityStateChanged> eventListener);
 
-  /** The security state of the page changed. */
+  /** The security state of the page changed. No longer being sent. */
   @EventName("securityStateChanged")
+  @Deprecated
   EventListener onSecurityStateChanged(EventHandler<SecurityStateChanged> eventListener);
 }

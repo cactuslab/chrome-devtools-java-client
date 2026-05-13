@@ -29,12 +29,12 @@ public class SourceOrderConfig {
 
   private RGBA childOutlineColor;
 
-  /** the color to outline the givent element in. */
+  /** the color to outline the given element in. */
   public RGBA getParentOutlineColor() {
     return parentOutlineColor;
   }
 
-  /** the color to outline the givent element in. */
+  /** the color to outline the given element in. */
   public void setParentOutlineColor(RGBA parentOutlineColor) {
     this.parentOutlineColor = parentOutlineColor;
   }

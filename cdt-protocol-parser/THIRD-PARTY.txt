@@ -1,10 +1,16 @@
 
-Lists of 8 third-party dependencies.
+Lists of 14 third-party dependencies.
      (The Apache Software License, Version 2.0) Jackson-annotations (com.fasterxml.jackson.core:jackson-annotations:2.19.4 - https://github.com/FasterXML/jackson)
      (The Apache Software License, Version 2.0) Jackson-core (com.fasterxml.jackson.core:jackson-core:2.19.4 - https://github.com/FasterXML/jackson-core)
      (The Apache Software License, Version 2.0) jackson-databind (com.fasterxml.jackson.core:jackson-databind:2.19.4 - https://github.com/FasterXML/jackson)
      (The Apache Software License, Version 2.0) JSON library from Android SDK (com.vaadin.external.google:android-json:0.0.20131108.vaadin1 - http://developer.android.com/sdk)
-     (Eclipse Public License v1.0) JUnit (junit:junit:4.13.2 - http://junit.org)
-     (BSD 3-Clause License) Hamcrest Core (org.hamcrest:hamcrest-core:1.3 - https://github.com/hamcrest/JavaHamcrest/hamcrest-core)
+     (The Apache License, Version 2.0) org.apiguardian:apiguardian-api (org.apiguardian:apiguardian-api:1.1.2 - https://github.com/apiguardian-team/apiguardian)
+     (Eclipse Public License v2.0) JUnit Jupiter (Aggregator) (org.junit.jupiter:junit-jupiter:5.11.4 - https://junit.org/junit5/)
+     (Eclipse Public License v2.0) JUnit Jupiter API (org.junit.jupiter:junit-jupiter-api:5.11.4 - https://junit.org/junit5/)
+     (Eclipse Public License v2.0) JUnit Jupiter Engine (org.junit.jupiter:junit-jupiter-engine:5.11.4 - https://junit.org/junit5/)
+     (Eclipse Public License v2.0) JUnit Jupiter Params (org.junit.jupiter:junit-jupiter-params:5.11.4 - https://junit.org/junit5/)
+     (Eclipse Public License v2.0) JUnit Platform Commons (org.junit.platform:junit-platform-commons:1.11.4 - https://junit.org/junit5/)
+     (Eclipse Public License v2.0) JUnit Platform Engine API (org.junit.platform:junit-platform-engine:1.11.4 - https://junit.org/junit5/)
+     (The Apache License, Version 2.0) org.opentest4j:opentest4j (org.opentest4j:opentest4j:1.3.0 - https://github.com/ota4j-team/opentest4j)
      (The MIT License) Project Lombok (org.projectlombok:lombok:1.18.46 - https://projectlombok.org)
      (The Apache Software License, Version 2.0) JSONassert (org.skyscreamer:jsonassert:1.5.0 - https://github.com/skyscreamer/JSONassert)

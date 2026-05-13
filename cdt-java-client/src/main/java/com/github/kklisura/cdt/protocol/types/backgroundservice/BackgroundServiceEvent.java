@@ -38,6 +38,8 @@ public class BackgroundServiceEvent {
 
   private List<EventMetadata> eventMetadata;
 
+  private String storageKey;
+
   /** Timestamp of the event (in seconds). */
   public Double getTimestamp() {
     return timestamp;
@@ -106,5 +108,15 @@ public class BackgroundServiceEvent {
   /** A list of event-specific information. */
   public void setEventMetadata(List<EventMetadata> eventMetadata) {
     this.eventMetadata = eventMetadata;
+  }
+
+  /** Storage key this event belongs to. */
+  public String getStorageKey() {
+    return storageKey;
+  }
+
+  /** Storage key this event belongs to. */
+  public void setStorageKey(String storageKey) {
+    this.storageKey = storageKey;
   }
 }

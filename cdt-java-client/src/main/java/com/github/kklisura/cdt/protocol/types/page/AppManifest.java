@@ -32,7 +32,9 @@ public class AppManifest {
 
   @Optional private String data;
 
-  @Experimental @Optional private AppManifestParsedProperties parsed;
+  @Deprecated @Experimental @Optional private AppManifestParsedProperties parsed;
+
+  @Experimental private WebAppManifest manifest;
 
   /** Manifest location. */
   public String getUrl() {
@@ -62,13 +64,21 @@ public class AppManifest {
     this.data = data;
   }
 
-  /** Parsed manifest properties */
+  /** Parsed manifest properties. Deprecated, use manifest instead. */
   public AppManifestParsedProperties getParsed() {
     return parsed;
   }
 
-  /** Parsed manifest properties */
+  /** Parsed manifest properties. Deprecated, use manifest instead. */
   public void setParsed(AppManifestParsedProperties parsed) {
     this.parsed = parsed;
+  }
+
+  public WebAppManifest getManifest() {
+    return manifest;
+  }
+
+  public void setManifest(WebAppManifest manifest) {
+    this.manifest = manifest;
   }
 }

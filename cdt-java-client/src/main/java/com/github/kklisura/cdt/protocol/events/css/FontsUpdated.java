@@ -25,7 +25,7 @@ import com.github.kklisura.cdt.protocol.types.css.FontFace;
 
 /**
  * Fires whenever a web font is updated. A non-empty font parameter indicates a successfully loaded
- * web font
+ * web font.
  */
 public class FontsUpdated {
 

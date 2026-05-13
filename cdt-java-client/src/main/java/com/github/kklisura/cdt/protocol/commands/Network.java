@@ -21,15 +21,36 @@ package com.github.kklisura.cdt.protocol.commands;
  */
 
 import com.github.kklisura.cdt.protocol.events.network.DataReceived;
+import com.github.kklisura.cdt.protocol.events.network.DeviceBoundSessionEventOccurred;
+import com.github.kklisura.cdt.protocol.events.network.DeviceBoundSessionsAdded;
+import com.github.kklisura.cdt.protocol.events.network.DirectTCPSocketAborted;
+import com.github.kklisura.cdt.protocol.events.network.DirectTCPSocketChunkReceived;
+import com.github.kklisura.cdt.protocol.events.network.DirectTCPSocketChunkSent;
+import com.github.kklisura.cdt.protocol.events.network.DirectTCPSocketClosed;
+import com.github.kklisura.cdt.protocol.events.network.DirectTCPSocketCreated;
+import com.github.kklisura.cdt.protocol.events.network.DirectTCPSocketOpened;
+import com.github.kklisura.cdt.protocol.events.network.DirectUDPSocketAborted;
+import com.github.kklisura.cdt.protocol.events.network.DirectUDPSocketChunkReceived;
+import com.github.kklisura.cdt.protocol.events.network.DirectUDPSocketChunkSent;
+import com.github.kklisura.cdt.protocol.events.network.DirectUDPSocketClosed;
+import com.github.kklisura.cdt.protocol.events.network.DirectUDPSocketCreated;
+import com.github.kklisura.cdt.protocol.events.network.DirectUDPSocketJoinedMulticastGroup;
+import com.github.kklisura.cdt.protocol.events.network.DirectUDPSocketLeftMulticastGroup;
+import com.github.kklisura.cdt.protocol.events.network.DirectUDPSocketOpened;
 import com.github.kklisura.cdt.protocol.events.network.EventSourceMessageReceived;
 import com.github.kklisura.cdt.protocol.events.network.LoadingFailed;
 import com.github.kklisura.cdt.protocol.events.network.LoadingFinished;
+import com.github.kklisura.cdt.protocol.events.network.PolicyUpdated;
+import com.github.kklisura.cdt.protocol.events.network.ReportingApiEndpointsChangedForOrigin;
+import com.github.kklisura.cdt.protocol.events.network.ReportingApiReportAdded;
+import com.github.kklisura.cdt.protocol.events.network.ReportingApiReportUpdated;
 import com.github.kklisura.cdt.protocol.events.network.RequestIntercepted;
 import com.github.kklisura.cdt.protocol.events.network.RequestServedFromCache;
 import com.github.kklisura.cdt.protocol.events.network.RequestWillBeSent;
 import com.github.kklisura.cdt.protocol.events.network.RequestWillBeSentExtraInfo;
 import com.github.kklisura.cdt.protocol.events.network.ResourceChangedPriority;
 import com.github.kklisura.cdt.protocol.events.network.ResponseReceived;
+import com.github.kklisura.cdt.protocol.events.network.ResponseReceivedEarlyHints;
 import com.github.kklisura.cdt.protocol.events.network.ResponseReceivedExtraInfo;
 import com.github.kklisura.cdt.protocol.events.network.SignedExchangeReceived;
 import com.github.kklisura.cdt.protocol.events.network.TrustTokenOperationDone;
@@ -53,17 +74,22 @@ import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.debugger.SearchMatch;
 import com.github.kklisura.cdt.protocol.types.network.AuthChallengeResponse;
+import com.github.kklisura.cdt.protocol.types.network.BlockPattern;
 import com.github.kklisura.cdt.protocol.types.network.ConnectionType;
 import com.github.kklisura.cdt.protocol.types.network.ContentEncoding;
 import com.github.kklisura.cdt.protocol.types.network.Cookie;
 import com.github.kklisura.cdt.protocol.types.network.CookieParam;
+import com.github.kklisura.cdt.protocol.types.network.CookiePartitionKey;
 import com.github.kklisura.cdt.protocol.types.network.CookiePriority;
 import com.github.kklisura.cdt.protocol.types.network.CookieSameSite;
 import com.github.kklisura.cdt.protocol.types.network.CookieSourceScheme;
+import com.github.kklisura.cdt.protocol.types.network.DeviceBoundSessionKey;
 import com.github.kklisura.cdt.protocol.types.network.ErrorReason;
 import com.github.kklisura.cdt.protocol.types.network.LoadNetworkResourceOptions;
 import com.github.kklisura.cdt.protocol.types.network.LoadNetworkResourcePageResult;
+import com.github.kklisura.cdt.protocol.types.network.NetworkConditions;
 import com.github.kklisura.cdt.protocol.types.network.RequestPattern;
+import com.github.kklisura.cdt.protocol.types.network.RequestPostData;
 import com.github.kklisura.cdt.protocol.types.network.ResponseBody;
 import com.github.kklisura.cdt.protocol.types.network.ResponseBodyForInterception;
 import com.github.kklisura.cdt.protocol.types.network.SecurityIsolationStatus;
@@ -161,32 +187,37 @@ public interface Network {
       @Optional @ParamName("authChallengeResponse") AuthChallengeResponse authChallengeResponse);
 
   /**
-   * Deletes browser cookies with matching name and url or domain/path pair.
+   * Deletes browser cookies with matching name and url or domain/path/partitionKey pair.
    *
    * @param name Name of the cookies to remove.
    */
   void deleteCookies(@ParamName("name") String name);
 
   /**
-   * Deletes browser cookies with matching name and url or domain/path pair.
+   * Deletes browser cookies with matching name and url or domain/path/partitionKey pair.
    *
    * @param name Name of the cookies to remove.
    * @param url If specified, deletes all the cookies with the given name where domain and path
    *     match provided URL.
    * @param domain If specified, deletes only cookies with the exact domain.
    * @param path If specified, deletes only cookies with the exact path.
+   * @param partitionKey If specified, deletes only cookies with the the given name and partitionKey
+   *     where all partition key attributes match the cookie partition key attribute.
    */
   void deleteCookies(
       @ParamName("name") String name,
       @Optional @ParamName("url") String url,
       @Optional @ParamName("domain") String domain,
-      @Optional @ParamName("path") String path);
+      @Optional @ParamName("path") String path,
+      @Experimental @Optional @ParamName("partitionKey") CookiePartitionKey partitionKey);
 
   /** Disables network tracking, prevents network events from being sent to the client. */
   void disable();
 
   /**
-   * Activates emulation of network conditions.
+   * Activates emulation of network conditions. This command is deprecated in favor of the
+   * emulateNetworkConditionsByRule and overrideNetworkState commands, which can be used together to
+   * the same effect.
    *
    * @param offline True to emulate internet disconnection.
    * @param latency Minimum latency from request sent to response headers received (ms).
@@ -195,6 +226,7 @@ public interface Network {
    * @param uploadThroughput Maximal aggregated upload throughput (bytes/sec). -1 disables upload
    *     throttling.
    */
+  @Deprecated
   void emulateNetworkConditions(
       @ParamName("offline") Boolean offline,
       @ParamName("latency") Double latency,
@@ -202,7 +234,90 @@ public interface Network {
       @ParamName("uploadThroughput") Double uploadThroughput);
 
   /**
-   * Activates emulation of network conditions.
+   * Activates emulation of network conditions. This command is deprecated in favor of the
+   * emulateNetworkConditionsByRule and overrideNetworkState commands, which can be used together to
+   * the same effect.
+   *
+   * @param offline True to emulate internet disconnection.
+   * @param latency Minimum latency from request sent to response headers received (ms).
+   * @param downloadThroughput Maximal aggregated download throughput (bytes/sec). -1 disables
+   *     download throttling.
+   * @param uploadThroughput Maximal aggregated upload throughput (bytes/sec). -1 disables upload
+   *     throttling.
+   * @param connectionType Connection type if known.
+   * @param packetLoss WebRTC packet loss (percent, 0-100). 0 disables packet loss emulation, 100
+   *     drops all the packets.
+   * @param packetQueueLength WebRTC packet queue length (packet). 0 removes any queue length
+   *     limitations.
+   * @param packetReordering WebRTC packetReordering feature.
+   */
+  @Deprecated
+  void emulateNetworkConditions(
+      @ParamName("offline") Boolean offline,
+      @ParamName("latency") Double latency,
+      @ParamName("downloadThroughput") Double downloadThroughput,
+      @ParamName("uploadThroughput") Double uploadThroughput,
+      @Optional @ParamName("connectionType") ConnectionType connectionType,
+      @Experimental @Optional @ParamName("packetLoss") Double packetLoss,
+      @Experimental @Optional @ParamName("packetQueueLength") Integer packetQueueLength,
+      @Experimental @Optional @ParamName("packetReordering") Boolean packetReordering);
+
+  /**
+   * Activates emulation of network conditions for individual requests using URL match patterns.
+   * Unlike the deprecated Network.emulateNetworkConditions this method does not affect `navigator`
+   * state. Use Network.overrideNetworkState to explicitly modify `navigator` behavior.
+   *
+   * @param matchedNetworkConditions Configure conditions for matching requests. If multiple entries
+   *     match a request, the first entry wins. Global conditions can be configured by leaving the
+   *     urlPattern for the conditions empty. These global conditions are also applied for
+   *     throttling of p2p connections.
+   */
+  @Experimental
+  @Returns("ruleIds")
+  @ReturnTypeParameter(String.class)
+  List<String> emulateNetworkConditionsByRule(
+      @ParamName("matchedNetworkConditions") List<NetworkConditions> matchedNetworkConditions);
+
+  /**
+   * Activates emulation of network conditions for individual requests using URL match patterns.
+   * Unlike the deprecated Network.emulateNetworkConditions this method does not affect `navigator`
+   * state. Use Network.overrideNetworkState to explicitly modify `navigator` behavior.
+   *
+   * @param offline True to emulate internet disconnection. Deprecated, use the offline property in
+   *     matchedNetworkConditions or emulateOfflineServiceWorker instead.
+   * @param emulateOfflineServiceWorker True to emulate offline service worker.
+   * @param matchedNetworkConditions Configure conditions for matching requests. If multiple entries
+   *     match a request, the first entry wins. Global conditions can be configured by leaving the
+   *     urlPattern for the conditions empty. These global conditions are also applied for
+   *     throttling of p2p connections.
+   */
+  @Experimental
+  @Returns("ruleIds")
+  @ReturnTypeParameter(String.class)
+  List<String> emulateNetworkConditionsByRule(
+      @Deprecated @Optional @ParamName("offline") Boolean offline,
+      @Optional @ParamName("emulateOfflineServiceWorker") Boolean emulateOfflineServiceWorker,
+      @ParamName("matchedNetworkConditions") List<NetworkConditions> matchedNetworkConditions);
+
+  /**
+   * Override the state of navigator.onLine and navigator.connection.
+   *
+   * @param offline True to emulate internet disconnection.
+   * @param latency Minimum latency from request sent to response headers received (ms).
+   * @param downloadThroughput Maximal aggregated download throughput (bytes/sec). -1 disables
+   *     download throttling.
+   * @param uploadThroughput Maximal aggregated upload throughput (bytes/sec). -1 disables upload
+   *     throttling.
+   */
+  @Experimental
+  void overrideNetworkState(
+      @ParamName("offline") Boolean offline,
+      @ParamName("latency") Double latency,
+      @ParamName("downloadThroughput") Double downloadThroughput,
+      @ParamName("uploadThroughput") Double uploadThroughput);
+
+  /**
+   * Override the state of navigator.onLine and navigator.connection.
    *
    * @param offline True to emulate internet disconnection.
    * @param latency Minimum latency from request sent to response headers received (ms).
@@ -212,7 +327,8 @@ public interface Network {
    *     throttling.
    * @param connectionType Connection type if known.
    */
-  void emulateNetworkConditions(
+  @Experimental
+  void overrideNetworkState(
       @ParamName("offline") Boolean offline,
       @ParamName("latency") Double latency,
       @ParamName("downloadThroughput") Double downloadThroughput,
@@ -226,21 +342,53 @@ public interface Network {
    * Enables network tracking, network events will now be delivered to the client.
    *
    * @param maxTotalBufferSize Buffer size in bytes to use when preserving network payloads (XHRs,
-   *     etc).
+   *     etc). This is the maximum number of bytes that will be collected by this DevTools session.
    * @param maxResourceBufferSize Per-resource buffer size in bytes to use when preserving network
    *     payloads (XHRs, etc).
    * @param maxPostDataSize Longest post body size (in bytes) that would be included in
    *     requestWillBeSent notification
+   * @param reportDirectSocketTraffic Whether DirectSocket chunk send/receive events should be
+   *     reported.
+   * @param enableDurableMessages Enable storing response bodies outside of renderer, so that these
+   *     survive a cross-process navigation. Requires maxTotalBufferSize to be set. Currently
+   *     defaults to false. This field is being deprecated in favor of the dedicated
+   *     configureDurableMessages command, due to the possibility of deadlocks when awaiting
+   *     Network.enable before issuing Runtime.runIfWaitingForDebugger.
    */
   void enable(
       @Experimental @Optional @ParamName("maxTotalBufferSize") Integer maxTotalBufferSize,
       @Experimental @Optional @ParamName("maxResourceBufferSize") Integer maxResourceBufferSize,
-      @Optional @ParamName("maxPostDataSize") Integer maxPostDataSize);
+      @Optional @ParamName("maxPostDataSize") Integer maxPostDataSize,
+      @Experimental @Optional @ParamName("reportDirectSocketTraffic")
+          Boolean reportDirectSocketTraffic,
+      @Experimental @Optional @ParamName("enableDurableMessages") Boolean enableDurableMessages);
+
+  /**
+   * Configures storing response bodies outside of renderer, so that these survive a cross-process
+   * navigation. If maxTotalBufferSize is not set, durable messages are disabled.
+   */
+  @Experimental
+  void configureDurableMessages();
+
+  /**
+   * Configures storing response bodies outside of renderer, so that these survive a cross-process
+   * navigation. If maxTotalBufferSize is not set, durable messages are disabled.
+   *
+   * @param maxTotalBufferSize Buffer size in bytes to use when preserving network payloads (XHRs,
+   *     etc).
+   * @param maxResourceBufferSize Per-resource buffer size in bytes to use when preserving network
+   *     payloads (XHRs, etc).
+   */
+  @Experimental
+  void configureDurableMessages(
+      @Optional @ParamName("maxTotalBufferSize") Integer maxTotalBufferSize,
+      @Optional @ParamName("maxResourceBufferSize") Integer maxResourceBufferSize);
 
   /**
    * Returns all browser cookies. Depending on the backend support, will return detailed cookie
-   * information in the `cookies` field.
+   * information in the `cookies` field. Deprecated. Use Storage.getCookies instead.
    */
+  @Deprecated
   @Returns("cookies")
   @ReturnTypeParameter(Cookie.class)
   List<Cookie> getAllCookies();
@@ -288,8 +436,7 @@ public interface Network {
    *
    * @param requestId Identifier of the network request to get content for.
    */
-  @Returns("postData")
-  String getRequestPostData(@ParamName("requestId") String requestId);
+  RequestPostData getRequestPostData(@ParamName("requestId") String requestId);
 
   /**
    * Returns content served for the given currently intercepted request.
@@ -352,20 +499,27 @@ public interface Network {
       @Optional @ParamName("caseSensitive") Boolean caseSensitive,
       @Optional @ParamName("isRegex") Boolean isRegex);
 
+  /** Blocks URLs from loading. */
+  @Experimental
+  void setBlockedURLs();
+
   /**
    * Blocks URLs from loading.
    *
+   * @param urlPatterns Patterns to match in the order in which they are given. These patterns also
+   *     take precedence over any wildcard patterns defined in `urls`.
    * @param urls URL patterns to block. Wildcards ('*') are allowed.
    */
   @Experimental
-  void setBlockedURLs(@ParamName("urls") List<String> urls);
+  void setBlockedURLs(
+      @Optional @ParamName("urlPatterns") List<BlockPattern> urlPatterns,
+      @Deprecated @Optional @ParamName("urls") List<String> urls);
 
   /**
    * Toggles ignoring of service worker for each request.
    *
    * @param bypass Bypass service worker and load from network.
    */
-  @Experimental
   void setBypassServiceWorker(@ParamName("bypass") Boolean bypass);
 
   /**
@@ -398,12 +552,13 @@ public interface Network {
    * @param sameSite Cookie SameSite type.
    * @param expires Cookie expiration date, session cookie if not set
    * @param priority Cookie Priority type.
-   * @param sameParty True if cookie is SameParty.
    * @param sourceScheme Cookie source scheme type.
    * @param sourcePort Cookie source port. Valid values are {-1, [1, 65535]}, -1 indicates an
    *     unspecified port. An unspecified port value allows protocol clients to emulate legacy
    *     cookie scope for the port. This is a temporary ability and it will be removed in the
    *     future.
+   * @param partitionKey Cookie partition key. If not set, the cookie will be set as not
+   *     partitioned.
    */
   @Returns("success")
   Boolean setCookie(
@@ -417,9 +572,9 @@ public interface Network {
       @Optional @ParamName("sameSite") CookieSameSite sameSite,
       @Optional @ParamName("expires") Double expires,
       @Experimental @Optional @ParamName("priority") CookiePriority priority,
-      @Experimental @Optional @ParamName("sameParty") Boolean sameParty,
       @Experimental @Optional @ParamName("sourceScheme") CookieSourceScheme sourceScheme,
-      @Experimental @Optional @ParamName("sourcePort") Integer sourcePort);
+      @Experimental @Optional @ParamName("sourcePort") Integer sourcePort,
+      @Experimental @Optional @ParamName("partitionKey") CookiePartitionKey partitionKey);
 
   /**
    * Sets given cookies.
@@ -427,17 +582,6 @@ public interface Network {
    * @param cookies Cookies to be set.
    */
   void setCookies(@ParamName("cookies") List<CookieParam> cookies);
-
-  /**
-   * For testing.
-   *
-   * @param maxTotalSize Maximum total buffer size.
-   * @param maxResourceSize Maximum per-resource size.
-   */
-  @Experimental
-  void setDataSizeLimitsForTest(
-      @ParamName("maxTotalSize") Integer maxTotalSize,
-      @ParamName("maxResourceSize") Integer maxResourceSize);
 
   /**
    * Specifies whether to always send extra HTTP headers with the requests from this page.
@@ -465,6 +609,16 @@ public interface Network {
   @Experimental
   void setRequestInterception(@ParamName("patterns") List<RequestPattern> patterns);
 
+  /**
+   * Enables streaming of the response for the given requestId. If enabled, the dataReceived event
+   * contains the data that was received during streaming.
+   *
+   * @param requestId Identifier of the request to stream.
+   */
+  @Experimental
+  @Returns("bufferedData")
+  String streamResourceContent(@ParamName("requestId") String requestId);
+
   /** Returns information about the COEP/COOP isolation status. */
   @Experimental
   @Returns("status")
@@ -481,18 +635,74 @@ public interface Network {
       @Optional @ParamName("frameId") String frameId);
 
   /**
+   * Enables tracking for the Reporting API, events generated by the Reporting API will now be
+   * delivered to the client. Enabling triggers 'reportingApiReportAdded' for all existing reports.
+   *
+   * @param enable Whether to enable or disable events for the Reporting API
+   */
+  @Experimental
+  void enableReportingApi(@ParamName("enable") Boolean enable);
+
+  /**
+   * Sets up tracking device bound sessions and fetching of initial set of sessions.
+   *
+   * @param enable Whether to enable or disable events.
+   */
+  @Experimental
+  void enableDeviceBoundSessions(@ParamName("enable") Boolean enable);
+
+  /**
+   * Deletes a device bound session.
+   *
+   * @param key
+   */
+  @Experimental
+  void deleteDeviceBoundSession(@ParamName("key") DeviceBoundSessionKey key);
+
+  /**
+   * Fetches the schemeful site for a specific origin.
+   *
+   * @param origin The URL origin.
+   */
+  @Experimental
+  @Returns("schemefulSite")
+  String fetchSchemefulSite(@ParamName("origin") String origin);
+
+  /**
    * Fetches the resource and returns the content.
    *
-   * @param frameId Frame id to get the resource for.
    * @param url URL of the resource to get content for.
    * @param options Options for the request.
    */
   @Experimental
   @Returns("resource")
   LoadNetworkResourcePageResult loadNetworkResource(
-      @ParamName("frameId") String frameId,
+      @ParamName("url") String url, @ParamName("options") LoadNetworkResourceOptions options);
+
+  /**
+   * Fetches the resource and returns the content.
+   *
+   * @param frameId Frame id to get the resource for. Mandatory for frame targets, and should be
+   *     omitted for worker targets.
+   * @param url URL of the resource to get content for.
+   * @param options Options for the request.
+   */
+  @Experimental
+  @Returns("resource")
+  LoadNetworkResourcePageResult loadNetworkResource(
+      @Optional @ParamName("frameId") String frameId,
       @ParamName("url") String url,
       @ParamName("options") LoadNetworkResourceOptions options);
+
+  /**
+   * Sets Controls for third-party cookie access Page reload is required before the new cookie
+   * behavior will be observed
+   *
+   * @param enableThirdPartyCookieRestriction Whether 3pc restriction is enabled.
+   */
+  @Experimental
+  void setCookieControls(
+      @ParamName("enableThirdPartyCookieRestriction") Boolean enableThirdPartyCookieRestriction);
 
   /** Fired when data chunk was received over the network. */
   @EventName("dataReceived")
@@ -585,6 +795,78 @@ public interface Network {
   @EventName("webTransportClosed")
   EventListener onWebTransportClosed(EventHandler<WebTransportClosed> eventListener);
 
+  /** Fired upon direct_socket.TCPSocket creation. */
+  @EventName("directTCPSocketCreated")
+  @Experimental
+  EventListener onDirectTCPSocketCreated(EventHandler<DirectTCPSocketCreated> eventListener);
+
+  /** Fired when direct_socket.TCPSocket connection is opened. */
+  @EventName("directTCPSocketOpened")
+  @Experimental
+  EventListener onDirectTCPSocketOpened(EventHandler<DirectTCPSocketOpened> eventListener);
+
+  /** Fired when direct_socket.TCPSocket is aborted. */
+  @EventName("directTCPSocketAborted")
+  @Experimental
+  EventListener onDirectTCPSocketAborted(EventHandler<DirectTCPSocketAborted> eventListener);
+
+  /** Fired when direct_socket.TCPSocket is closed. */
+  @EventName("directTCPSocketClosed")
+  @Experimental
+  EventListener onDirectTCPSocketClosed(EventHandler<DirectTCPSocketClosed> eventListener);
+
+  /** Fired when data is sent to tcp direct socket stream. */
+  @EventName("directTCPSocketChunkSent")
+  @Experimental
+  EventListener onDirectTCPSocketChunkSent(EventHandler<DirectTCPSocketChunkSent> eventListener);
+
+  /** Fired when data is received from tcp direct socket stream. */
+  @EventName("directTCPSocketChunkReceived")
+  @Experimental
+  EventListener onDirectTCPSocketChunkReceived(
+      EventHandler<DirectTCPSocketChunkReceived> eventListener);
+
+  @EventName("directUDPSocketJoinedMulticastGroup")
+  @Experimental
+  EventListener onDirectUDPSocketJoinedMulticastGroup(
+      EventHandler<DirectUDPSocketJoinedMulticastGroup> eventListener);
+
+  @EventName("directUDPSocketLeftMulticastGroup")
+  @Experimental
+  EventListener onDirectUDPSocketLeftMulticastGroup(
+      EventHandler<DirectUDPSocketLeftMulticastGroup> eventListener);
+
+  /** Fired upon direct_socket.UDPSocket creation. */
+  @EventName("directUDPSocketCreated")
+  @Experimental
+  EventListener onDirectUDPSocketCreated(EventHandler<DirectUDPSocketCreated> eventListener);
+
+  /** Fired when direct_socket.UDPSocket connection is opened. */
+  @EventName("directUDPSocketOpened")
+  @Experimental
+  EventListener onDirectUDPSocketOpened(EventHandler<DirectUDPSocketOpened> eventListener);
+
+  /** Fired when direct_socket.UDPSocket is aborted. */
+  @EventName("directUDPSocketAborted")
+  @Experimental
+  EventListener onDirectUDPSocketAborted(EventHandler<DirectUDPSocketAborted> eventListener);
+
+  /** Fired when direct_socket.UDPSocket is closed. */
+  @EventName("directUDPSocketClosed")
+  @Experimental
+  EventListener onDirectUDPSocketClosed(EventHandler<DirectUDPSocketClosed> eventListener);
+
+  /** Fired when message is sent to udp direct socket stream. */
+  @EventName("directUDPSocketChunkSent")
+  @Experimental
+  EventListener onDirectUDPSocketChunkSent(EventHandler<DirectUDPSocketChunkSent> eventListener);
+
+  /** Fired when message is received from udp direct socket stream. */
+  @EventName("directUDPSocketChunkReceived")
+  @Experimental
+  EventListener onDirectUDPSocketChunkReceived(
+      EventHandler<DirectUDPSocketChunkReceived> eventListener);
+
   /**
    * Fired when additional information about a requestWillBeSent event is available from the network
    * stack. Not every requestWillBeSent event will have an additional requestWillBeSentExtraInfo
@@ -606,6 +888,16 @@ public interface Network {
   EventListener onResponseReceivedExtraInfo(EventHandler<ResponseReceivedExtraInfo> eventListener);
 
   /**
+   * Fired when 103 Early Hints headers is received in addition to the common response. Not every
+   * responseReceived event will have an responseReceivedEarlyHints fired. Only one
+   * responseReceivedEarlyHints may be fired for eached responseReceived event.
+   */
+  @EventName("responseReceivedEarlyHints")
+  @Experimental
+  EventListener onResponseReceivedEarlyHints(
+      EventHandler<ResponseReceivedEarlyHints> eventListener);
+
+  /**
    * Fired exactly once for each Trust Token operation. Depending on the type of the operation and
    * whether the operation succeeded or failed, the event is fired before the corresponding request
    * was sent or after the response was received.
@@ -613,4 +905,37 @@ public interface Network {
   @EventName("trustTokenOperationDone")
   @Experimental
   EventListener onTrustTokenOperationDone(EventHandler<TrustTokenOperationDone> eventListener);
+
+  /** Fired once security policy has been updated. */
+  @EventName("policyUpdated")
+  @Experimental
+  EventListener onPolicyUpdated(EventHandler<PolicyUpdated> eventListener);
+
+  /**
+   * Is sent whenever a new report is added. And after 'enableReportingApi' for all existing
+   * reports.
+   */
+  @EventName("reportingApiReportAdded")
+  @Experimental
+  EventListener onReportingApiReportAdded(EventHandler<ReportingApiReportAdded> eventListener);
+
+  @EventName("reportingApiReportUpdated")
+  @Experimental
+  EventListener onReportingApiReportUpdated(EventHandler<ReportingApiReportUpdated> eventListener);
+
+  @EventName("reportingApiEndpointsChangedForOrigin")
+  @Experimental
+  EventListener onReportingApiEndpointsChangedForOrigin(
+      EventHandler<ReportingApiEndpointsChangedForOrigin> eventListener);
+
+  /** Triggered when the initial set of device bound sessions is added. */
+  @EventName("deviceBoundSessionsAdded")
+  @Experimental
+  EventListener onDeviceBoundSessionsAdded(EventHandler<DeviceBoundSessionsAdded> eventListener);
+
+  /** Triggered when a device bound session event occurs. */
+  @EventName("deviceBoundSessionEventOccurred")
+  @Experimental
+  EventListener onDeviceBoundSessionEventOccurred(
+      EventHandler<DeviceBoundSessionEventOccurred> eventListener);
 }

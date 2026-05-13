@@ -24,6 +24,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** Enum of possible native property sources (as a subtype of a particular AXValueSourceType). */
 public enum AXValueNativeSourceType {
+  @JsonProperty("description")
+  DESCRIPTION,
   @JsonProperty("figcaption")
   FIGCAPTION,
   @JsonProperty("label")

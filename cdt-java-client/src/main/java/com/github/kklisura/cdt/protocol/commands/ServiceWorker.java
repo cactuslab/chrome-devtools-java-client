@@ -68,9 +68,6 @@ public interface ServiceWorker {
 
   void enable();
 
-  /** @param versionId */
-  void inspectWorker(@ParamName("versionId") String versionId);
-
   /** @param forceUpdateOnPageLoad */
   void setForceUpdateOnPageLoad(@ParamName("forceUpdateOnPageLoad") Boolean forceUpdateOnPageLoad);
 

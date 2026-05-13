@@ -25,9 +25,9 @@ import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 /** Information about a request that is affected by an inspector issue. */
 public class AffectedRequest {
 
-  private String requestId;
+  @Optional private String requestId;
 
-  @Optional private String url;
+  private String url;
 
   /** The unique request id. */
   public String getRequestId() {

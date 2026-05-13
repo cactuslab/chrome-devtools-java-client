@@ -62,6 +62,8 @@ public class HighlightConfig {
 
   @Optional private ContrastAlgorithm contrastAlgorithm;
 
+  @Optional private ContainerQueryContainerHighlightConfig containerQueryContainerHighlightConfig;
+
   /** Whether the node info tooltip should be shown (default: false). */
   public Boolean getShowInfo() {
     return showInfo;
@@ -241,5 +243,16 @@ public class HighlightConfig {
   /** The contrast algorithm to use for the contrast ratio (default: aa). */
   public void setContrastAlgorithm(ContrastAlgorithm contrastAlgorithm) {
     this.contrastAlgorithm = contrastAlgorithm;
+  }
+
+  /** The container query container highlight configuration (default: all transparent). */
+  public ContainerQueryContainerHighlightConfig getContainerQueryContainerHighlightConfig() {
+    return containerQueryContainerHighlightConfig;
+  }
+
+  /** The container query container highlight configuration (default: all transparent). */
+  public void setContainerQueryContainerHighlightConfig(
+      ContainerQueryContainerHighlightConfig containerQueryContainerHighlightConfig) {
+    this.containerQueryContainerHighlightConfig = containerQueryContainerHighlightConfig;
   }
 }

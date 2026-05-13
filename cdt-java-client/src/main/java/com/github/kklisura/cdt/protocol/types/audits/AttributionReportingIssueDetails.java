@@ -24,13 +24,11 @@ import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 
 /**
  * Details for issues around "Attribution Reporting API" usage. Explainer:
- * https://github.com/WICG/conversion-measurement-api
+ * https://github.com/WICG/attribution-reporting-api
  */
 public class AttributionReportingIssueDetails {
 
   private AttributionReportingIssueType violationType;
-
-  @Optional private AffectedFrame frame;
 
   @Optional private AffectedRequest request;
 
@@ -44,14 +42,6 @@ public class AttributionReportingIssueDetails {
 
   public void setViolationType(AttributionReportingIssueType violationType) {
     this.violationType = violationType;
-  }
-
-  public AffectedFrame getFrame() {
-    return frame;
-  }
-
-  public void setFrame(AffectedFrame frame) {
-    this.frame = frame;
   }
 
   public AffectedRequest getRequest() {

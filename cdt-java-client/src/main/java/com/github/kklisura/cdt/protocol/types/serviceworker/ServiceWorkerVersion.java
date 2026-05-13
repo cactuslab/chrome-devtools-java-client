@@ -44,6 +44,8 @@ public class ServiceWorkerVersion {
 
   @Optional private String targetId;
 
+  @Optional private String routerRules;
+
   public String getVersionId() {
     return versionId;
   }
@@ -124,5 +126,13 @@ public class ServiceWorkerVersion {
 
   public void setTargetId(String targetId) {
     this.targetId = targetId;
+  }
+
+  public String getRouterRules() {
+    return routerRules;
+  }
+
+  public void setRouterRules(String routerRules) {
+    this.routerRules = routerRules;
   }
 }

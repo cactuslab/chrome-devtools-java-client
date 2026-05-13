@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn -pl cdt-protocol-parser -am -q test)",
+      "Bash(mvn -pl cdt-java-protocol-builder -am test)",
+      "Bash(mvn verify *)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  }
+}

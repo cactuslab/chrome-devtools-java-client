@@ -20,6 +20,8 @@ package com.github.kklisura.cdt.protocol.events.runtime;
  * #L%
  */
 
+import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
+import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.types.runtime.RemoteObject;
 import java.util.Map;
 
@@ -32,6 +34,8 @@ public class InspectRequested {
   private RemoteObject object;
 
   private Map<String, Object> hints;
+
+  @Experimental @Optional private Integer executionContextId;
 
   public RemoteObject getObject() {
     return object;
@@ -47,5 +51,15 @@ public class InspectRequested {
 
   public void setHints(Map<String, Object> hints) {
     this.hints = hints;
+  }
+
+  /** Identifier of the context where the call was made. */
+  public Integer getExecutionContextId() {
+    return executionContextId;
+  }
+
+  /** Identifier of the context where the call was made. */
+  public void setExecutionContextId(Integer executionContextId) {
+    this.executionContextId = executionContextId;
   }
 }

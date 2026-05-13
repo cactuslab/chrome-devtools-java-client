@@ -25,10 +25,14 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
+import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.audits.EncodedResponse;
+import com.github.kklisura.cdt.protocol.types.audits.GenericIssueDetails;
 import com.github.kklisura.cdt.protocol.types.audits.GetEncodedResponseEncoding;
+import java.util.List;
 
 /** Audits domain allows investigation of page violations and possible improvements. */
 @Experimental
@@ -70,18 +74,12 @@ public interface Audits {
   void enable();
 
   /**
-   * Runs the contrast check for the target page. Found issues are reported using Audits.issueAdded
-   * event.
+   * Runs the form issues check for the target page. Found issues are reported using
+   * Audits.issueAdded event.
    */
-  void checkContrast();
-
-  /**
-   * Runs the contrast check for the target page. Found issues are reported using Audits.issueAdded
-   * event.
-   *
-   * @param reportAAA Whether to report WCAG AAA level issues. Default is false.
-   */
-  void checkContrast(@Optional @ParamName("reportAAA") Boolean reportAAA);
+  @Returns("formIssues")
+  @ReturnTypeParameter(GenericIssueDetails.class)
+  List<GenericIssueDetails> checkFormsIssues();
 
   @EventName("issueAdded")
   EventListener onIssueAdded(EventHandler<IssueAdded> eventListener);

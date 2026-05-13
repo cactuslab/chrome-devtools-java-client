@@ -35,8 +35,11 @@ import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
+import com.github.kklisura.cdt.protocol.types.target.BrowserContexts;
+import com.github.kklisura.cdt.protocol.types.target.FilterEntry;
 import com.github.kklisura.cdt.protocol.types.target.RemoteLocation;
 import com.github.kklisura.cdt.protocol.types.target.TargetInfo;
+import com.github.kklisura.cdt.protocol.types.target.WindowState;
 import java.util.List;
 
 /** Supports additional targets discovery and allows to attach to them. */
@@ -88,9 +91,9 @@ public interface Target {
    *
    * <p>Injected object will be available as `window[bindingName]`.
    *
-   * <p>The object has the follwing API: - `binding.send(json)` - a method to send messages over the
-   * remote debugging protocol - `binding.onmessage = json => handleMessage(json)` - a callback that
-   * will be called for the protocol notifications and command responses.
+   * <p>The object has the following API: - `binding.send(json)` - a method to send messages over
+   * the remote debugging protocol - `binding.onmessage = json => handleMessage(json)` - a callback
+   * that will be called for the protocol notifications and command responses.
    *
    * @param targetId
    */
@@ -103,23 +106,25 @@ public interface Target {
    *
    * <p>Injected object will be available as `window[bindingName]`.
    *
-   * <p>The object has the follwing API: - `binding.send(json)` - a method to send messages over the
-   * remote debugging protocol - `binding.onmessage = json => handleMessage(json)` - a callback that
-   * will be called for the protocol notifications and command responses.
+   * <p>The object has the following API: - `binding.send(json)` - a method to send messages over
+   * the remote debugging protocol - `binding.onmessage = json => handleMessage(json)` - a callback
+   * that will be called for the protocol notifications and command responses.
    *
    * @param targetId
    * @param bindingName Binding name, 'cdp' if not specified.
+   * @param inheritPermissions If true, inherits the current root session's permissions (default:
+   *     false).
    */
   @Experimental
   void exposeDevToolsProtocol(
       @ParamName("targetId") String targetId,
-      @Optional @ParamName("bindingName") String bindingName);
+      @Optional @ParamName("bindingName") String bindingName,
+      @Optional @ParamName("inheritPermissions") Boolean inheritPermissions);
 
   /**
    * Creates a new empty BrowserContext. Similar to an incognito profile but you can have more than
    * one.
    */
-  @Experimental
   @Returns("browserContextId")
   String createBrowserContext();
 
@@ -130,19 +135,19 @@ public interface Target {
    * @param disposeOnDetach If specified, disposes this context when debugging session disconnects.
    * @param proxyServer Proxy server, similar to the one passed to --proxy-server
    * @param proxyBypassList Proxy bypass list, similar to the one passed to --proxy-bypass-list
+   * @param originsWithUniversalNetworkAccess An optional list of origins to grant unlimited
+   *     cross-origin access to. Parts of the URL other than those constituting origin are ignored.
    */
-  @Experimental
   @Returns("browserContextId")
   String createBrowserContext(
-      @Optional @ParamName("disposeOnDetach") Boolean disposeOnDetach,
-      @Optional @ParamName("proxyServer") String proxyServer,
-      @Optional @ParamName("proxyBypassList") String proxyBypassList);
+      @Experimental @Optional @ParamName("disposeOnDetach") Boolean disposeOnDetach,
+      @Experimental @Optional @ParamName("proxyServer") String proxyServer,
+      @Experimental @Optional @ParamName("proxyBypassList") String proxyBypassList,
+      @Experimental @Optional @ParamName("originsWithUniversalNetworkAccess")
+          List<String> originsWithUniversalNetworkAccess);
 
   /** Returns all browser contexts created with `Target.createBrowserContext` method. */
-  @Experimental
-  @Returns("browserContextIds")
-  @ReturnTypeParameter(String.class)
-  List<String> getBrowserContexts();
+  BrowserContexts getBrowserContexts();
 
   /**
    * Creates a new page.
@@ -158,24 +163,47 @@ public interface Target {
    *
    * @param url The initial URL the page will be navigated to. An empty string indicates
    *     about:blank.
-   * @param width Frame width in DIP (headless chrome only).
-   * @param height Frame height in DIP (headless chrome only).
+   * @param left Frame left origin in DIP (requires newWindow to be true or headless shell).
+   * @param top Frame top origin in DIP (requires newWindow to be true or headless shell).
+   * @param width Frame width in DIP (requires newWindow to be true or headless shell).
+   * @param height Frame height in DIP (requires newWindow to be true or headless shell).
+   * @param windowState Frame window state (requires newWindow to be true or headless shell).
+   *     Default is normal.
    * @param browserContextId The browser context to create the page in.
    * @param enableBeginFrameControl Whether BeginFrames for this target will be controlled via
-   *     DevTools (headless chrome only, not supported on MacOS yet, false by default).
-   * @param newWindow Whether to create a new Window or Tab (chrome-only, false by default).
-   * @param background Whether to create the target in background or foreground (chrome-only, false
-   *     by default).
+   *     DevTools (headless shell only, not supported on MacOS yet, false by default).
+   * @param newWindow Whether to create a new Window or Tab (false by default, not supported by
+   *     headless shell).
+   * @param background Whether to create the target in background or foreground (false by default,
+   *     not supported by headless shell).
+   * @param forTab Whether to create the target of type "tab".
+   * @param hidden Whether to create a hidden target. The hidden target is observable via protocol,
+   *     but not present in the tab UI strip. Cannot be created with `forTab: true`, `newWindow:
+   *     true` or `background: false`. The life-time of the tab is limited to the life-time of the
+   *     session.
+   * @param focus If specified, the option is used to determine if the new target should be focused
+   *     or not. By default, the focus behavior depends on the value of the background field. For
+   *     example, background=false and focus=false will result in the target tab being opened but
+   *     the browser window remain unchanged (if it was in the background, it will remain in the
+   *     background) and background=false with focus=undefined will result in the window being
+   *     focused. Using background: true and focus: true is not supported and will result in an
+   *     error.
    */
   @Returns("targetId")
   String createTarget(
       @ParamName("url") String url,
+      @Experimental @Optional @ParamName("left") Integer left,
+      @Experimental @Optional @ParamName("top") Integer top,
       @Optional @ParamName("width") Integer width,
       @Optional @ParamName("height") Integer height,
-      @Optional @ParamName("browserContextId") String browserContextId,
+      @Optional @ParamName("windowState") WindowState windowState,
+      @Experimental @Optional @ParamName("browserContextId") String browserContextId,
       @Experimental @Optional @ParamName("enableBeginFrameControl") Boolean enableBeginFrameControl,
       @Optional @ParamName("newWindow") Boolean newWindow,
-      @Optional @ParamName("background") Boolean background);
+      @Optional @ParamName("background") Boolean background,
+      @Experimental @Optional @ParamName("forTab") Boolean forTab,
+      @Experimental @Optional @ParamName("hidden") Boolean hidden,
+      @Experimental @Optional @ParamName("focus") Boolean focus);
 
   /** Detaches session with given id. */
   void detachFromTarget();
@@ -196,7 +224,6 @@ public interface Target {
    *
    * @param browserContextId
    */
-  @Experimental
   void disposeBrowserContext(@ParamName("browserContextId") String browserContextId);
 
   /** Returns information about a target. */
@@ -217,6 +244,18 @@ public interface Target {
   @Returns("targetInfos")
   @ReturnTypeParameter(TargetInfo.class)
   List<TargetInfo> getTargets();
+
+  /**
+   * Retrieves a list of available targets.
+   *
+   * @param filter Only targets matching filter will be reported. If filter is not specified and
+   *     target discovery is currently enabled, a filter used for target discovery is used for
+   *     consistency.
+   */
+  @Returns("targetInfos")
+  @ReturnTypeParameter(TargetInfo.class)
+  List<TargetInfo> getTargets(
+      @Experimental @Optional @ParamName("filter") List<FilterEntry> filter);
 
   /**
    * Sends protocol message over session with given id. Consider using flat mode instead; see
@@ -242,23 +281,28 @@ public interface Target {
       @Deprecated @Optional @ParamName("targetId") String targetId);
 
   /**
-   * Controls whether to automatically attach to new targets which are considered to be related to
-   * this one. When turned on, attaches to all existing related targets as well. When turned off,
-   * automatically detaches from all currently attached targets.
+   * Controls whether to automatically attach to new targets which are considered to be directly
+   * related to this one (for example, iframes or workers). When turned on, attaches to all existing
+   * related targets as well. When turned off, automatically detaches from all currently attached
+   * targets. This also clears all targets added by `autoAttachRelated` from the list of targets to
+   * watch for creation of related targets. You might want to call this recursively for
+   * auto-attached targets to attach to all available targets.
    *
    * @param autoAttach Whether to auto-attach to related targets.
    * @param waitForDebuggerOnStart Whether to pause new targets when attaching to them. Use
    *     `Runtime.runIfWaitingForDebugger` to run paused targets.
    */
-  @Experimental
   void setAutoAttach(
       @ParamName("autoAttach") Boolean autoAttach,
       @ParamName("waitForDebuggerOnStart") Boolean waitForDebuggerOnStart);
 
   /**
-   * Controls whether to automatically attach to new targets which are considered to be related to
-   * this one. When turned on, attaches to all existing related targets as well. When turned off,
-   * automatically detaches from all currently attached targets.
+   * Controls whether to automatically attach to new targets which are considered to be directly
+   * related to this one (for example, iframes or workers). When turned on, attaches to all existing
+   * related targets as well. When turned off, automatically detaches from all currently attached
+   * targets. This also clears all targets added by `autoAttachRelated` from the list of targets to
+   * watch for creation of related targets. You might want to call this recursively for
+   * auto-attached targets to attach to all available targets.
    *
    * @param autoAttach Whether to auto-attach to related targets.
    * @param waitForDebuggerOnStart Whether to pause new targets when attaching to them. Use
@@ -266,12 +310,47 @@ public interface Target {
    * @param flatten Enables "flat" access to the session via specifying sessionId attribute in the
    *     commands. We plan to make this the default, deprecate non-flattened mode, and eventually
    *     retire it. See crbug.com/991325.
+   * @param filter Only targets matching filter will be attached.
    */
-  @Experimental
   void setAutoAttach(
       @ParamName("autoAttach") Boolean autoAttach,
       @ParamName("waitForDebuggerOnStart") Boolean waitForDebuggerOnStart,
-      @Optional @ParamName("flatten") Boolean flatten);
+      @Experimental @Optional @ParamName("flatten") Boolean flatten,
+      @Experimental @Optional @ParamName("filter") List<FilterEntry> filter);
+
+  /**
+   * Adds the specified target to the list of targets that will be monitored for any related target
+   * creation (such as child frames, child workers and new versions of service worker) and reported
+   * through `attachedToTarget`. The specified target is also auto-attached. This cancels the effect
+   * of any previous `setAutoAttach` and is also cancelled by subsequent `setAutoAttach`. Only
+   * available at the Browser target.
+   *
+   * @param targetId
+   * @param waitForDebuggerOnStart Whether to pause new targets when attaching to them. Use
+   *     `Runtime.runIfWaitingForDebugger` to run paused targets.
+   */
+  @Experimental
+  void autoAttachRelated(
+      @ParamName("targetId") String targetId,
+      @ParamName("waitForDebuggerOnStart") Boolean waitForDebuggerOnStart);
+
+  /**
+   * Adds the specified target to the list of targets that will be monitored for any related target
+   * creation (such as child frames, child workers and new versions of service worker) and reported
+   * through `attachedToTarget`. The specified target is also auto-attached. This cancels the effect
+   * of any previous `setAutoAttach` and is also cancelled by subsequent `setAutoAttach`. Only
+   * available at the Browser target.
+   *
+   * @param targetId
+   * @param waitForDebuggerOnStart Whether to pause new targets when attaching to them. Use
+   *     `Runtime.runIfWaitingForDebugger` to run paused targets.
+   * @param filter Only targets matching filter will be attached.
+   */
+  @Experimental
+  void autoAttachRelated(
+      @ParamName("targetId") String targetId,
+      @ParamName("waitForDebuggerOnStart") Boolean waitForDebuggerOnStart,
+      @Experimental @Optional @ParamName("filter") List<FilterEntry> filter);
 
   /**
    * Controls whether to discover available targets and notify via
@@ -282,6 +361,18 @@ public interface Target {
   void setDiscoverTargets(@ParamName("discover") Boolean discover);
 
   /**
+   * Controls whether to discover available targets and notify via
+   * `targetCreated/targetInfoChanged/targetDestroyed` events.
+   *
+   * @param discover Whether to discover available targets.
+   * @param filter Only targets matching filter will be attached. If `discover` is false, `filter`
+   *     must be omitted or empty.
+   */
+  void setDiscoverTargets(
+      @ParamName("discover") Boolean discover,
+      @Experimental @Optional @ParamName("filter") List<FilterEntry> filter);
+
+  /**
    * Enables target discovery for the specified locations, when `setDiscoverTargets` was set to
    * `true`.
    *
@@ -289,6 +380,36 @@ public interface Target {
    */
   @Experimental
   void setRemoteLocations(@ParamName("locations") List<RemoteLocation> locations);
+
+  /**
+   * Gets the targetId of the DevTools page target opened for the given target (if any).
+   *
+   * @param targetId Page or tab target ID.
+   */
+  @Experimental
+  @Returns("targetId")
+  String getDevToolsTarget(@ParamName("targetId") String targetId);
+
+  /**
+   * Opens a DevTools window for the target.
+   *
+   * @param targetId This can be the page or tab target ID.
+   */
+  @Experimental
+  @Returns("targetId")
+  String openDevTools(@ParamName("targetId") String targetId);
+
+  /**
+   * Opens a DevTools window for the target.
+   *
+   * @param targetId This can be the page or tab target ID.
+   * @param panelId The id of the panel we want DevTools to open initially. Currently supported
+   *     panels are elements, console, network, sources, resources and performance.
+   */
+  @Experimental
+  @Returns("targetId")
+  String openDevTools(
+      @ParamName("targetId") String targetId, @Optional @ParamName("panelId") String panelId);
 
   /** Issued when attached to target because of auto-attach or `attachToTarget` command. */
   @EventName("attachedToTarget")

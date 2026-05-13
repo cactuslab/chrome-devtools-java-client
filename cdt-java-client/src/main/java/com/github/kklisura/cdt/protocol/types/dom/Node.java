@@ -20,7 +20,9 @@ package com.github.kklisura.cdt.protocol.types.dom;
  * #L%
  */
 
+import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
+import com.github.kklisura.cdt.protocol.types.network.AdProvenance;
 import java.util.List;
 
 /**
@@ -67,6 +69,8 @@ public class Node {
 
   @Optional private PseudoType pseudoType;
 
+  @Optional private String pseudoIdentifier;
+
   @Optional private ShadowRootType shadowRootType;
 
   @Optional private String frameId;
@@ -84,6 +88,18 @@ public class Node {
   @Optional private List<BackendNode> distributedNodes;
 
   @Optional private Boolean isSVG;
+
+  @Optional private CompatibilityMode compatibilityMode;
+
+  @Optional private BackendNode assignedSlot;
+
+  @Experimental @Optional private Boolean isScrollable;
+
+  @Experimental @Optional private Boolean affectedByStartingStyles;
+
+  @Experimental @Optional private List<String> adoptedStyleSheets;
+
+  @Experimental @Optional private AdProvenance adProvenance;
 
   /**
    * Node identifier that is passed into the rest of the DOM messages as the `nodeId`. Backend will
@@ -287,6 +303,16 @@ public class Node {
     this.pseudoType = pseudoType;
   }
 
+  /** Pseudo element identifier for this node. Only present if there is a valid pseudoType. */
+  public String getPseudoIdentifier() {
+    return pseudoIdentifier;
+  }
+
+  /** Pseudo element identifier for this node. Only present if there is a valid pseudoType. */
+  public void setPseudoIdentifier(String pseudoIdentifier) {
+    this.pseudoIdentifier = pseudoIdentifier;
+  }
+
   /** Shadow root type. */
   public ShadowRootType getShadowRootType() {
     return shadowRootType;
@@ -381,5 +407,53 @@ public class Node {
   /** Whether the node is SVG. */
   public void setIsSVG(Boolean isSVG) {
     this.isSVG = isSVG;
+  }
+
+  public CompatibilityMode getCompatibilityMode() {
+    return compatibilityMode;
+  }
+
+  public void setCompatibilityMode(CompatibilityMode compatibilityMode) {
+    this.compatibilityMode = compatibilityMode;
+  }
+
+  public BackendNode getAssignedSlot() {
+    return assignedSlot;
+  }
+
+  public void setAssignedSlot(BackendNode assignedSlot) {
+    this.assignedSlot = assignedSlot;
+  }
+
+  public Boolean getIsScrollable() {
+    return isScrollable;
+  }
+
+  public void setIsScrollable(Boolean isScrollable) {
+    this.isScrollable = isScrollable;
+  }
+
+  public Boolean getAffectedByStartingStyles() {
+    return affectedByStartingStyles;
+  }
+
+  public void setAffectedByStartingStyles(Boolean affectedByStartingStyles) {
+    this.affectedByStartingStyles = affectedByStartingStyles;
+  }
+
+  public List<String> getAdoptedStyleSheets() {
+    return adoptedStyleSheets;
+  }
+
+  public void setAdoptedStyleSheets(List<String> adoptedStyleSheets) {
+    this.adoptedStyleSheets = adoptedStyleSheets;
+  }
+
+  public AdProvenance getAdProvenance() {
+    return adProvenance;
+  }
+
+  public void setAdProvenance(AdProvenance adProvenance) {
+    this.adProvenance = adProvenance;
   }
 }

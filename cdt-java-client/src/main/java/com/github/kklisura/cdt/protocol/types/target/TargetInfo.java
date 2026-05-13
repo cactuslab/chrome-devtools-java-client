@@ -35,13 +35,19 @@ public class TargetInfo {
 
   private Boolean attached;
 
+  @Optional private String parentId;
+
   @Optional private String openerId;
 
   @Experimental private Boolean canAccessOpener;
 
   @Experimental @Optional private String openerFrameId;
 
+  @Experimental @Optional private String parentFrameId;
+
   @Experimental @Optional private String browserContextId;
+
+  @Experimental @Optional private String subtype;
 
   public String getTargetId() {
     return targetId;
@@ -51,10 +57,18 @@ public class TargetInfo {
     this.targetId = targetId;
   }
 
+  /**
+   * List of types:
+   * https://source.chromium.org/chromium/chromium/src/+/main:content/browser/devtools/devtools_agent_host_impl.cc?ss=chromium&q=f:devtools%20-f:out%20%22::kTypeTab%5B%5D%22
+   */
   public String getType() {
     return type;
   }
 
+  /**
+   * List of types:
+   * https://source.chromium.org/chromium/chromium/src/+/main:content/browser/devtools/devtools_agent_host_impl.cc?ss=chromium&q=f:devtools%20-f:out%20%22::kTypeTab%5B%5D%22
+   */
   public void setType(String type) {
     this.type = type;
   }
@@ -83,6 +97,16 @@ public class TargetInfo {
   /** Whether the target has an attached client. */
   public void setAttached(Boolean attached) {
     this.attached = attached;
+  }
+
+  /** Id of the parent target, if any. For example, "iframe" target may have a "page" parent. */
+  public String getParentId() {
+    return parentId;
+  }
+
+  /** Id of the parent target, if any. For example, "iframe" target may have a "page" parent. */
+  public void setParentId(String parentId) {
+    this.parentId = parentId;
   }
 
   /** Opener target Id */
@@ -115,11 +139,43 @@ public class TargetInfo {
     this.openerFrameId = openerFrameId;
   }
 
+  /**
+   * Id of the parent frame, present for "iframe" and "worker" targets. For nested workers, this is
+   * the "ancestor" frame that created the first worker in the nested chain.
+   */
+  public String getParentFrameId() {
+    return parentFrameId;
+  }
+
+  /**
+   * Id of the parent frame, present for "iframe" and "worker" targets. For nested workers, this is
+   * the "ancestor" frame that created the first worker in the nested chain.
+   */
+  public void setParentFrameId(String parentFrameId) {
+    this.parentFrameId = parentFrameId;
+  }
+
   public String getBrowserContextId() {
     return browserContextId;
   }
 
   public void setBrowserContextId(String browserContextId) {
     this.browserContextId = browserContextId;
+  }
+
+  /**
+   * Provides additional details for specific target types. For example, for the type of "page",
+   * this may be set to "prerender".
+   */
+  public String getSubtype() {
+    return subtype;
+  }
+
+  /**
+   * Provides additional details for specific target types. For example, for the type of "page",
+   * this may be set to "prerender".
+   */
+  public void setSubtype(String subtype) {
+    this.subtype = subtype;
   }
 }

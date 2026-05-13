@@ -174,12 +174,12 @@ public class CertificateSecurityState {
     this.certificateNetworkError = certificateNetworkError;
   }
 
-  /** True if the certificate uses a weak signature aglorithm. */
+  /** True if the certificate uses a weak signature algorithm. */
   public Boolean getCertificateHasWeakSignature() {
     return certificateHasWeakSignature;
   }
 
-  /** True if the certificate uses a weak signature aglorithm. */
+  /** True if the certificate uses a weak signature algorithm. */
   public void setCertificateHasWeakSignature(Boolean certificateHasWeakSignature) {
     this.certificateHasWeakSignature = certificateHasWeakSignature;
   }

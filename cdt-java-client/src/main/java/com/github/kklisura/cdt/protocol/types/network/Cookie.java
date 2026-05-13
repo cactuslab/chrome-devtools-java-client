@@ -48,11 +48,13 @@ public class Cookie {
 
   @Experimental private CookiePriority priority;
 
-  @Experimental private Boolean sameParty;
-
   @Experimental private CookieSourceScheme sourceScheme;
 
   @Experimental private Integer sourcePort;
+
+  @Experimental @Optional private CookiePartitionKey partitionKey;
+
+  @Experimental @Optional private Boolean partitionKeyOpaque;
 
   /** Cookie name. */
   public String getName() {
@@ -94,12 +96,20 @@ public class Cookie {
     this.path = path;
   }
 
-  /** Cookie expiration date as the number of seconds since the UNIX epoch. */
+  /**
+   * Cookie expiration date as the number of seconds since the UNIX epoch. The value is set to -1 if
+   * the expiry date is not set. The value can be null for values that cannot be represented in JSON
+   * (±Inf).
+   */
   public Double getExpires() {
     return expires;
   }
 
-  /** Cookie expiration date as the number of seconds since the UNIX epoch. */
+  /**
+   * Cookie expiration date as the number of seconds since the UNIX epoch. The value is set to -1 if
+   * the expiry date is not set. The value can be null for values that cannot be represented in JSON
+   * (±Inf).
+   */
   public void setExpires(Double expires) {
     this.expires = expires;
   }
@@ -164,16 +174,6 @@ public class Cookie {
     this.priority = priority;
   }
 
-  /** True if cookie is SameParty. */
-  public Boolean getSameParty() {
-    return sameParty;
-  }
-
-  /** True if cookie is SameParty. */
-  public void setSameParty(Boolean sameParty) {
-    this.sameParty = sameParty;
-  }
-
   /** Cookie source scheme type. */
   public CookieSourceScheme getSourceScheme() {
     return sourceScheme;
@@ -200,5 +200,25 @@ public class Cookie {
    */
   public void setSourcePort(Integer sourcePort) {
     this.sourcePort = sourcePort;
+  }
+
+  /** Cookie partition key. */
+  public CookiePartitionKey getPartitionKey() {
+    return partitionKey;
+  }
+
+  /** Cookie partition key. */
+  public void setPartitionKey(CookiePartitionKey partitionKey) {
+    this.partitionKey = partitionKey;
+  }
+
+  /** True if cookie partition key is opaque. */
+  public Boolean getPartitionKeyOpaque() {
+    return partitionKeyOpaque;
+  }
+
+  /** True if cookie partition key is opaque. */
+  public void setPartitionKeyOpaque(Boolean partitionKeyOpaque) {
+    this.partitionKeyOpaque = partitionKeyOpaque;
   }
 }

@@ -51,7 +51,7 @@ public class TimelineEvent {
   /**
    * The event type, as specified in
    * https://w3c.github.io/performance-timeline/#dom-performanceentry-entrytype This determines
-   * which of the optional "details" fiedls is present.
+   * which of the optional "details" fields is present.
    */
   public String getType() {
     return type;
@@ -60,7 +60,7 @@ public class TimelineEvent {
   /**
    * The event type, as specified in
    * https://w3c.github.io/performance-timeline/#dom-performanceentry-entrytype This determines
-   * which of the optional "details" fiedls is present.
+   * which of the optional "details" fields is present.
    */
   public void setType(String type) {
     this.type = type;

@@ -20,6 +20,7 @@ package com.github.kklisura.cdt.protocol.types.css;
  * #L%
  */
 
+import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import java.util.List;
 
@@ -35,7 +36,23 @@ public class MatchedStylesForNode {
 
   @Optional private List<InheritedStyleEntry> inherited;
 
+  @Optional private List<InheritedPseudoElementMatches> inheritedPseudoElements;
+
   @Optional private List<CSSKeyframesRule> cssKeyframesRules;
+
+  @Optional private List<CSSPositionTryRule> cssPositionTryRules;
+
+  @Optional private Integer activePositionFallbackIndex;
+
+  @Optional private List<CSSPropertyRule> cssPropertyRules;
+
+  @Optional private List<CSSPropertyRegistration> cssPropertyRegistrations;
+
+  @Optional private List<CSSAtRule> cssAtRules;
+
+  @Experimental @Optional private Integer parentLayoutNodeId;
+
+  @Experimental @Optional private List<CSSFunctionRule> cssFunctionRules;
 
   /** Inline style for the specified DOM node. */
   public CSSStyle getInlineStyle() {
@@ -87,6 +104,23 @@ public class MatchedStylesForNode {
     this.inherited = inherited;
   }
 
+  /**
+   * A chain of inherited pseudo element styles (from the immediate node parent up to the DOM tree
+   * root).
+   */
+  public List<InheritedPseudoElementMatches> getInheritedPseudoElements() {
+    return inheritedPseudoElements;
+  }
+
+  /**
+   * A chain of inherited pseudo element styles (from the immediate node parent up to the DOM tree
+   * root).
+   */
+  public void setInheritedPseudoElements(
+      List<InheritedPseudoElementMatches> inheritedPseudoElements) {
+    this.inheritedPseudoElements = inheritedPseudoElements;
+  }
+
   /** A list of CSS keyframed animations matching this node. */
   public List<CSSKeyframesRule> getCssKeyframesRules() {
     return cssKeyframesRules;
@@ -95,5 +129,87 @@ public class MatchedStylesForNode {
   /** A list of CSS keyframed animations matching this node. */
   public void setCssKeyframesRules(List<CSSKeyframesRule> cssKeyframesRules) {
     this.cssKeyframesRules = cssKeyframesRules;
+  }
+
+  /**
+   * A list of CSS @position-try rules matching this node, based on the position-try-fallbacks
+   * property.
+   */
+  public List<CSSPositionTryRule> getCssPositionTryRules() {
+    return cssPositionTryRules;
+  }
+
+  /**
+   * A list of CSS @position-try rules matching this node, based on the position-try-fallbacks
+   * property.
+   */
+  public void setCssPositionTryRules(List<CSSPositionTryRule> cssPositionTryRules) {
+    this.cssPositionTryRules = cssPositionTryRules;
+  }
+
+  /**
+   * Index of the active fallback in the applied position-try-fallback property, will not be set if
+   * there is no active position-try fallback.
+   */
+  public Integer getActivePositionFallbackIndex() {
+    return activePositionFallbackIndex;
+  }
+
+  /**
+   * Index of the active fallback in the applied position-try-fallback property, will not be set if
+   * there is no active position-try fallback.
+   */
+  public void setActivePositionFallbackIndex(Integer activePositionFallbackIndex) {
+    this.activePositionFallbackIndex = activePositionFallbackIndex;
+  }
+
+  /** A list of CSS at-property rules matching this node. */
+  public List<CSSPropertyRule> getCssPropertyRules() {
+    return cssPropertyRules;
+  }
+
+  /** A list of CSS at-property rules matching this node. */
+  public void setCssPropertyRules(List<CSSPropertyRule> cssPropertyRules) {
+    this.cssPropertyRules = cssPropertyRules;
+  }
+
+  /** A list of CSS property registrations matching this node. */
+  public List<CSSPropertyRegistration> getCssPropertyRegistrations() {
+    return cssPropertyRegistrations;
+  }
+
+  /** A list of CSS property registrations matching this node. */
+  public void setCssPropertyRegistrations(List<CSSPropertyRegistration> cssPropertyRegistrations) {
+    this.cssPropertyRegistrations = cssPropertyRegistrations;
+  }
+
+  /** A list of simple @rules matching this node or its pseudo-elements. */
+  public List<CSSAtRule> getCssAtRules() {
+    return cssAtRules;
+  }
+
+  /** A list of simple @rules matching this node or its pseudo-elements. */
+  public void setCssAtRules(List<CSSAtRule> cssAtRules) {
+    this.cssAtRules = cssAtRules;
+  }
+
+  /** Id of the first parent element that does not have display: contents. */
+  public Integer getParentLayoutNodeId() {
+    return parentLayoutNodeId;
+  }
+
+  /** Id of the first parent element that does not have display: contents. */
+  public void setParentLayoutNodeId(Integer parentLayoutNodeId) {
+    this.parentLayoutNodeId = parentLayoutNodeId;
+  }
+
+  /** A list of CSS at-function rules referenced by styles of this node. */
+  public List<CSSFunctionRule> getCssFunctionRules() {
+    return cssFunctionRules;
+  }
+
+  /** A list of CSS at-function rules referenced by styles of this node. */
+  public void setCssFunctionRules(List<CSSFunctionRule> cssFunctionRules) {
+    this.cssFunctionRules = cssFunctionRules;
   }
 }

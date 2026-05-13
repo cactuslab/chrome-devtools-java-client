@@ -28,7 +28,7 @@ import com.github.kklisura.cdt.protocol.support.annotations.Optional;
  */
 public class InspectorIssueDetails {
 
-  @Optional private SameSiteCookieIssueDetails sameSiteCookieIssueDetails;
+  @Optional private CookieIssueDetails cookieIssueDetails;
 
   @Optional private MixedContentIssueDetails mixedContentIssueDetails;
 
@@ -40,20 +40,60 @@ public class InspectorIssueDetails {
 
   @Optional private SharedArrayBufferIssueDetails sharedArrayBufferIssueDetails;
 
-  @Optional private TrustedWebActivityIssueDetails twaQualityEnforcementDetails;
-
-  @Optional private LowTextContrastIssueDetails lowTextContrastIssueDetails;
-
   @Optional private CorsIssueDetails corsIssueDetails;
 
   @Optional private AttributionReportingIssueDetails attributionReportingIssueDetails;
 
-  public SameSiteCookieIssueDetails getSameSiteCookieIssueDetails() {
-    return sameSiteCookieIssueDetails;
+  @Optional private QuirksModeIssueDetails quirksModeIssueDetails;
+
+  @Optional private PartitioningBlobURLIssueDetails partitioningBlobURLIssueDetails;
+
+  @Deprecated @Optional private NavigatorUserAgentIssueDetails navigatorUserAgentIssueDetails;
+
+  @Optional private GenericIssueDetails genericIssueDetails;
+
+  @Optional private DeprecationIssueDetails deprecationIssueDetails;
+
+  @Optional private ClientHintIssueDetails clientHintIssueDetails;
+
+  @Optional private FederatedAuthRequestIssueDetails federatedAuthRequestIssueDetails;
+
+  @Optional private BounceTrackingIssueDetails bounceTrackingIssueDetails;
+
+  @Optional private CookieDeprecationMetadataIssueDetails cookieDeprecationMetadataIssueDetails;
+
+  @Optional private StylesheetLoadingIssueDetails stylesheetLoadingIssueDetails;
+
+  @Optional private PropertyRuleIssueDetails propertyRuleIssueDetails;
+
+  @Optional
+  private FederatedAuthUserInfoRequestIssueDetails federatedAuthUserInfoRequestIssueDetails;
+
+  @Optional private SharedDictionaryIssueDetails sharedDictionaryIssueDetails;
+
+  @Optional private ElementAccessibilityIssueDetails elementAccessibilityIssueDetails;
+
+  @Optional private SRIMessageSignatureIssueDetails sriMessageSignatureIssueDetails;
+
+  @Optional private UnencodedDigestIssueDetails unencodedDigestIssueDetails;
+
+  @Optional private ConnectionAllowlistIssueDetails connectionAllowlistIssueDetails;
+
+  @Optional private UserReidentificationIssueDetails userReidentificationIssueDetails;
+
+  @Optional private PermissionElementIssueDetails permissionElementIssueDetails;
+
+  @Optional private PerformanceIssueDetails performanceIssueDetails;
+
+  @Optional
+  private SelectivePermissionsInterventionIssueDetails selectivePermissionsInterventionIssueDetails;
+
+  public CookieIssueDetails getCookieIssueDetails() {
+    return cookieIssueDetails;
   }
 
-  public void setSameSiteCookieIssueDetails(SameSiteCookieIssueDetails sameSiteCookieIssueDetails) {
-    this.sameSiteCookieIssueDetails = sameSiteCookieIssueDetails;
+  public void setCookieIssueDetails(CookieIssueDetails cookieIssueDetails) {
+    this.cookieIssueDetails = cookieIssueDetails;
   }
 
   public MixedContentIssueDetails getMixedContentIssueDetails() {
@@ -99,24 +139,6 @@ public class InspectorIssueDetails {
     this.sharedArrayBufferIssueDetails = sharedArrayBufferIssueDetails;
   }
 
-  public TrustedWebActivityIssueDetails getTwaQualityEnforcementDetails() {
-    return twaQualityEnforcementDetails;
-  }
-
-  public void setTwaQualityEnforcementDetails(
-      TrustedWebActivityIssueDetails twaQualityEnforcementDetails) {
-    this.twaQualityEnforcementDetails = twaQualityEnforcementDetails;
-  }
-
-  public LowTextContrastIssueDetails getLowTextContrastIssueDetails() {
-    return lowTextContrastIssueDetails;
-  }
-
-  public void setLowTextContrastIssueDetails(
-      LowTextContrastIssueDetails lowTextContrastIssueDetails) {
-    this.lowTextContrastIssueDetails = lowTextContrastIssueDetails;
-  }
-
   public CorsIssueDetails getCorsIssueDetails() {
     return corsIssueDetails;
   }
@@ -132,5 +154,189 @@ public class InspectorIssueDetails {
   public void setAttributionReportingIssueDetails(
       AttributionReportingIssueDetails attributionReportingIssueDetails) {
     this.attributionReportingIssueDetails = attributionReportingIssueDetails;
+  }
+
+  public QuirksModeIssueDetails getQuirksModeIssueDetails() {
+    return quirksModeIssueDetails;
+  }
+
+  public void setQuirksModeIssueDetails(QuirksModeIssueDetails quirksModeIssueDetails) {
+    this.quirksModeIssueDetails = quirksModeIssueDetails;
+  }
+
+  public PartitioningBlobURLIssueDetails getPartitioningBlobURLIssueDetails() {
+    return partitioningBlobURLIssueDetails;
+  }
+
+  public void setPartitioningBlobURLIssueDetails(
+      PartitioningBlobURLIssueDetails partitioningBlobURLIssueDetails) {
+    this.partitioningBlobURLIssueDetails = partitioningBlobURLIssueDetails;
+  }
+
+  public NavigatorUserAgentIssueDetails getNavigatorUserAgentIssueDetails() {
+    return navigatorUserAgentIssueDetails;
+  }
+
+  public void setNavigatorUserAgentIssueDetails(
+      NavigatorUserAgentIssueDetails navigatorUserAgentIssueDetails) {
+    this.navigatorUserAgentIssueDetails = navigatorUserAgentIssueDetails;
+  }
+
+  public GenericIssueDetails getGenericIssueDetails() {
+    return genericIssueDetails;
+  }
+
+  public void setGenericIssueDetails(GenericIssueDetails genericIssueDetails) {
+    this.genericIssueDetails = genericIssueDetails;
+  }
+
+  public DeprecationIssueDetails getDeprecationIssueDetails() {
+    return deprecationIssueDetails;
+  }
+
+  public void setDeprecationIssueDetails(DeprecationIssueDetails deprecationIssueDetails) {
+    this.deprecationIssueDetails = deprecationIssueDetails;
+  }
+
+  public ClientHintIssueDetails getClientHintIssueDetails() {
+    return clientHintIssueDetails;
+  }
+
+  public void setClientHintIssueDetails(ClientHintIssueDetails clientHintIssueDetails) {
+    this.clientHintIssueDetails = clientHintIssueDetails;
+  }
+
+  public FederatedAuthRequestIssueDetails getFederatedAuthRequestIssueDetails() {
+    return federatedAuthRequestIssueDetails;
+  }
+
+  public void setFederatedAuthRequestIssueDetails(
+      FederatedAuthRequestIssueDetails federatedAuthRequestIssueDetails) {
+    this.federatedAuthRequestIssueDetails = federatedAuthRequestIssueDetails;
+  }
+
+  public BounceTrackingIssueDetails getBounceTrackingIssueDetails() {
+    return bounceTrackingIssueDetails;
+  }
+
+  public void setBounceTrackingIssueDetails(BounceTrackingIssueDetails bounceTrackingIssueDetails) {
+    this.bounceTrackingIssueDetails = bounceTrackingIssueDetails;
+  }
+
+  public CookieDeprecationMetadataIssueDetails getCookieDeprecationMetadataIssueDetails() {
+    return cookieDeprecationMetadataIssueDetails;
+  }
+
+  public void setCookieDeprecationMetadataIssueDetails(
+      CookieDeprecationMetadataIssueDetails cookieDeprecationMetadataIssueDetails) {
+    this.cookieDeprecationMetadataIssueDetails = cookieDeprecationMetadataIssueDetails;
+  }
+
+  public StylesheetLoadingIssueDetails getStylesheetLoadingIssueDetails() {
+    return stylesheetLoadingIssueDetails;
+  }
+
+  public void setStylesheetLoadingIssueDetails(
+      StylesheetLoadingIssueDetails stylesheetLoadingIssueDetails) {
+    this.stylesheetLoadingIssueDetails = stylesheetLoadingIssueDetails;
+  }
+
+  public PropertyRuleIssueDetails getPropertyRuleIssueDetails() {
+    return propertyRuleIssueDetails;
+  }
+
+  public void setPropertyRuleIssueDetails(PropertyRuleIssueDetails propertyRuleIssueDetails) {
+    this.propertyRuleIssueDetails = propertyRuleIssueDetails;
+  }
+
+  public FederatedAuthUserInfoRequestIssueDetails getFederatedAuthUserInfoRequestIssueDetails() {
+    return federatedAuthUserInfoRequestIssueDetails;
+  }
+
+  public void setFederatedAuthUserInfoRequestIssueDetails(
+      FederatedAuthUserInfoRequestIssueDetails federatedAuthUserInfoRequestIssueDetails) {
+    this.federatedAuthUserInfoRequestIssueDetails = federatedAuthUserInfoRequestIssueDetails;
+  }
+
+  public SharedDictionaryIssueDetails getSharedDictionaryIssueDetails() {
+    return sharedDictionaryIssueDetails;
+  }
+
+  public void setSharedDictionaryIssueDetails(
+      SharedDictionaryIssueDetails sharedDictionaryIssueDetails) {
+    this.sharedDictionaryIssueDetails = sharedDictionaryIssueDetails;
+  }
+
+  public ElementAccessibilityIssueDetails getElementAccessibilityIssueDetails() {
+    return elementAccessibilityIssueDetails;
+  }
+
+  public void setElementAccessibilityIssueDetails(
+      ElementAccessibilityIssueDetails elementAccessibilityIssueDetails) {
+    this.elementAccessibilityIssueDetails = elementAccessibilityIssueDetails;
+  }
+
+  public SRIMessageSignatureIssueDetails getSriMessageSignatureIssueDetails() {
+    return sriMessageSignatureIssueDetails;
+  }
+
+  public void setSriMessageSignatureIssueDetails(
+      SRIMessageSignatureIssueDetails sriMessageSignatureIssueDetails) {
+    this.sriMessageSignatureIssueDetails = sriMessageSignatureIssueDetails;
+  }
+
+  public UnencodedDigestIssueDetails getUnencodedDigestIssueDetails() {
+    return unencodedDigestIssueDetails;
+  }
+
+  public void setUnencodedDigestIssueDetails(
+      UnencodedDigestIssueDetails unencodedDigestIssueDetails) {
+    this.unencodedDigestIssueDetails = unencodedDigestIssueDetails;
+  }
+
+  public ConnectionAllowlistIssueDetails getConnectionAllowlistIssueDetails() {
+    return connectionAllowlistIssueDetails;
+  }
+
+  public void setConnectionAllowlistIssueDetails(
+      ConnectionAllowlistIssueDetails connectionAllowlistIssueDetails) {
+    this.connectionAllowlistIssueDetails = connectionAllowlistIssueDetails;
+  }
+
+  public UserReidentificationIssueDetails getUserReidentificationIssueDetails() {
+    return userReidentificationIssueDetails;
+  }
+
+  public void setUserReidentificationIssueDetails(
+      UserReidentificationIssueDetails userReidentificationIssueDetails) {
+    this.userReidentificationIssueDetails = userReidentificationIssueDetails;
+  }
+
+  public PermissionElementIssueDetails getPermissionElementIssueDetails() {
+    return permissionElementIssueDetails;
+  }
+
+  public void setPermissionElementIssueDetails(
+      PermissionElementIssueDetails permissionElementIssueDetails) {
+    this.permissionElementIssueDetails = permissionElementIssueDetails;
+  }
+
+  public PerformanceIssueDetails getPerformanceIssueDetails() {
+    return performanceIssueDetails;
+  }
+
+  public void setPerformanceIssueDetails(PerformanceIssueDetails performanceIssueDetails) {
+    this.performanceIssueDetails = performanceIssueDetails;
+  }
+
+  public SelectivePermissionsInterventionIssueDetails
+      getSelectivePermissionsInterventionIssueDetails() {
+    return selectivePermissionsInterventionIssueDetails;
+  }
+
+  public void setSelectivePermissionsInterventionIssueDetails(
+      SelectivePermissionsInterventionIssueDetails selectivePermissionsInterventionIssueDetails) {
+    this.selectivePermissionsInterventionIssueDetails =
+        selectivePermissionsInterventionIssueDetails;
   }
 }
