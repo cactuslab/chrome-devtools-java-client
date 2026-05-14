@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 
 import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
@@ -171,6 +172,45 @@ public class CommandInvocationHandlerTest {
   }
 
   @Test
+  public void testInvokeMethodWithParamObject() throws Throwable {
+    TestParameters parameters = new TestParameters().setParamTest("Test").setParamTest1(1);
+
+    assertNull(
+        invocationHandler.invoke(
+            this, getMethodByName("methodWithParamObject"), new Object[] {parameters}));
+
+    ArgumentCaptor<MethodInvocation> methodInvocationCapture =
+        ArgumentCaptor.forClass(MethodInvocation.class);
+    verify(chromeDevToolsService)
+        .invoke(isNull(), eq(String.class), isNull(), methodInvocationCapture.capture());
+
+    MethodInvocation methodInvocation = methodInvocationCapture.getValue();
+    assertNotNull(methodInvocation.getId());
+    assertEquals(
+        "CommandInvocationHandlerTest.methodWithParamObject", methodInvocation.getMethod());
+    assertEquals("Test", methodInvocation.getParams().get("paramTest"));
+    assertEquals(1, (int) methodInvocation.getParams().get("paramTest1"));
+  }
+
+  @Test
+  public void testInvokeMethodWithParamObjectSkipsNullFields() throws Throwable {
+    TestParameters parameters = new TestParameters().setParamTest("Test");
+
+    assertNull(
+        invocationHandler.invoke(
+            this, getMethodByName("methodWithParamObject"), new Object[] {parameters}));
+
+    ArgumentCaptor<MethodInvocation> methodInvocationCapture =
+        ArgumentCaptor.forClass(MethodInvocation.class);
+    verify(chromeDevToolsService)
+        .invoke(isNull(), eq(String.class), isNull(), methodInvocationCapture.capture());
+
+    MethodInvocation methodInvocation = methodInvocationCapture.getValue();
+    assertEquals("Test", methodInvocation.getParams().get("paramTest"));
+    assertFalse(methodInvocation.getParams().containsKey("paramTest1"));
+  }
+
+  @Test
   public void testIsEventSubscription() {
     assertFalse(CommandInvocationHandler.isEventSubscription(getMethodByName("voidMethod")));
     assertFalse(
@@ -253,5 +293,27 @@ public class CommandInvocationHandlerTest {
   private List<String> stringMethodWithParamsAndReturnTypeAnnotation(
       @ParamName("paramTest") String param1, @ParamName("paramTest1") Integer param2) {
     return Collections.emptyList();
+  }
+
+  private String methodWithParamObject(@ParamObject TestParameters parameters) {
+    return "EMPTY-STRING";
+  }
+
+  private static class TestParameters {
+    @ParamName("paramTest")
+    private String paramTest;
+
+    @ParamName("paramTest1")
+    private Integer paramTest1;
+
+    private TestParameters setParamTest(String paramTest) {
+      this.paramTest = paramTest;
+      return this;
+    }
+
+    private TestParameters setParamTest1(Integer paramTest1) {
+      this.paramTest1 = paramTest1;
+      return this;
+    }
   }
 }
