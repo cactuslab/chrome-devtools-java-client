@@ -230,6 +230,78 @@ public class JavaClassBuilderImplTest extends EasyMockSupport {
   }
 
   @Test
+  public void testGenerateGettersAndFluentSetters() throws IOException {
+    Capture<CompilationUnit> compilationUnitCapture = Capture.newInstance();
+
+    sourceProject.addCompilationUnit(
+        eq(PACKAGE_NAME), eq(CLASS_NAME), capture(compilationUnitCapture));
+
+    replayAll();
+
+    javaClassBuilder.addPrivateField("privateField", "String", "Private field description");
+
+    javaClassBuilder.generateGettersAndSetters(true);
+
+    javaClassBuilder.build(sourceProject);
+
+    assertEquals(
+        "package com.github.kklisura;\n"
+            + "\n"
+            + "public class ClassName {\n"
+            + "\n"
+            + "    private String privateField;\n"
+            + "\n"
+            + "    /**\n"
+            + "     * Private field description\n"
+            + "     */\n"
+            + "    public String getPrivateField() {\n"
+            + "        return privateField;\n"
+            + "    }\n"
+            + "\n"
+            + "    /**\n"
+            + "     * Private field description\n"
+            + "     */\n"
+            + "    public ClassName setPrivateField(String privateField) {\n"
+            + "        this.privateField = privateField;\n"
+            + "        return this;\n"
+            + "    }\n"
+            + "}\n",
+        compilationUnitCapture.getValue().toString());
+
+    verifyAll();
+  }
+
+  @Test
+  public void testGenerateParametrizedFieldAnnotation() throws IOException {
+    Capture<CompilationUnit> compilationUnitCapture = Capture.newInstance();
+
+    sourceProject.addCompilationUnit(
+        eq(PACKAGE_NAME), eq(CLASS_NAME), capture(compilationUnitCapture));
+
+    replayAll();
+
+    javaClassBuilder.addPrivateField("privateField", "String", "Private field description");
+
+    javaClassBuilder.addParametrizedFieldAnnotation("privateField", "ParamName", "privateField");
+
+    javaClassBuilder.build(sourceProject);
+
+    assertEquals(
+        "package com.github.kklisura;\n"
+            + "\n"
+            + "import com.github.kklisura.annotations.ParamName;\n"
+            + "\n"
+            + "public class ClassName {\n"
+            + "\n"
+            + "    @ParamName(\"privateField\")\n"
+            + "    private String privateField;\n"
+            + "}\n",
+        compilationUnitCapture.getValue().toString());
+
+    verifyAll();
+  }
+
+  @Test
   public void testGenerateFieldAnnotation() throws IOException {
     Capture<CompilationUnit> compilationUnitCapture = Capture.newInstance();
 

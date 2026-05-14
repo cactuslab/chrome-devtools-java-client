@@ -274,13 +274,18 @@ public class CommandBuilderTest extends EasyMockSupport {
 
     domain.setCommands(Collections.singletonList(command));
 
+    // Enum builder is created once for the all-params method overload and once for the
+    // parameters-object class.
     expect(
             javaBuilderFactory.createEnumBuilder(
                 "com.github.kklisura.types.domainname", "EnumParam1"))
-        .andReturn(javaEnumBuilder);
+        .andReturn(javaEnumBuilder)
+        .times(2);
 
     javaEnumBuilder.addEnumConstant("ENUM_1", "enum1");
+    expectLastCall().times(2);
     javaEnumBuilder.addEnumConstant("ENUM_2", "enum2");
+    expectLastCall().times(2);
 
     expect(javaBuilderFactory.createInterfaceBuilder(BASE_PACKAGE_NAME, "DomainName"))
         .andReturn(interfaceBuilder);
@@ -302,12 +307,44 @@ public class CommandBuilderTest extends EasyMockSupport {
         capture(allMethodParamCapture),
         eq("Boolean"));
 
+    // Parameters-object class and overload.
+    expect(
+            javaBuilderFactory.createClassBuilder(
+                "com.github.kklisura.types.domainname", "CommandParameters"))
+        .andReturn(javaClassBuilder);
+    javaClassBuilder.setJavaDoc("Parameters for the command command.");
+
+    javaClassBuilder.addImport("com.github.kklisura.types.domainname", "TestRef");
+    javaClassBuilder.addImport("java.util", "List");
+    javaClassBuilder.addImport("com.github.kklisura.types.domainname", "EnumParam1");
+
+    javaClassBuilder.addPrivateField("stringParam1", "TestRef", null);
+    javaClassBuilder.addFieldAnnotation("stringParam1", "Deprecated");
+    javaClassBuilder.addParametrizedFieldAnnotation("stringParam1", "ParamName", "stringParam1");
+
+    javaClassBuilder.addPrivateField("enumParam1", "List<EnumParam1>", "enum param 1 description");
+    javaClassBuilder.addFieldAnnotation("enumParam1", "Experimental");
+    javaClassBuilder.addFieldAnnotation("enumParam1", "Optional");
+    javaClassBuilder.addParametrizedFieldAnnotation("enumParam1", "ParamName", "enumParam1");
+
+    javaClassBuilder.generateGettersAndSetters(true);
+
+    interfaceBuilder.addImport("com.github.kklisura.types.domainname", "CommandParameters");
+
+    Capture<String> paramsObjectMethodDescriptionCapture = Capture.newInstance();
+    Capture<List<MethodParam>> paramsObjectMethodParamCapture = Capture.newInstance();
+    interfaceBuilder.addMethod(
+        eq("command"),
+        capture(paramsObjectMethodDescriptionCapture),
+        capture(paramsObjectMethodParamCapture),
+        eq("Boolean"));
+
     final ObjectType resolvedRefType = new ObjectType();
     resolvedRefType.setId("TestRef");
     resolvedRefType.setProperties(
         Collections.singletonList(createProperty(StringProperty.class, "stringPropertyTestRef")));
 
-    expect(resolver.resolve("domainName", "TestRef")).andReturn(resolvedRefType).times(2);
+    expect(resolver.resolve("domainName", "TestRef")).andReturn(resolvedRefType).times(3);
 
     interfaceBuilder.addImport("com.github.kklisura.types.domainname", "TestRef");
     expectLastCall().times(2);
@@ -315,7 +352,7 @@ public class CommandBuilderTest extends EasyMockSupport {
     interfaceBuilder.addImport("com.github.kklisura.types.domainname", "EnumParam1");
 
     interfaceBuilder.addParametrizedMethodAnnotation("command", "Returns", "booleanReturnValue");
-    interfaceBuilder.addParametrizedMethodAnnotation("command", "Returns", "booleanReturnValue");
+    expectLastCall().times(3);
 
     replayAll();
 
@@ -326,10 +363,12 @@ public class CommandBuilderTest extends EasyMockSupport {
     assertTrue(build instanceof CombinedBuilders);
 
     List<Builder> builderList = ((CombinedBuilders) build).getBuilderList();
-    assertEquals(2, builderList.size());
+    assertEquals(4, builderList.size());
 
     assertEquals(javaEnumBuilder, builderList.get(0));
-    assertEquals(interfaceBuilder, builderList.get(1));
+    assertEquals(javaEnumBuilder, builderList.get(1));
+    assertEquals(javaClassBuilder, builderList.get(2));
+    assertEquals(interfaceBuilder, builderList.get(3));
 
     assertEquals(
         "command description\r\n\r\n@param stringParam1",
@@ -338,6 +377,8 @@ public class CommandBuilderTest extends EasyMockSupport {
     assertEquals(
         "command description\r\n\r\n@param stringParam1\r\n@param enumParam1 enum param 1 description",
         allMethodDescriptionCapture.getValue());
+
+    assertEquals("command description", paramsObjectMethodDescriptionCapture.getValue());
 
     List<MethodParam> mandatoryParams = mandatoryMethodParamCapture.getValue();
     assertEquals(1, mandatoryParams.size());
@@ -361,6 +402,13 @@ public class CommandBuilderTest extends EasyMockSupport {
     assertEquals("Optional", allParams.get(1).getAnnotations().get(1).getName());
     assertEquals("ParamName", allParams.get(1).getAnnotations().get(2).getName());
     assertEquals(arrayProperty.getName(), allParams.get(1).getAnnotations().get(2).getValue());
+
+    List<MethodParam> paramsObjectParams = paramsObjectMethodParamCapture.getValue();
+    assertEquals(1, paramsObjectParams.size());
+    assertEquals("parameters", paramsObjectParams.get(0).getName());
+    assertEquals("CommandParameters", paramsObjectParams.get(0).getType());
+    assertEquals(1, paramsObjectParams.get(0).getAnnotations().size());
+    assertEquals("ParamObject", paramsObjectParams.get(0).getAnnotations().get(0).getName());
   }
 
   @Test

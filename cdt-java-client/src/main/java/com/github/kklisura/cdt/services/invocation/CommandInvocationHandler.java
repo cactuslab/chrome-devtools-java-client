@@ -22,12 +22,15 @@ package com.github.kklisura.cdt.services.invocation;
 
 import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.services.ChromeDevToolsService;
+import com.github.kklisura.cdt.services.exceptions.ChromeDevToolsInvocationException;
 import com.github.kklisura.cdt.services.types.MethodInvocation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -120,11 +123,48 @@ public class CommandInvocationHandler implements InvocationHandler {
 
     if (args != null) {
       for (int i = 0; i < args.length; i++) {
-        params.put(parameters[i].getAnnotation(ParamName.class).value(), args[i]);
+        Parameter parameter = parameters[i];
+        ParamName paramName = parameter.getAnnotation(ParamName.class);
+        if (paramName != null) {
+          params.put(paramName.value(), args[i]);
+        } else if (parameter.getAnnotation(ParamObject.class) != null) {
+          addParamsFromObject(params, args[i]);
+        }
       }
     }
 
     return params;
+  }
+
+  /**
+   * Unpacks the {@link ParamName}-annotated fields of a parameters object into the params map.
+   * Fields that are null are skipped, so optional parameters that were never set are not sent.
+   *
+   * @param params Params map to populate.
+   * @param paramsObject Parameters object.
+   */
+  private void addParamsFromObject(Map<String, Object> params, Object paramsObject) {
+    if (paramsObject == null) {
+      return;
+    }
+
+    for (Field field : paramsObject.getClass().getDeclaredFields()) {
+      ParamName paramName = field.getAnnotation(ParamName.class);
+      if (paramName == null) {
+        continue;
+      }
+
+      try {
+        field.setAccessible(true);
+        Object value = field.get(paramsObject);
+        if (value != null) {
+          params.put(paramName.value(), value);
+        }
+      } catch (IllegalAccessException e) {
+        throw new ChromeDevToolsInvocationException(
+            "Failed reading parameter " + paramName.value() + " from parameters object.", e);
+      }
+    }
   }
 
   /**

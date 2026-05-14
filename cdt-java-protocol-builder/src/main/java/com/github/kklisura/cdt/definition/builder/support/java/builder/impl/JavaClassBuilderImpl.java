@@ -30,6 +30,9 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.ThisExpr;
+import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.kklisura.cdt.definition.builder.support.java.builder.JavaClassBuilder;
 import com.github.kklisura.cdt.definition.builder.support.java.builder.impl.utils.CompilationUnitUtils;
 import com.github.kklisura.cdt.definition.builder.support.java.builder.utils.JavadocUtils;
@@ -136,6 +139,20 @@ public class JavaClassBuilderImpl extends BaseBuilder implements JavaClassBuilde
   }
 
   @Override
+  public void addParametrizedFieldAnnotation(String name, String annotationName, String parameter) {
+    Optional<FieldDeclaration> fieldDeclaration = declaration.getFieldByName(getFieldName(name));
+    if (fieldDeclaration.isPresent()) {
+      fieldDeclaration
+          .get()
+          .addSingleMemberAnnotation(annotationName, new StringLiteralExpr(parameter));
+
+      importAnnotation(annotationName);
+    } else {
+      throw new RuntimeException("Field " + name + " is not present in current class.");
+    }
+  }
+
+  @Override
   public void addAnnotation(String annotationName) {
     MarkerAnnotationExpr annotationExpr = new MarkerAnnotationExpr();
     annotationExpr.setName(annotationName);
@@ -146,12 +163,23 @@ public class JavaClassBuilderImpl extends BaseBuilder implements JavaClassBuilde
 
   @Override
   public void generateGettersAndSetters() {
+    generateGettersAndSetters(false);
+  }
+
+  @Override
+  public void generateGettersAndSetters(boolean fluentSetters) {
     List<FieldDeclaration> fields = declaration.getFields();
     for (FieldDeclaration fieldDeclaration : fields) {
       String fieldName = fieldDeclaration.getVariables().get(0).getNameAsString();
 
       setMethodJavadoc(fieldName, fieldDeclaration.createGetter());
-      setMethodJavadoc(fieldName, fieldDeclaration.createSetter());
+
+      MethodDeclaration setter = fieldDeclaration.createSetter();
+      if (fluentSetters) {
+        setter.setType(name);
+        setter.getBody().get().addStatement(new ReturnStmt(new ThisExpr()));
+      }
+      setMethodJavadoc(fieldName, setter);
     }
   }
 

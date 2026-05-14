@@ -25,6 +25,8 @@ import static com.github.kklisura.cdt.definition.builder.support.utils.StringUti
 
 import com.github.kklisura.cdt.definition.builder.support.java.builder.Builder;
 import com.github.kklisura.cdt.definition.builder.support.java.builder.JavaBuilderFactory;
+import com.github.kklisura.cdt.definition.builder.support.java.builder.JavaClassBuilder;
+import com.github.kklisura.cdt.definition.builder.support.java.builder.JavaImportAwareBuilder;
 import com.github.kklisura.cdt.definition.builder.support.java.builder.JavaInterfaceBuilder;
 import com.github.kklisura.cdt.definition.builder.support.java.builder.support.CombinedBuilders;
 import com.github.kklisura.cdt.definition.builder.support.java.builder.support.MethodParam;
@@ -61,6 +63,10 @@ public class CommandBuilder {
   private static final String COMMENT_PARAM = "@param";
   private static final String EMPTY_SPACE = " ";
   private static final String OBJECT_CLASS_PROPERTY = ".class";
+
+  private static final String PARAMETERS_CLASS_SUFFIX = "Parameters";
+  private static final String PARAMETERS_PARAM_NAME = "parameters";
+  private static final String PARAM_OBJECT_ANNOTATION = "ParamObject";
 
   private String basePackageName;
   private String typesPackageName;
@@ -205,11 +211,17 @@ public class CommandBuilder {
     if (mandatoryParams.size() != parameters.size()) {
       // Generate methods with rest of the params
       command.setParameters(parameters);
-      addCommand(command, domain, interfaceBuilder, domainTypeResolver, builders);
+      ReturnType returnType =
+          addCommand(command, domain, interfaceBuilder, domainTypeResolver, builders);
+
+      // Generate a parameters-object overload so commands with many optional params can be
+      // called without juggling a long positional argument list.
+      addParamsObjectCommand(
+          command, domain, interfaceBuilder, returnType, domainTypeResolver, builders);
     }
   }
 
-  private void addCommand(
+  private ReturnType addCommand(
       Command command,
       Domain domain,
       JavaInterfaceBuilder interfaceBuilder,
@@ -226,6 +238,15 @@ public class CommandBuilder {
         buildMethodParamDescription(command.getDescription(), command.getParameters());
 
     interfaceBuilder.addMethod(method, description, methodParams, returnType.getType());
+
+    addCommandAnnotations(command, interfaceBuilder, returnType);
+
+    return returnType;
+  }
+
+  private void addCommandAnnotations(
+      Command command, JavaInterfaceBuilder interfaceBuilder, ReturnType returnType) {
+    final String method = command.getName();
 
     if (Boolean.TRUE.equals(command.getDeprecated())) {
       interfaceBuilder.addMethodAnnotation(method, TypesBuilder.DEPRECATED_ANNOTATION);
@@ -249,6 +270,77 @@ public class CommandBuilder {
         }
       }
     }
+  }
+
+  /**
+   * Generates a parameters object class holding all of a command's parameters, and adds an
+   * overloaded command method that accepts that object. The parameters object exposes fluent
+   * setters so commands with many (often optional) parameters can be called without a long
+   * positional argument list.
+   */
+  private void addParamsObjectCommand(
+      Command command,
+      Domain domain,
+      JavaInterfaceBuilder interfaceBuilder,
+      ReturnType returnType,
+      DomainTypeResolver domainTypeResolver,
+      List<Builder> builders) {
+    final String typesPackage =
+        buildPackageName(typesPackageName, domain.getDomain().toLowerCase());
+    final String className = toEnumClass(command.getName()) + PARAMETERS_CLASS_SUFFIX;
+
+    JavaClassBuilder classBuilder = javaBuilderFactory.createClassBuilder(typesPackage, className);
+    classBuilder.setJavaDoc("Parameters for the " + command.getName() + " command.");
+
+    TypesBuilder typesBuilder = new TypesBuilder(typesPackageName, javaBuilderFactory);
+
+    for (Property property : command.getParameters()) {
+      ObjectType objectType = new ObjectType();
+      objectType.setId(toEnumClass(command.getName()));
+      TypeBuildRequest<ObjectType> request =
+          new TypeBuildRequest<>(domain, objectType, domainTypeResolver);
+
+      PropertyHandlerResult result =
+          typesBuilder.getPropertyHandleResult(property, request, classBuilder);
+
+      addBuilder(domain, property, result, classBuilder, builders);
+
+      classBuilder.addPrivateField(property.getName(), result.getType(), property.getDescription());
+
+      if (Boolean.TRUE.equals(property.getDeprecated())) {
+        classBuilder.addFieldAnnotation(property.getName(), TypesBuilder.DEPRECATED_ANNOTATION);
+      }
+
+      if (Boolean.TRUE.equals(property.getExperimental())) {
+        classBuilder.addFieldAnnotation(property.getName(), TypesBuilder.EXPERIMENTAL_ANNOTATION);
+      }
+
+      if (Boolean.TRUE.equals(property.getOptional())) {
+        classBuilder.addFieldAnnotation(property.getName(), TypesBuilder.OPTIONAL_ANNOTATION);
+      }
+
+      classBuilder.addParametrizedFieldAnnotation(
+          property.getName(), TypesBuilder.PARAM_NAME_ANNOTATION, property.getName());
+    }
+
+    classBuilder.generateGettersAndSetters(true);
+    builders.add(classBuilder);
+
+    interfaceBuilder.addImport(typesPackage, className);
+
+    MethodParam methodParam = new MethodParam();
+    methodParam.setType(className);
+    methodParam.setName(PARAMETERS_PARAM_NAME);
+    methodParam.setAnnotations(
+        Collections.singletonList(new MethodParam.Annotation(PARAM_OBJECT_ANNOTATION)));
+
+    interfaceBuilder.addMethod(
+        command.getName(),
+        command.getDescription(),
+        Collections.singletonList(methodParam),
+        returnType.getType());
+
+    addCommandAnnotations(command, interfaceBuilder, returnType);
   }
 
   private String buildMethodParamDescription(String description, List<Property> parameters) {
@@ -417,7 +509,7 @@ public class CommandBuilder {
       Domain domain,
       Property property,
       PropertyHandlerResult result,
-      JavaInterfaceBuilder interfaceBuilder,
+      JavaImportAwareBuilder importAwareBuilder,
       List<Builder> builders) {
     if (result.getBuilder() != null) {
       builders.add(result.getBuilder());
@@ -425,7 +517,7 @@ public class CommandBuilder {
       // Since these properties are not ref type, we need to manually import them.
       String packageName = buildPackageName(typesPackageName, domain.getDomain().toLowerCase());
 
-      interfaceBuilder.addImport(packageName, getTypeName(result));
+      importAwareBuilder.addImport(packageName, getTypeName(result));
     }
   }
 

@@ -51,6 +51,15 @@ public interface JavaClassBuilder extends JavaImportAwareBuilder {
   void addFieldAnnotation(String name, String annotationName);
 
   /**
+   * Adds a parametrized annotation to a specified field. Ie. {@code @AnnotationName("parameter")}.
+   *
+   * @param name Field name. Could not be in correct format.
+   * @param annotationName Annotation name.
+   * @param parameter Annotation string parameter.
+   */
+  void addParametrizedFieldAnnotation(String name, String annotationName, String parameter);
+
+  /**
    * Adds annotation to this class.
    *
    * @param annotationName Annotation name.
@@ -59,4 +68,12 @@ public interface JavaClassBuilder extends JavaImportAwareBuilder {
 
   /** Generates getters and setters for all fields. */
   void generateGettersAndSetters();
+
+  /**
+   * Generates getters and setters for all fields, optionally generating fluent setters that return
+   * this instance.
+   *
+   * @param fluentSetters True if setters should return this instance.
+   */
+  void generateGettersAndSetters(boolean fluentSetters);
 }
