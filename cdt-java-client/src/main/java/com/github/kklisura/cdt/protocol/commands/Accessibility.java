@@ -26,11 +26,18 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.accessibility.AXNode;
+import com.github.kklisura.cdt.protocol.types.accessibility.GetAXNodeAndAncestorsParameters;
+import com.github.kklisura.cdt.protocol.types.accessibility.GetChildAXNodesParameters;
+import com.github.kklisura.cdt.protocol.types.accessibility.GetFullAXTreeParameters;
+import com.github.kklisura.cdt.protocol.types.accessibility.GetPartialAXTreeParameters;
+import com.github.kklisura.cdt.protocol.types.accessibility.GetRootAXNodeParameters;
+import com.github.kklisura.cdt.protocol.types.accessibility.QueryAXTreeParameters;
 import java.util.List;
 
 @Experimental
@@ -73,6 +80,14 @@ public interface Accessibility {
       @Optional @ParamName("objectId") String objectId,
       @Optional @ParamName("fetchRelatives") Boolean fetchRelatives);
 
+  /**
+   * Fetches the accessibility node and partial accessibility tree for this DOM node, if it exists.
+   */
+  @Experimental
+  @Returns("nodes")
+  @ReturnTypeParameter(AXNode.class)
+  List<AXNode> getPartialAXTree(@ParamObject GetPartialAXTreeParameters parameters);
+
   /** Fetches the entire accessibility tree for the root Document */
   @Experimental
   @Returns("nodes")
@@ -93,6 +108,12 @@ public interface Accessibility {
   List<AXNode> getFullAXTree(
       @Optional @ParamName("depth") Integer depth, @Optional @ParamName("frameId") String frameId);
 
+  /** Fetches the entire accessibility tree for the root Document */
+  @Experimental
+  @Returns("nodes")
+  @ReturnTypeParameter(AXNode.class)
+  List<AXNode> getFullAXTree(@ParamObject GetFullAXTreeParameters parameters);
+
   /** Fetches the root node. Requires `enable()` to have been called previously. */
   @Experimental
   @Returns("node")
@@ -107,6 +128,11 @@ public interface Accessibility {
   @Experimental
   @Returns("node")
   AXNode getRootAXNode(@Optional @ParamName("frameId") String frameId);
+
+  /** Fetches the root node. Requires `enable()` to have been called previously. */
+  @Experimental
+  @Returns("node")
+  AXNode getRootAXNode(@ParamObject GetRootAXNodeParameters parameters);
 
   /**
    * Fetches a node and all ancestors up to and including the root. Requires `enable()` to have been
@@ -134,6 +160,15 @@ public interface Accessibility {
       @Optional @ParamName("objectId") String objectId);
 
   /**
+   * Fetches a node and all ancestors up to and including the root. Requires `enable()` to have been
+   * called previously.
+   */
+  @Experimental
+  @Returns("nodes")
+  @ReturnTypeParameter(AXNode.class)
+  List<AXNode> getAXNodeAndAncestors(@ParamObject GetAXNodeAndAncestorsParameters parameters);
+
+  /**
    * Fetches a particular accessibility node by AXNodeId. Requires `enable()` to have been called
    * previously.
    *
@@ -157,6 +192,15 @@ public interface Accessibility {
   @ReturnTypeParameter(AXNode.class)
   List<AXNode> getChildAXNodes(
       @ParamName("id") String id, @Optional @ParamName("frameId") String frameId);
+
+  /**
+   * Fetches a particular accessibility node by AXNodeId. Requires `enable()` to have been called
+   * previously.
+   */
+  @Experimental
+  @Returns("nodes")
+  @ReturnTypeParameter(AXNode.class)
+  List<AXNode> getChildAXNodes(@ParamObject GetChildAXNodesParameters parameters);
 
   /**
    * Query a DOM node's accessibility subtree for accessible name and role. This command computes
@@ -192,6 +236,18 @@ public interface Accessibility {
       @Optional @ParamName("objectId") String objectId,
       @Optional @ParamName("accessibleName") String accessibleName,
       @Optional @ParamName("role") String role);
+
+  /**
+   * Query a DOM node's accessibility subtree for accessible name and role. This command computes
+   * the name and role for all nodes in the subtree, including those that are ignored for
+   * accessibility, and returns those that match the specified name and role. If no DOM node is
+   * specified, or the DOM node does not exist, the command returns an error. If neither
+   * `accessibleName` or `role` is specified, it returns all the accessibility nodes in the subtree.
+   */
+  @Experimental
+  @Returns("nodes")
+  @ReturnTypeParameter(AXNode.class)
+  List<AXNode> queryAXTree(@ParamObject QueryAXTreeParameters parameters);
 
   /**
    * The loadComplete event mirrors the load complete event sent by the browser to assistive

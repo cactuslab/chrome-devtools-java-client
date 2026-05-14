@@ -26,18 +26,30 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
+import com.github.kklisura.cdt.protocol.types.browser.AddPrivacySandboxCoordinatorKeyConfigParameters;
 import com.github.kklisura.cdt.protocol.types.browser.Bounds;
 import com.github.kklisura.cdt.protocol.types.browser.BrowserCommandId;
+import com.github.kklisura.cdt.protocol.types.browser.CancelDownloadParameters;
+import com.github.kklisura.cdt.protocol.types.browser.GetHistogramParameters;
+import com.github.kklisura.cdt.protocol.types.browser.GetHistogramsParameters;
+import com.github.kklisura.cdt.protocol.types.browser.GetWindowForTargetParameters;
+import com.github.kklisura.cdt.protocol.types.browser.GrantPermissionsParameters;
 import com.github.kklisura.cdt.protocol.types.browser.Histogram;
 import com.github.kklisura.cdt.protocol.types.browser.PermissionDescriptor;
 import com.github.kklisura.cdt.protocol.types.browser.PermissionSetting;
 import com.github.kklisura.cdt.protocol.types.browser.PermissionType;
 import com.github.kklisura.cdt.protocol.types.browser.PrivacySandboxAPI;
+import com.github.kklisura.cdt.protocol.types.browser.ResetPermissionsParameters;
+import com.github.kklisura.cdt.protocol.types.browser.SetContentsSizeParameters;
+import com.github.kklisura.cdt.protocol.types.browser.SetDockTileParameters;
 import com.github.kklisura.cdt.protocol.types.browser.SetDownloadBehaviorBehavior;
+import com.github.kklisura.cdt.protocol.types.browser.SetDownloadBehaviorParameters;
+import com.github.kklisura.cdt.protocol.types.browser.SetPermissionParameters;
 import com.github.kklisura.cdt.protocol.types.browser.Version;
 import com.github.kklisura.cdt.protocol.types.browser.WindowForTarget;
 import java.util.List;
@@ -75,6 +87,10 @@ public interface Browser {
       @Optional @ParamName("embeddedOrigin") String embeddedOrigin,
       @Optional @ParamName("browserContextId") String browserContextId);
 
+  /** Set permission settings for given embedding and embedded origins. */
+  @Experimental
+  void setPermission(@ParamObject SetPermissionParameters parameters);
+
   /**
    * Grant specific permissions to the given origin and reject all others. Deprecated. Use
    * setPermission instead.
@@ -101,6 +117,14 @@ public interface Browser {
       @Optional @ParamName("origin") String origin,
       @Optional @ParamName("browserContextId") String browserContextId);
 
+  /**
+   * Grant specific permissions to the given origin and reject all others. Deprecated. Use
+   * setPermission instead.
+   */
+  @Deprecated
+  @Experimental
+  void grantPermissions(@ParamObject GrantPermissionsParameters parameters);
+
   /** Reset all permission management for all origins. */
   void resetPermissions();
 
@@ -111,6 +135,9 @@ public interface Browser {
    *     context is used.
    */
   void resetPermissions(@Optional @ParamName("browserContextId") String browserContextId);
+
+  /** Reset all permission management for all origins. */
+  void resetPermissions(@ParamObject ResetPermissionsParameters parameters);
 
   /**
    * Set the behavior when downloading a file.
@@ -141,6 +168,10 @@ public interface Browser {
       @Optional @ParamName("downloadPath") String downloadPath,
       @Optional @ParamName("eventsEnabled") Boolean eventsEnabled);
 
+  /** Set the behavior when downloading a file. */
+  @Experimental
+  void setDownloadBehavior(@ParamObject SetDownloadBehaviorParameters parameters);
+
   /**
    * Cancel a download if in progress
    *
@@ -160,6 +191,10 @@ public interface Browser {
   void cancelDownload(
       @ParamName("guid") String guid,
       @Optional @ParamName("browserContextId") String browserContextId);
+
+  /** Cancel a download if in progress */
+  @Experimental
+  void cancelDownload(@ParamObject CancelDownloadParameters parameters);
 
   /** Close browser gracefully. */
   void close();
@@ -203,6 +238,12 @@ public interface Browser {
   List<Histogram> getHistograms(
       @Optional @ParamName("query") String query, @Optional @ParamName("delta") Boolean delta);
 
+  /** Get Chrome histograms. */
+  @Experimental
+  @Returns("histograms")
+  @ReturnTypeParameter(Histogram.class)
+  List<Histogram> getHistograms(@ParamObject GetHistogramsParameters parameters);
+
   /**
    * Get a Chrome histogram by name.
    *
@@ -222,6 +263,11 @@ public interface Browser {
   @Returns("histogram")
   Histogram getHistogram(
       @ParamName("name") String name, @Optional @ParamName("delta") Boolean delta);
+
+  /** Get a Chrome histogram by name. */
+  @Experimental
+  @Returns("histogram")
+  Histogram getHistogram(@ParamObject GetHistogramParameters parameters);
 
   /**
    * Get position and size of the browser window.
@@ -244,6 +290,10 @@ public interface Browser {
    */
   @Experimental
   WindowForTarget getWindowForTarget(@Optional @ParamName("targetId") String targetId);
+
+  /** Get the browser window that contains the devtools target. */
+  @Experimental
+  WindowForTarget getWindowForTarget(@ParamObject GetWindowForTargetParameters parameters);
 
   /**
    * Set position and/or size of the browser window.
@@ -278,6 +328,10 @@ public interface Browser {
       @Optional @ParamName("width") Integer width,
       @Optional @ParamName("height") Integer height);
 
+  /** Set size of the browser contents resizing browser window as necessary. */
+  @Experimental
+  void setContentsSize(@ParamObject SetContentsSizeParameters parameters);
+
   /** Set dock tile details, platform-specific. */
   @Experimental
   void setDockTile();
@@ -292,6 +346,10 @@ public interface Browser {
   void setDockTile(
       @Optional @ParamName("badgeLabel") String badgeLabel,
       @Optional @ParamName("image") String image);
+
+  /** Set dock tile details, platform-specific. */
+  @Experimental
+  void setDockTile(@ParamObject SetDockTileParameters parameters);
 
   /**
    * Invoke custom browser commands used by telemetry.
@@ -339,6 +397,14 @@ public interface Browser {
       @ParamName("coordinatorOrigin") String coordinatorOrigin,
       @ParamName("keyConfig") String keyConfig,
       @Optional @ParamName("browserContextId") String browserContextId);
+
+  /**
+   * Configures encryption keys used with a given privacy sandbox API to talk to a trusted
+   * coordinator. Since this is intended for test automation only, coordinatorOrigin must be a .test
+   * domain. No existing coordinator configuration for the origin may exist.
+   */
+  void addPrivacySandboxCoordinatorKeyConfig(
+      @ParamObject AddPrivacySandboxCoordinatorKeyConfigParameters parameters);
 
   /** Fired when page is about to start a download. */
   @EventName("downloadWillBegin")

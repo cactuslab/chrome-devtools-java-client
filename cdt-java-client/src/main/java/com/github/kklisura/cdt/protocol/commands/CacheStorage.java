@@ -23,12 +23,15 @@ package com.github.kklisura.cdt.protocol.commands;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.types.cachestorage.Cache;
 import com.github.kklisura.cdt.protocol.types.cachestorage.CachedResponse;
 import com.github.kklisura.cdt.protocol.types.cachestorage.Header;
+import com.github.kklisura.cdt.protocol.types.cachestorage.RequestCacheNamesParameters;
 import com.github.kklisura.cdt.protocol.types.cachestorage.RequestEntries;
+import com.github.kklisura.cdt.protocol.types.cachestorage.RequestEntriesParameters;
 import com.github.kklisura.cdt.protocol.types.storage.StorageBucket;
 import java.util.List;
 
@@ -70,6 +73,11 @@ public interface CacheStorage {
       @Optional @ParamName("storageKey") String storageKey,
       @Optional @ParamName("storageBucket") StorageBucket storageBucket);
 
+  /** Requests cache names. */
+  @Returns("caches")
+  @ReturnTypeParameter(Cache.class)
+  List<Cache> requestCacheNames(@ParamObject RequestCacheNamesParameters parameters);
+
   /**
    * Fetches cache entry.
    *
@@ -103,4 +111,7 @@ public interface CacheStorage {
       @Optional @ParamName("skipCount") Integer skipCount,
       @Optional @ParamName("pageSize") Integer pageSize,
       @Optional @ParamName("pathFilter") String pathFilter);
+
+  /** Requests data from cache. */
+  RequestEntries requestEntries(@ParamObject RequestEntriesParameters parameters);
 }

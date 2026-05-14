@@ -29,10 +29,16 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
+import com.github.kklisura.cdt.protocol.types.heapprofiler.GetObjectByHeapObjectIdParameters;
 import com.github.kklisura.cdt.protocol.types.heapprofiler.SamplingHeapProfile;
+import com.github.kklisura.cdt.protocol.types.heapprofiler.StartSamplingParameters;
+import com.github.kklisura.cdt.protocol.types.heapprofiler.StartTrackingHeapObjectsParameters;
+import com.github.kklisura.cdt.protocol.types.heapprofiler.StopTrackingHeapObjectsParameters;
+import com.github.kklisura.cdt.protocol.types.heapprofiler.TakeHeapSnapshotParameters;
 import com.github.kklisura.cdt.protocol.types.runtime.RemoteObject;
 
 @Experimental
@@ -69,6 +75,9 @@ public interface HeapProfiler {
       @ParamName("objectId") String objectId,
       @Optional @ParamName("objectGroup") String objectGroup);
 
+  @Returns("result")
+  RemoteObject getObjectByHeapObjectId(@ParamObject GetObjectByHeapObjectIdParameters parameters);
+
   @Returns("profile")
   SamplingHeapProfile getSamplingProfile();
 
@@ -99,10 +108,14 @@ public interface HeapProfiler {
       @Optional @ParamName("includeObjectsCollectedByMinorGC")
           Boolean includeObjectsCollectedByMinorGC);
 
+  void startSampling(@ParamObject StartSamplingParameters parameters);
+
   void startTrackingHeapObjects();
 
   /** @param trackAllocations */
   void startTrackingHeapObjects(@Optional @ParamName("trackAllocations") Boolean trackAllocations);
+
+  void startTrackingHeapObjects(@ParamObject StartTrackingHeapObjectsParameters parameters);
 
   @Returns("profile")
   SamplingHeapProfile stopSampling();
@@ -123,6 +136,8 @@ public interface HeapProfiler {
       @Optional @ParamName("captureNumericValue") Boolean captureNumericValue,
       @Experimental @Optional @ParamName("exposeInternals") Boolean exposeInternals);
 
+  void stopTrackingHeapObjects(@ParamObject StopTrackingHeapObjectsParameters parameters);
+
   void takeHeapSnapshot();
 
   /**
@@ -139,6 +154,8 @@ public interface HeapProfiler {
           Boolean treatGlobalObjectsAsRoots,
       @Optional @ParamName("captureNumericValue") Boolean captureNumericValue,
       @Experimental @Optional @ParamName("exposeInternals") Boolean exposeInternals);
+
+  void takeHeapSnapshot(@ParamObject TakeHeapSnapshotParameters parameters);
 
   @EventName("addHeapSnapshotChunk")
   EventListener onAddHeapSnapshotChunk(EventHandler<AddHeapSnapshotChunk> eventListener);

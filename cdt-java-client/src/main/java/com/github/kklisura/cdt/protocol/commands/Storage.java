@@ -35,13 +35,20 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.network.Cookie;
 import com.github.kklisura.cdt.protocol.types.network.CookieParam;
+import com.github.kklisura.cdt.protocol.types.storage.ClearCookiesParameters;
+import com.github.kklisura.cdt.protocol.types.storage.GetCookiesParameters;
+import com.github.kklisura.cdt.protocol.types.storage.GetStorageKeyParameters;
+import com.github.kklisura.cdt.protocol.types.storage.OverrideQuotaForOriginParameters;
 import com.github.kklisura.cdt.protocol.types.storage.RelatedWebsiteSet;
+import com.github.kklisura.cdt.protocol.types.storage.SetCookiesParameters;
+import com.github.kklisura.cdt.protocol.types.storage.SetSharedStorageEntryParameters;
 import com.github.kklisura.cdt.protocol.types.storage.SharedStorageEntry;
 import com.github.kklisura.cdt.protocol.types.storage.SharedStorageMetadata;
 import com.github.kklisura.cdt.protocol.types.storage.StorageBucket;
@@ -81,6 +88,14 @@ public interface Storage {
   String getStorageKey(@Optional @ParamName("frameId") String frameId);
 
   /**
+   * Returns storage key for the given frame. If no frame ID is provided, the storage key of the
+   * target executing this command is returned.
+   */
+  @Experimental
+  @Returns("storageKey")
+  String getStorageKey(@ParamObject GetStorageKeyParameters parameters);
+
+  /**
    * Clears storage for origin.
    *
    * @param origin Security origin.
@@ -112,6 +127,11 @@ public interface Storage {
   @ReturnTypeParameter(Cookie.class)
   List<Cookie> getCookies(@Optional @ParamName("browserContextId") String browserContextId);
 
+  /** Returns all browser cookies. */
+  @Returns("cookies")
+  @ReturnTypeParameter(Cookie.class)
+  List<Cookie> getCookies(@ParamObject GetCookiesParameters parameters);
+
   /**
    * Sets given cookies.
    *
@@ -129,6 +149,9 @@ public interface Storage {
       @ParamName("cookies") List<CookieParam> cookies,
       @Optional @ParamName("browserContextId") String browserContextId);
 
+  /** Sets given cookies. */
+  void setCookies(@ParamObject SetCookiesParameters parameters);
+
   /** Clears cookies. */
   void clearCookies();
 
@@ -138,6 +161,9 @@ public interface Storage {
    * @param browserContextId Browser context to use when called on the browser endpoint.
    */
   void clearCookies(@Optional @ParamName("browserContextId") String browserContextId);
+
+  /** Clears cookies. */
+  void clearCookies(@ParamObject ClearCookiesParameters parameters);
 
   /**
    * Returns usage and quota in bytes.
@@ -168,6 +194,10 @@ public interface Storage {
   @Experimental
   void overrideQuotaForOrigin(
       @ParamName("origin") String origin, @Optional @ParamName("quotaSize") Double quotaSize);
+
+  /** Override quota for the specified origin */
+  @Experimental
+  void overrideQuotaForOrigin(@ParamObject OverrideQuotaForOriginParameters parameters);
 
   /**
    * Registers origin to be notified when an update occurs to its cache storage list.
@@ -316,6 +346,10 @@ public interface Storage {
       @ParamName("key") String key,
       @ParamName("value") String value,
       @Optional @ParamName("ignoreIfPresent") Boolean ignoreIfPresent);
+
+  /** Sets entry with `key` and `value` for a given origin's shared storage. */
+  @Experimental
+  void setSharedStorageEntry(@ParamObject SetSharedStorageEntryParameters parameters);
 
   /**
    * Deletes entry for `key` (if it exists) for a given origin's shared storage.

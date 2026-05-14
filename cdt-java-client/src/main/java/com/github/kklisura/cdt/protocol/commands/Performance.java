@@ -25,10 +25,12 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
+import com.github.kklisura.cdt.protocol.types.performance.EnableParameters;
 import com.github.kklisura.cdt.protocol.types.performance.EnableTimeDomain;
 import com.github.kklisura.cdt.protocol.types.performance.Metric;
 import com.github.kklisura.cdt.protocol.types.performance.SetTimeDomainTimeDomain;
@@ -48,6 +50,9 @@ public interface Performance {
    * @param timeDomain Time domain to use for collecting and reporting duration metrics.
    */
   void enable(@Optional @ParamName("timeDomain") EnableTimeDomain timeDomain);
+
+  /** Enable collecting and reporting metrics. */
+  void enable(@ParamObject EnableParameters parameters);
 
   /**
    * Sets time domain to use for collecting and reporting duration metrics. Note that this must be

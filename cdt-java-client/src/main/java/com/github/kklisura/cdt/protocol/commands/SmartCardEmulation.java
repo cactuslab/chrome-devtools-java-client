@@ -38,11 +38,14 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.smartcardemulation.ConnectionState;
 import com.github.kklisura.cdt.protocol.types.smartcardemulation.Protocol;
 import com.github.kklisura.cdt.protocol.types.smartcardemulation.ReaderStateOut;
+import com.github.kklisura.cdt.protocol.types.smartcardemulation.ReportConnectResultParameters;
+import com.github.kklisura.cdt.protocol.types.smartcardemulation.ReportStatusResultParameters;
 import com.github.kklisura.cdt.protocol.types.smartcardemulation.ResultCode;
 import java.util.List;
 
@@ -174,6 +177,15 @@ public interface SmartCardEmulation {
       @Optional @ParamName("activeProtocol") Protocol activeProtocol);
 
   /**
+   * Reports the successful result of a |SCardConnect| call.
+   *
+   * <p>This maps to: PC/SC Lite:
+   * https://pcsclite.apdu.fr/api/group__API.html#ga4e515829752e0a8dbc4d630696a8d6a5 Microsoft:
+   * https://learn.microsoft.com/en-us/windows/win32/api/winscard/nf-winscard-scardconnecta
+   */
+  void reportConnectResult(@ParamObject ReportConnectResultParameters parameters);
+
+  /**
    * Reports the successful result of a call that sends back data on success. Used for
    * |SCardTransmit|, |SCardControl|, and |SCardGetAttrib|.
    *
@@ -231,6 +243,15 @@ public interface SmartCardEmulation {
       @ParamName("state") ConnectionState state,
       @ParamName("atr") String atr,
       @Optional @ParamName("protocol") Protocol protocol);
+
+  /**
+   * Reports the successful result of a |SCardStatus| call.
+   *
+   * <p>This maps to: PC/SC Lite:
+   * https://pcsclite.apdu.fr/api/group__API.html#gae49c3c894ad7ac12a5b896bde70d0382 Microsoft:
+   * https://learn.microsoft.com/en-us/windows/win32/api/winscard/nf-winscard-scardstatusa
+   */
+  void reportStatusResult(@ParamObject ReportStatusResultParameters parameters);
 
   /**
    * Reports an error result for the given request.

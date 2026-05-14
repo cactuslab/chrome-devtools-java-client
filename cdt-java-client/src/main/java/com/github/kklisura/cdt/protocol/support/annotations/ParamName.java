@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 
 /** Param value. */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.PARAMETER})
+@Target(value = {ElementType.PARAMETER, ElementType.FIELD})
 public @interface ParamName {
   String value();
 }

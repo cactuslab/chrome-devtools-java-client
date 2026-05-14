@@ -43,22 +43,43 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.dom.BoxModel;
 import com.github.kklisura.cdt.protocol.types.dom.CSSComputedStyleProperty;
+import com.github.kklisura.cdt.protocol.types.dom.CopyToParameters;
+import com.github.kklisura.cdt.protocol.types.dom.DescribeNodeParameters;
 import com.github.kklisura.cdt.protocol.types.dom.DetachedElementInfo;
 import com.github.kklisura.cdt.protocol.types.dom.EnableIncludeWhitespace;
+import com.github.kklisura.cdt.protocol.types.dom.EnableParameters;
+import com.github.kklisura.cdt.protocol.types.dom.FocusParameters;
 import com.github.kklisura.cdt.protocol.types.dom.FrameOwner;
+import com.github.kklisura.cdt.protocol.types.dom.GetAnchorElementParameters;
+import com.github.kklisura.cdt.protocol.types.dom.GetBoxModelParameters;
+import com.github.kklisura.cdt.protocol.types.dom.GetContainerForNodeParameters;
+import com.github.kklisura.cdt.protocol.types.dom.GetContentQuadsParameters;
+import com.github.kklisura.cdt.protocol.types.dom.GetDocumentParameters;
 import com.github.kklisura.cdt.protocol.types.dom.GetElementByRelationRelation;
+import com.github.kklisura.cdt.protocol.types.dom.GetFlattenedDocumentParameters;
+import com.github.kklisura.cdt.protocol.types.dom.GetNodeForLocationParameters;
+import com.github.kklisura.cdt.protocol.types.dom.GetNodesForSubtreeByStyleParameters;
+import com.github.kklisura.cdt.protocol.types.dom.GetOuterHTMLParameters;
 import com.github.kklisura.cdt.protocol.types.dom.LogicalAxes;
+import com.github.kklisura.cdt.protocol.types.dom.MoveToParameters;
 import com.github.kklisura.cdt.protocol.types.dom.Node;
 import com.github.kklisura.cdt.protocol.types.dom.NodeForLocation;
 import com.github.kklisura.cdt.protocol.types.dom.PerformSearch;
+import com.github.kklisura.cdt.protocol.types.dom.PerformSearchParameters;
 import com.github.kklisura.cdt.protocol.types.dom.PhysicalAxes;
 import com.github.kklisura.cdt.protocol.types.dom.Rect;
+import com.github.kklisura.cdt.protocol.types.dom.RequestChildNodesParameters;
+import com.github.kklisura.cdt.protocol.types.dom.ResolveNodeParameters;
+import com.github.kklisura.cdt.protocol.types.dom.ScrollIntoViewIfNeededParameters;
+import com.github.kklisura.cdt.protocol.types.dom.SetAttributesAsTextParameters;
+import com.github.kklisura.cdt.protocol.types.dom.SetFileInputFilesParameters;
 import com.github.kklisura.cdt.protocol.types.runtime.RemoteObject;
 import com.github.kklisura.cdt.protocol.types.runtime.StackTrace;
 import java.util.List;
@@ -113,6 +134,14 @@ public interface DOM {
       @Optional @ParamName("insertBeforeNodeId") Integer insertBeforeNodeId);
 
   /**
+   * Creates a deep copy of the specified node and places it into the target container before the
+   * given anchor.
+   */
+  @Experimental
+  @Returns("nodeId")
+  Integer copyTo(@ParamObject CopyToParameters parameters);
+
+  /**
    * Describes node given its id, does not require domain to be enabled. Does not start tracking any
    * objects, can be used for automation.
    */
@@ -140,6 +169,13 @@ public interface DOM {
       @Optional @ParamName("pierce") Boolean pierce);
 
   /**
+   * Describes node given its id, does not require domain to be enabled. Does not start tracking any
+   * objects, can be used for automation.
+   */
+  @Returns("node")
+  Node describeNode(@ParamObject DescribeNodeParameters parameters);
+
+  /**
    * Scrolls the specified rect of the given node into view if not already visible. Note: exactly
    * one between nodeId, backendNodeId and objectId should be passed to identify the node.
    */
@@ -160,6 +196,12 @@ public interface DOM {
       @Optional @ParamName("backendNodeId") Integer backendNodeId,
       @Optional @ParamName("objectId") String objectId,
       @Optional @ParamName("rect") Rect rect);
+
+  /**
+   * Scrolls the specified rect of the given node into view if not already visible. Note: exactly
+   * one between nodeId, backendNodeId and objectId should be passed to identify the node.
+   */
+  void scrollIntoViewIfNeeded(@ParamObject ScrollIntoViewIfNeededParameters parameters);
 
   /** Disables DOM agent for the given page. */
   void disable();
@@ -186,6 +228,9 @@ public interface DOM {
       @Experimental @Optional @ParamName("includeWhitespace")
           EnableIncludeWhitespace includeWhitespace);
 
+  /** Enables DOM agent for the given page. */
+  void enable(@ParamObject EnableParameters parameters);
+
   /** Focuses the given element. */
   void focus();
 
@@ -200,6 +245,9 @@ public interface DOM {
       @Optional @ParamName("nodeId") Integer nodeId,
       @Optional @ParamName("backendNodeId") Integer backendNodeId,
       @Optional @ParamName("objectId") String objectId);
+
+  /** Focuses the given element. */
+  void focus(@ParamObject FocusParameters parameters);
 
   /**
    * Returns attributes for the specified node.
@@ -227,6 +275,10 @@ public interface DOM {
       @Optional @ParamName("backendNodeId") Integer backendNodeId,
       @Optional @ParamName("objectId") String objectId);
 
+  /** Returns boxes for the given node. */
+  @Returns("model")
+  BoxModel getBoxModel(@ParamObject GetBoxModelParameters parameters);
+
   /**
    * Returns quads that describe node position on the page. This method might return multiple quads
    * for inline nodes.
@@ -253,6 +305,15 @@ public interface DOM {
       @Optional @ParamName("objectId") String objectId);
 
   /**
+   * Returns quads that describe node position on the page. This method might return multiple quads
+   * for inline nodes.
+   */
+  @Experimental
+  @Returns("quads")
+  @ReturnTypeParameter({List.class, Double.class})
+  List<List<Double>> getContentQuads(@ParamObject GetContentQuadsParameters parameters);
+
+  /**
    * Returns the root DOM node (and optionally the subtree) to the caller. Implicitly enables the
    * DOM domain events for the current target.
    */
@@ -271,6 +332,13 @@ public interface DOM {
   @Returns("root")
   Node getDocument(
       @Optional @ParamName("depth") Integer depth, @Optional @ParamName("pierce") Boolean pierce);
+
+  /**
+   * Returns the root DOM node (and optionally the subtree) to the caller. Implicitly enables the
+   * DOM domain events for the current target.
+   */
+  @Returns("root")
+  Node getDocument(@ParamObject GetDocumentParameters parameters);
 
   /**
    * Returns the root DOM node (and optionally the subtree) to the caller. Deprecated, as it is not
@@ -295,6 +363,15 @@ public interface DOM {
   @ReturnTypeParameter(Node.class)
   List<Node> getFlattenedDocument(
       @Optional @ParamName("depth") Integer depth, @Optional @ParamName("pierce") Boolean pierce);
+
+  /**
+   * Returns the root DOM node (and optionally the subtree) to the caller. Deprecated, as it is not
+   * designed to work well with the rest of the DOM agent. Use DOMSnapshot.captureSnapshot instead.
+   */
+  @Deprecated
+  @Returns("nodes")
+  @ReturnTypeParameter(Node.class)
+  List<Node> getFlattenedDocument(@ParamObject GetFlattenedDocumentParameters parameters);
 
   /**
    * Finds nodes with a given computed style in a subtree.
@@ -327,6 +404,13 @@ public interface DOM {
       @ParamName("computedStyles") List<CSSComputedStyleProperty> computedStyles,
       @Optional @ParamName("pierce") Boolean pierce);
 
+  /** Finds nodes with a given computed style in a subtree. */
+  @Experimental
+  @Returns("nodeIds")
+  @ReturnTypeParameter(Integer.class)
+  List<Integer> getNodesForSubtreeByStyle(
+      @ParamObject GetNodesForSubtreeByStyleParameters parameters);
+
   /**
    * Returns node id at given location. Depending on whether DOM domain is enabled, nodeId is either
    * returned or not.
@@ -353,6 +437,12 @@ public interface DOM {
       @Optional @ParamName("includeUserAgentShadowDOM") Boolean includeUserAgentShadowDOM,
       @Optional @ParamName("ignorePointerEventsNone") Boolean ignorePointerEventsNone);
 
+  /**
+   * Returns node id at given location. Depending on whether DOM domain is enabled, nodeId is either
+   * returned or not.
+   */
+  NodeForLocation getNodeForLocation(@ParamObject GetNodeForLocationParameters parameters);
+
   /** Returns node's HTML markup. */
   @Returns("outerHTML")
   String getOuterHTML();
@@ -371,6 +461,10 @@ public interface DOM {
       @Optional @ParamName("backendNodeId") Integer backendNodeId,
       @Optional @ParamName("objectId") String objectId,
       @Experimental @Optional @ParamName("includeShadowDOM") Boolean includeShadowDOM);
+
+  /** Returns node's HTML markup. */
+  @Returns("outerHTML")
+  String getOuterHTML(@ParamObject GetOuterHTMLParameters parameters);
 
   /**
    * Returns the id of the nearest ancestor that is a relayout boundary.
@@ -425,6 +519,10 @@ public interface DOM {
       @ParamName("targetNodeId") Integer targetNodeId,
       @Optional @ParamName("insertBeforeNodeId") Integer insertBeforeNodeId);
 
+  /** Moves node into the new container, places it before the given anchor. */
+  @Returns("nodeId")
+  Integer moveTo(@ParamObject MoveToParameters parameters);
+
   /**
    * Searches for a given string in the DOM tree. Use `getSearchResults` to access search results or
    * `cancelSearch` to end this search session.
@@ -445,6 +543,13 @@ public interface DOM {
   PerformSearch performSearch(
       @ParamName("query") String query,
       @Optional @ParamName("includeUserAgentShadowDOM") Boolean includeUserAgentShadowDOM);
+
+  /**
+   * Searches for a given string in the DOM tree. Use `getSearchResults` to access search results or
+   * `cancelSearch` to end this search session.
+   */
+  @Experimental
+  PerformSearch performSearch(@ParamObject PerformSearchParameters parameters);
 
   /**
    * Requests that the node is sent to the caller given its path. // FIXME, use XPath
@@ -553,6 +658,13 @@ public interface DOM {
       @Optional @ParamName("pierce") Boolean pierce);
 
   /**
+   * Requests that children of the node with given id are returned to the caller in form of
+   * `setChildNodes` events where not only immediate children are retrieved, but all children down
+   * to the specified depth.
+   */
+  void requestChildNodes(@ParamObject RequestChildNodesParameters parameters);
+
+  /**
    * Requests that the node is sent to the caller given the JavaScript node object reference. All
    * nodes that form the path from the node to the root are also sent to the client as a series of
    * `setChildNodes` notifications.
@@ -580,6 +692,10 @@ public interface DOM {
       @Optional @ParamName("backendNodeId") Integer backendNodeId,
       @Optional @ParamName("objectGroup") String objectGroup,
       @Optional @ParamName("executionContextId") Integer executionContextId);
+
+  /** Resolves the JavaScript node object for a given NodeId or BackendNodeId. */
+  @Returns("object")
+  RemoteObject resolveNode(@ParamObject ResolveNodeParameters parameters);
 
   /**
    * Sets attribute for an element with given id.
@@ -617,6 +733,12 @@ public interface DOM {
       @Optional @ParamName("name") String name);
 
   /**
+   * Sets attributes on element with given id. This method is useful when user edits some existing
+   * attribute value and types in several attribute name/value pairs.
+   */
+  void setAttributesAsText(@ParamObject SetAttributesAsTextParameters parameters);
+
+  /**
    * Sets files for the given file input element.
    *
    * @param files Array of file paths to set.
@@ -636,6 +758,9 @@ public interface DOM {
       @Optional @ParamName("nodeId") Integer nodeId,
       @Optional @ParamName("backendNodeId") Integer backendNodeId,
       @Optional @ParamName("objectId") String objectId);
+
+  /** Sets files for the given file input element. */
+  void setFileInputFiles(@ParamObject SetFileInputFilesParameters parameters);
 
   /**
    * Sets if stack traces should be captured for Nodes. See `Node.getNodeStackTraces`. Default is
@@ -753,6 +878,16 @@ public interface DOM {
       @Optional @ParamName("queriesAnchored") Boolean queriesAnchored);
 
   /**
+   * Returns the query container of the given node based on container query conditions:
+   * containerName, physical and logical axes, and whether it queries scroll-state or anchored
+   * elements. If no axes are provided and queriesScrollState is false, the style container is
+   * returned, which is the direct parent or the closest element with a matching container-name.
+   */
+  @Experimental
+  @Returns("nodeId")
+  Integer getContainerForNode(@ParamObject GetContainerForNodeParameters parameters);
+
+  /**
    * Returns the descendants of a container query container that have container queries against this
    * container.
    *
@@ -787,6 +922,14 @@ public interface DOM {
   Integer getAnchorElement(
       @ParamName("nodeId") Integer nodeId,
       @Optional @ParamName("anchorSpecifier") String anchorSpecifier);
+
+  /**
+   * Returns the target anchor element of the given anchor query according to
+   * https://www.w3.org/TR/css-anchor-position-1/#target.
+   */
+  @Experimental
+  @Returns("nodeId")
+  Integer getAnchorElement(@ParamObject GetAnchorElementParameters parameters);
 
   /**
    * When enabling, this API force-opens the popover identified by nodeId and keeps it open until

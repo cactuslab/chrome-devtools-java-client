@@ -27,12 +27,14 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.profiler.Profile;
 import com.github.kklisura.cdt.protocol.types.profiler.ScriptCoverage;
+import com.github.kklisura.cdt.protocol.types.profiler.StartPreciseCoverageParameters;
 import com.github.kklisura.cdt.protocol.types.profiler.TakePreciseCoverage;
 import java.util.List;
 
@@ -81,6 +83,14 @@ public interface Profiler {
       @Optional @ParamName("callCount") Boolean callCount,
       @Optional @ParamName("detailed") Boolean detailed,
       @Optional @ParamName("allowTriggeredUpdates") Boolean allowTriggeredUpdates);
+
+  /**
+   * Enable precise code coverage. Coverage data for JavaScript executed before enabling precise
+   * code coverage may be incomplete. Enabling prevents running optimized code and resets execution
+   * counters.
+   */
+  @Returns("timestamp")
+  Double startPreciseCoverage(@ParamObject StartPreciseCoverageParameters parameters);
 
   @Returns("profile")
   Profile stop();

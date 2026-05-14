@@ -26,10 +26,15 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.fetch.AuthChallengeResponse;
+import com.github.kklisura.cdt.protocol.types.fetch.ContinueRequestParameters;
+import com.github.kklisura.cdt.protocol.types.fetch.ContinueResponseParameters;
+import com.github.kklisura.cdt.protocol.types.fetch.EnableParameters;
+import com.github.kklisura.cdt.protocol.types.fetch.FulfillRequestParameters;
 import com.github.kklisura.cdt.protocol.types.fetch.HeaderEntry;
 import com.github.kklisura.cdt.protocol.types.fetch.RequestPattern;
 import com.github.kklisura.cdt.protocol.types.fetch.ResponseBody;
@@ -61,6 +66,12 @@ public interface Fetch {
   void enable(
       @Optional @ParamName("patterns") List<RequestPattern> patterns,
       @Optional @ParamName("handleAuthRequests") Boolean handleAuthRequests);
+
+  /**
+   * Enables issuing of requestPaused events. A request will be paused until client calls one of
+   * failRequest, fulfillRequest or continueRequest/continueWithAuth.
+   */
+  void enable(@ParamObject EnableParameters parameters);
 
   /**
    * Causes the request to fail with specified reason.
@@ -104,6 +115,9 @@ public interface Fetch {
       @Optional @ParamName("body") String body,
       @Optional @ParamName("responsePhrase") String responsePhrase);
 
+  /** Provides response to the request. */
+  void fulfillRequest(@ParamObject FulfillRequestParameters parameters);
+
   /**
    * Continues the request, optionally modifying some of its parameters.
    *
@@ -131,6 +145,9 @@ public interface Fetch {
       @Optional @ParamName("postData") String postData,
       @Optional @ParamName("headers") List<HeaderEntry> headers,
       @Experimental @Optional @ParamName("interceptResponse") Boolean interceptResponse);
+
+  /** Continues the request, optionally modifying some of its parameters. */
+  void continueRequest(@ParamObject ContinueRequestParameters parameters);
 
   /**
    * Continues a request supplying authChallengeResponse following authRequired event.
@@ -172,6 +189,13 @@ public interface Fetch {
       @Optional @ParamName("responsePhrase") String responsePhrase,
       @Optional @ParamName("responseHeaders") List<HeaderEntry> responseHeaders,
       @Optional @ParamName("binaryResponseHeaders") String binaryResponseHeaders);
+
+  /**
+   * Continues loading of the paused response, optionally modifying the response headers. If either
+   * responseCode or headers are modified, all of them must be present.
+   */
+  @Experimental
+  void continueResponse(@ParamObject ContinueResponseParameters parameters);
 
   /**
    * Causes the body of the response to be received from the server and returned as a single string.

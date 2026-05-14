@@ -26,6 +26,7 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
@@ -33,6 +34,8 @@ import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.dom.Rect;
 import com.github.kklisura.cdt.protocol.types.layertree.CompositingReasons;
 import com.github.kklisura.cdt.protocol.types.layertree.PictureTile;
+import com.github.kklisura.cdt.protocol.types.layertree.ProfileSnapshotParameters;
+import com.github.kklisura.cdt.protocol.types.layertree.ReplaySnapshotParameters;
 import java.util.List;
 
 @Experimental
@@ -86,6 +89,10 @@ public interface LayerTree {
       @Optional @ParamName("minDuration") Double minDuration,
       @Optional @ParamName("clipRect") Rect clipRect);
 
+  @Returns("timings")
+  @ReturnTypeParameter({List.class, Double.class})
+  List<List<Double>> profileSnapshot(@ParamObject ProfileSnapshotParameters parameters);
+
   /**
    * Releases layer snapshot captured by the back-end.
    *
@@ -115,6 +122,10 @@ public interface LayerTree {
       @Optional @ParamName("fromStep") Integer fromStep,
       @Optional @ParamName("toStep") Integer toStep,
       @Optional @ParamName("scale") Double scale);
+
+  /** Replays the layer snapshot and returns the resulting bitmap. */
+  @Returns("dataURL")
+  String replaySnapshot(@ParamObject ReplaySnapshotParameters parameters);
 
   /**
    * Replays the layer snapshot and returns canvas log.

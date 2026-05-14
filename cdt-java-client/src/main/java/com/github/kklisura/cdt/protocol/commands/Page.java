@@ -52,37 +52,55 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.debugger.SearchMatch;
 import com.github.kklisura.cdt.protocol.types.network.AdAncestry;
+import com.github.kklisura.cdt.protocol.types.page.AddScriptToEvaluateOnNewDocumentParameters;
 import com.github.kklisura.cdt.protocol.types.page.AppId;
 import com.github.kklisura.cdt.protocol.types.page.AppManifest;
 import com.github.kklisura.cdt.protocol.types.page.CaptureScreenshotFormat;
+import com.github.kklisura.cdt.protocol.types.page.CaptureScreenshotParameters;
 import com.github.kklisura.cdt.protocol.types.page.CaptureSnapshotFormat;
+import com.github.kklisura.cdt.protocol.types.page.CaptureSnapshotParameters;
 import com.github.kklisura.cdt.protocol.types.page.CompilationCacheParams;
+import com.github.kklisura.cdt.protocol.types.page.CreateIsolatedWorldParameters;
+import com.github.kklisura.cdt.protocol.types.page.EnableParameters;
 import com.github.kklisura.cdt.protocol.types.page.FontFamilies;
 import com.github.kklisura.cdt.protocol.types.page.FontSizes;
 import com.github.kklisura.cdt.protocol.types.page.FrameResourceTree;
 import com.github.kklisura.cdt.protocol.types.page.FrameTree;
+import com.github.kklisura.cdt.protocol.types.page.GenerateTestReportParameters;
+import com.github.kklisura.cdt.protocol.types.page.GetAnnotatedPageContentParameters;
+import com.github.kklisura.cdt.protocol.types.page.GetAppManifestParameters;
+import com.github.kklisura.cdt.protocol.types.page.HandleJavaScriptDialogParameters;
 import com.github.kklisura.cdt.protocol.types.page.InstallabilityError;
 import com.github.kklisura.cdt.protocol.types.page.LayoutMetrics;
 import com.github.kklisura.cdt.protocol.types.page.Navigate;
+import com.github.kklisura.cdt.protocol.types.page.NavigateParameters;
 import com.github.kklisura.cdt.protocol.types.page.NavigationHistory;
 import com.github.kklisura.cdt.protocol.types.page.OriginTrial;
 import com.github.kklisura.cdt.protocol.types.page.PermissionsPolicyFeatureState;
 import com.github.kklisura.cdt.protocol.types.page.PrintToPDF;
+import com.github.kklisura.cdt.protocol.types.page.PrintToPDFParameters;
 import com.github.kklisura.cdt.protocol.types.page.PrintToPDFTransferMode;
 import com.github.kklisura.cdt.protocol.types.page.ReferrerPolicy;
+import com.github.kklisura.cdt.protocol.types.page.ReloadParameters;
 import com.github.kklisura.cdt.protocol.types.page.ResourceContent;
 import com.github.kklisura.cdt.protocol.types.page.ScriptFontFamilies;
+import com.github.kklisura.cdt.protocol.types.page.SearchInResourceParameters;
 import com.github.kklisura.cdt.protocol.types.page.SetDownloadBehaviorBehavior;
+import com.github.kklisura.cdt.protocol.types.page.SetDownloadBehaviorParameters;
+import com.github.kklisura.cdt.protocol.types.page.SetFontFamiliesParameters;
+import com.github.kklisura.cdt.protocol.types.page.SetInterceptFileChooserDialogParameters;
 import com.github.kklisura.cdt.protocol.types.page.SetRPHRegistrationModeMode;
 import com.github.kklisura.cdt.protocol.types.page.SetSPCTransactionModeMode;
 import com.github.kklisura.cdt.protocol.types.page.SetWebLifecycleStateState;
 import com.github.kklisura.cdt.protocol.types.page.StartScreencastFormat;
+import com.github.kklisura.cdt.protocol.types.page.StartScreencastParameters;
 import com.github.kklisura.cdt.protocol.types.page.TransitionType;
 import com.github.kklisura.cdt.protocol.types.page.Viewport;
 import java.util.List;
@@ -127,6 +145,11 @@ public interface Page {
       @Experimental @Optional @ParamName("includeCommandLineAPI") Boolean includeCommandLineAPI,
       @Experimental @Optional @ParamName("runImmediately") Boolean runImmediately);
 
+  /** Evaluates given script in every frame upon creation (before loading frame's scripts). */
+  @Returns("identifier")
+  String addScriptToEvaluateOnNewDocument(
+      @ParamObject AddScriptToEvaluateOnNewDocumentParameters parameters);
+
   /** Brings page to front (activates tab). */
   void bringToFront();
 
@@ -155,6 +178,10 @@ public interface Page {
       @Experimental @Optional @ParamName("captureBeyondViewport") Boolean captureBeyondViewport,
       @Experimental @Optional @ParamName("optimizeForSpeed") Boolean optimizeForSpeed);
 
+  /** Capture page screenshot. */
+  @Returns("data")
+  String captureScreenshot(@ParamObject CaptureScreenshotParameters parameters);
+
   /**
    * Returns a snapshot of the page as a string. For MHTML format, the serialization includes
    * iframes, shadow DOM, external resources, and element-inline styles.
@@ -172,6 +199,14 @@ public interface Page {
   @Experimental
   @Returns("data")
   String captureSnapshot(@Optional @ParamName("format") CaptureSnapshotFormat format);
+
+  /**
+   * Returns a snapshot of the page as a string. For MHTML format, the serialization includes
+   * iframes, shadow DOM, external resources, and element-inline styles.
+   */
+  @Experimental
+  @Returns("data")
+  String captureSnapshot(@ParamObject CaptureSnapshotParameters parameters);
 
   /**
    * Creates an isolated world for the given frame.
@@ -195,6 +230,10 @@ public interface Page {
       @Optional @ParamName("worldName") String worldName,
       @Optional @ParamName("grantUniveralAccess") Boolean grantUniveralAccess);
 
+  /** Creates an isolated world for the given frame. */
+  @Returns("executionContextId")
+  Integer createIsolatedWorld(@ParamObject CreateIsolatedWorldParameters parameters);
+
   /** Disables page domain notifications. */
   void disable();
 
@@ -212,6 +251,9 @@ public interface Page {
       @Experimental @Optional @ParamName("enableFileChooserOpenedEvent")
           Boolean enableFileChooserOpenedEvent);
 
+  /** Enables page domain notifications. */
+  void enable(@ParamObject EnableParameters parameters);
+
   /**
    * Gets the processed manifest for this current document. This API always waits for the manifest
    * to be loaded. If manifestId is provided, and it does not match the manifest of the current
@@ -227,6 +269,13 @@ public interface Page {
    * @param manifestId
    */
   AppManifest getAppManifest(@Optional @ParamName("manifestId") String manifestId);
+
+  /**
+   * Gets the processed manifest for this current document. This API always waits for the manifest
+   * to be loaded. If manifestId is provided, and it does not match the manifest of the current
+   * document, this API errors out. If there is not a loaded page, this API errors out immediately.
+   */
+  AppManifest getAppManifest(@ParamObject GetAppManifestParameters parameters);
 
   @Experimental
   @Returns("installabilityErrors")
@@ -300,6 +349,11 @@ public interface Page {
       @ParamName("accept") Boolean accept, @Optional @ParamName("promptText") String promptText);
 
   /**
+   * Accepts or dismisses a JavaScript initiated dialog (alert, confirm, prompt, or onbeforeunload).
+   */
+  void handleJavaScriptDialog(@ParamObject HandleJavaScriptDialogParameters parameters);
+
+  /**
    * Navigates current page to the given URL.
    *
    * @param url URL to navigate the page to.
@@ -321,6 +375,9 @@ public interface Page {
       @Optional @ParamName("transitionType") TransitionType transitionType,
       @Optional @ParamName("frameId") String frameId,
       @Experimental @Optional @ParamName("referrerPolicy") ReferrerPolicy referrerPolicy);
+
+  /** Navigates current page to the given URL. */
+  Navigate navigate(@ParamObject NavigateParameters parameters);
 
   /**
    * Navigates current page to the given history entry.
@@ -385,6 +442,9 @@ public interface Page {
       @Experimental @Optional @ParamName("generateDocumentOutline")
           Boolean generateDocumentOutline);
 
+  /** Print page as PDF. */
+  PrintToPDF printToPDF(@ParamObject PrintToPDFParameters parameters);
+
   /** Reloads given page optionally ignoring the cache. */
   void reload();
 
@@ -402,6 +462,9 @@ public interface Page {
       @Optional @ParamName("ignoreCache") Boolean ignoreCache,
       @Optional @ParamName("scriptToEvaluateOnLoad") String scriptToEvaluateOnLoad,
       @Experimental @Optional @ParamName("loaderId") String loaderId);
+
+  /** Reloads given page optionally ignoring the cache. */
+  void reload(@ParamObject ReloadParameters parameters);
 
   /**
    * Deprecated, please use removeScriptToEvaluateOnNewDocument instead.
@@ -461,6 +524,12 @@ public interface Page {
       @Optional @ParamName("caseSensitive") Boolean caseSensitive,
       @Optional @ParamName("isRegex") Boolean isRegex);
 
+  /** Searches for given string in resource content. */
+  @Experimental
+  @Returns("result")
+  @ReturnTypeParameter(SearchMatch.class)
+  List<SearchMatch> searchInResource(@ParamObject SearchInResourceParameters parameters);
+
   /**
    * Enable Chrome's experimental ad filter on all sites.
    *
@@ -518,6 +587,10 @@ public interface Page {
       @ParamName("fontFamilies") FontFamilies fontFamilies,
       @Optional @ParamName("forScripts") List<ScriptFontFamilies> forScripts);
 
+  /** Set generic font families. */
+  @Experimental
+  void setFontFamilies(@ParamObject SetFontFamiliesParameters parameters);
+
   /**
    * Set default font sizes.
    *
@@ -559,6 +632,11 @@ public interface Page {
       @ParamName("behavior") SetDownloadBehaviorBehavior behavior,
       @Optional @ParamName("downloadPath") String downloadPath);
 
+  /** Set the behavior when downloading a file. */
+  @Deprecated
+  @Experimental
+  void setDownloadBehavior(@ParamObject SetDownloadBehaviorParameters parameters);
+
   /**
    * Controls whether page will emit lifecycle events.
    *
@@ -586,6 +664,10 @@ public interface Page {
       @Optional @ParamName("maxWidth") Integer maxWidth,
       @Optional @ParamName("maxHeight") Integer maxHeight,
       @Optional @ParamName("everyNthFrame") Integer everyNthFrame);
+
+  /** Starts sending each frame using the `screencastFrame` event. */
+  @Experimental
+  void startScreencast(@ParamObject StartScreencastParameters parameters);
 
   /** Force the page stop all navigations and pending resource fetches. */
   void stopLoading();
@@ -672,6 +754,10 @@ public interface Page {
   void generateTestReport(
       @ParamName("message") String message, @Optional @ParamName("group") String group);
 
+  /** Generates a report for testing. */
+  @Experimental
+  void generateTestReport(@ParamObject GenerateTestReportParameters parameters);
+
   /** Pauses page execution. Can be resumed using generic Runtime.runIfWaitingForDebugger. */
   @Experimental
   void waitForDebugger();
@@ -697,6 +783,14 @@ public interface Page {
   void setInterceptFileChooserDialog(
       @ParamName("enabled") Boolean enabled,
       @Experimental @Optional @ParamName("cancel") Boolean cancel);
+
+  /**
+   * Intercept file chooser requests and transfer control to protocol clients. When file chooser
+   * interception is enabled, native file chooser dialog is not shown. Instead, a protocol event
+   * `Page.fileChooserOpened` is emitted.
+   */
+  void setInterceptFileChooserDialog(
+      @ParamObject SetInterceptFileChooserDialogParameters parameters);
 
   /**
    * Enable/disable prerendering manually.
@@ -731,6 +825,14 @@ public interface Page {
   @Returns("content")
   String getAnnotatedPageContent(
       @Optional @ParamName("includeActionableInformation") Boolean includeActionableInformation);
+
+  /**
+   * Get the annotated page content for the main frame. This is an experimental command that is
+   * subject to change.
+   */
+  @Experimental
+  @Returns("content")
+  String getAnnotatedPageContent(@ParamObject GetAnnotatedPageContentParameters parameters);
 
   @EventName("domContentEventFired")
   EventListener onDomContentEventFired(EventHandler<DomContentEventFired> eventListener);

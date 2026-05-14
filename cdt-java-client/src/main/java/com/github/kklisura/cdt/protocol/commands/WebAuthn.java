@@ -28,11 +28,15 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.webauthn.Credential;
+import com.github.kklisura.cdt.protocol.types.webauthn.EnableParameters;
+import com.github.kklisura.cdt.protocol.types.webauthn.SetCredentialPropertiesParameters;
+import com.github.kklisura.cdt.protocol.types.webauthn.SetResponseOverrideBitsParameters;
 import com.github.kklisura.cdt.protocol.types.webauthn.VirtualAuthenticatorOptions;
 import java.util.List;
 
@@ -56,6 +60,12 @@ public interface WebAuthn {
    *     available. Defaults to false.
    */
   void enable(@Optional @ParamName("enableUI") Boolean enableUI);
+
+  /**
+   * Enable the WebAuthn domain and start intercepting credential storage and retrieval with a
+   * virtual authenticator.
+   */
+  void enable(@ParamObject EnableParameters parameters);
 
   /** Disable the WebAuthn domain. */
   void disable();
@@ -91,6 +101,9 @@ public interface WebAuthn {
       @Optional @ParamName("isBogusSignature") Boolean isBogusSignature,
       @Optional @ParamName("isBadUV") Boolean isBadUV,
       @Optional @ParamName("isBadUP") Boolean isBadUP);
+
+  /** Resets parameters isBogusSignature, isBadUV, isBadUP to false if they are not present. */
+  void setResponseOverrideBits(@ParamObject SetResponseOverrideBitsParameters parameters);
 
   /**
    * Removes the given authenticator.
@@ -192,6 +205,12 @@ public interface WebAuthn {
       @ParamName("credentialId") String credentialId,
       @Optional @ParamName("backupEligibility") Boolean backupEligibility,
       @Optional @ParamName("backupState") Boolean backupState);
+
+  /**
+   * Allows setting credential properties.
+   * https://w3c.github.io/webauthn/#sctn-automation-set-credential-properties
+   */
+  void setCredentialProperties(@ParamObject SetCredentialPropertiesParameters parameters);
 
   /** Triggered when a credential is added to an authenticator. */
   @EventName("credentialAdded")

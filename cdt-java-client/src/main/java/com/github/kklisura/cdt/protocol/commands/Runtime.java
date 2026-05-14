@@ -32,20 +32,30 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
+import com.github.kklisura.cdt.protocol.types.runtime.AddBindingParameters;
 import com.github.kklisura.cdt.protocol.types.runtime.AwaitPromise;
+import com.github.kklisura.cdt.protocol.types.runtime.AwaitPromiseParameters;
 import com.github.kklisura.cdt.protocol.types.runtime.CallArgument;
 import com.github.kklisura.cdt.protocol.types.runtime.CallFunctionOn;
+import com.github.kklisura.cdt.protocol.types.runtime.CallFunctionOnParameters;
 import com.github.kklisura.cdt.protocol.types.runtime.CompileScript;
+import com.github.kklisura.cdt.protocol.types.runtime.CompileScriptParameters;
 import com.github.kklisura.cdt.protocol.types.runtime.Evaluate;
+import com.github.kklisura.cdt.protocol.types.runtime.EvaluateParameters;
 import com.github.kklisura.cdt.protocol.types.runtime.ExceptionDetails;
+import com.github.kklisura.cdt.protocol.types.runtime.GetPropertiesParameters;
+import com.github.kklisura.cdt.protocol.types.runtime.GlobalLexicalScopeNamesParameters;
 import com.github.kklisura.cdt.protocol.types.runtime.HeapUsage;
 import com.github.kklisura.cdt.protocol.types.runtime.Properties;
+import com.github.kklisura.cdt.protocol.types.runtime.QueryObjectsParameters;
 import com.github.kklisura.cdt.protocol.types.runtime.RemoteObject;
 import com.github.kklisura.cdt.protocol.types.runtime.RunScript;
+import com.github.kklisura.cdt.protocol.types.runtime.RunScriptParameters;
 import com.github.kklisura.cdt.protocol.types.runtime.SerializationOptions;
 import java.util.List;
 
@@ -77,6 +87,9 @@ public interface Runtime {
       @ParamName("promiseObjectId") String promiseObjectId,
       @Optional @ParamName("returnByValue") Boolean returnByValue,
       @Optional @ParamName("generatePreview") Boolean generatePreview);
+
+  /** Add handler to promise with given promise object id. */
+  AwaitPromise awaitPromise(@ParamObject AwaitPromiseParameters parameters);
 
   /**
    * Calls function with given declaration on the given object. Object group of the result is
@@ -134,6 +147,12 @@ public interface Runtime {
           SerializationOptions serializationOptions);
 
   /**
+   * Calls function with given declaration on the given object. Object group of the result is
+   * inherited from the target object.
+   */
+  CallFunctionOn callFunctionOn(@ParamObject CallFunctionOnParameters parameters);
+
+  /**
    * Compiles expression.
    *
    * @param expression Expression to compile.
@@ -159,6 +178,9 @@ public interface Runtime {
       @ParamName("sourceURL") String sourceURL,
       @ParamName("persistScript") Boolean persistScript,
       @Optional @ParamName("executionContextId") Integer executionContextId);
+
+  /** Compiles expression. */
+  CompileScript compileScript(@ParamObject CompileScriptParameters parameters);
 
   /** Disables reporting of execution contexts creation. */
   void disable();
@@ -238,6 +260,9 @@ public interface Runtime {
       @Experimental @Optional @ParamName("serializationOptions")
           SerializationOptions serializationOptions);
 
+  /** Evaluates expression on global object. */
+  Evaluate evaluate(@ParamObject EvaluateParameters parameters);
+
   /** Returns the isolate id. */
   @Experimental
   @Returns("id")
@@ -278,6 +303,12 @@ public interface Runtime {
       @Experimental @Optional @ParamName("nonIndexedPropertiesOnly")
           Boolean nonIndexedPropertiesOnly);
 
+  /**
+   * Returns properties of a given object. Object group of the result is inherited from the target
+   * object.
+   */
+  Properties getProperties(@ParamObject GetPropertiesParameters parameters);
+
   /** Returns all let, const and class variables from global scope. */
   @Returns("names")
   @ReturnTypeParameter(String.class)
@@ -294,6 +325,11 @@ public interface Runtime {
   List<String> globalLexicalScopeNames(
       @Optional @ParamName("executionContextId") Integer executionContextId);
 
+  /** Returns all let, const and class variables from global scope. */
+  @Returns("names")
+  @ReturnTypeParameter(String.class)
+  List<String> globalLexicalScopeNames(@ParamObject GlobalLexicalScopeNamesParameters parameters);
+
   /** @param prototypeObjectId Identifier of the prototype to return objects for. */
   @Returns("objects")
   RemoteObject queryObjects(@ParamName("prototypeObjectId") String prototypeObjectId);
@@ -306,6 +342,9 @@ public interface Runtime {
   RemoteObject queryObjects(
       @ParamName("prototypeObjectId") String prototypeObjectId,
       @Optional @ParamName("objectGroup") String objectGroup);
+
+  @Returns("objects")
+  RemoteObject queryObjects(@ParamObject QueryObjectsParameters parameters);
 
   /**
    * Releases remote object with given id.
@@ -358,6 +397,9 @@ public interface Runtime {
       @Optional @ParamName("generatePreview") Boolean generatePreview,
       @Optional @ParamName("awaitPromise") Boolean awaitPromise);
 
+  /** Runs script with given id in a given context. */
+  RunScript runScript(@ParamObject RunScriptParameters parameters);
+
   /** @param enabled */
   @Experimental
   void setCustomObjectFormatterEnabled(@ParamName("enabled") Boolean enabled);
@@ -409,6 +451,15 @@ public interface Runtime {
       @Deprecated @Experimental @Optional @ParamName("executionContextId")
           Integer executionContextId,
       @Optional @ParamName("executionContextName") String executionContextName);
+
+  /**
+   * If executionContextId is empty, adds binding with the given name on the global objects of all
+   * inspected contexts, including those created later, bindings survive reloads. Binding function
+   * takes exactly one argument, this argument should be string, in case of any other input,
+   * function throws an exception. Each binding function call produces Runtime.bindingCalled
+   * notification.
+   */
+  void addBinding(@ParamObject AddBindingParameters parameters);
 
   /**
    * This method does not remove binding function from global object but unsubscribes current

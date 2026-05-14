@@ -25,6 +25,7 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
@@ -32,6 +33,7 @@ import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.audits.EncodedResponse;
 import com.github.kklisura.cdt.protocol.types.audits.GenericIssueDetails;
 import com.github.kklisura.cdt.protocol.types.audits.GetEncodedResponseEncoding;
+import com.github.kklisura.cdt.protocol.types.audits.GetEncodedResponseParameters;
 import java.util.List;
 
 /** Audits domain allows investigation of page violations and possible improvements. */
@@ -63,6 +65,12 @@ public interface Audits {
       @ParamName("encoding") GetEncodedResponseEncoding encoding,
       @Optional @ParamName("quality") Double quality,
       @Optional @ParamName("sizeOnly") Boolean sizeOnly);
+
+  /**
+   * Returns the response body and size if it were re-encoded with the specified settings. Only
+   * applies to images.
+   */
+  EncodedResponse getEncodedResponse(@ParamObject GetEncodedResponseParameters parameters);
 
   /** Disables issues domain, prevents further issues from being reported to the client. */
   void disable();

@@ -25,17 +25,27 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
+import com.github.kklisura.cdt.protocol.types.input.DispatchDragEventParameters;
 import com.github.kklisura.cdt.protocol.types.input.DispatchDragEventType;
+import com.github.kklisura.cdt.protocol.types.input.DispatchKeyEventParameters;
 import com.github.kklisura.cdt.protocol.types.input.DispatchKeyEventType;
+import com.github.kklisura.cdt.protocol.types.input.DispatchMouseEventParameters;
 import com.github.kklisura.cdt.protocol.types.input.DispatchMouseEventPointerType;
 import com.github.kklisura.cdt.protocol.types.input.DispatchMouseEventType;
+import com.github.kklisura.cdt.protocol.types.input.DispatchTouchEventParameters;
 import com.github.kklisura.cdt.protocol.types.input.DispatchTouchEventType;
 import com.github.kklisura.cdt.protocol.types.input.DragData;
+import com.github.kklisura.cdt.protocol.types.input.EmulateTouchFromMouseEventParameters;
 import com.github.kklisura.cdt.protocol.types.input.EmulateTouchFromMouseEventType;
 import com.github.kklisura.cdt.protocol.types.input.GestureSourceType;
+import com.github.kklisura.cdt.protocol.types.input.ImeSetCompositionParameters;
 import com.github.kklisura.cdt.protocol.types.input.MouseButton;
+import com.github.kklisura.cdt.protocol.types.input.SynthesizePinchGestureParameters;
+import com.github.kklisura.cdt.protocol.types.input.SynthesizeScrollGestureParameters;
+import com.github.kklisura.cdt.protocol.types.input.SynthesizeTapGestureParameters;
 import com.github.kklisura.cdt.protocol.types.input.TouchPoint;
 import java.util.List;
 
@@ -77,6 +87,10 @@ public interface Input {
       @ParamName("y") Double y,
       @ParamName("data") DragData data,
       @Optional @ParamName("modifiers") Integer modifiers);
+
+  /** Dispatches a drag event into the page. */
+  @Experimental
+  void dispatchDragEvent(@ParamObject DispatchDragEventParameters parameters);
 
   /**
    * Dispatches a key event to the page.
@@ -130,6 +144,9 @@ public interface Input {
       @Optional @ParamName("location") Integer location,
       @Experimental @Optional @ParamName("commands") List<String> commands);
 
+  /** Dispatches a key event to the page. */
+  void dispatchKeyEvent(@ParamObject DispatchKeyEventParameters parameters);
+
   /**
    * This method emulates inserting text that doesn't come from a key press, for example an emoji
    * keyboard or an IME.
@@ -170,6 +187,13 @@ public interface Input {
       @ParamName("selectionEnd") Integer selectionEnd,
       @Optional @ParamName("replacementStart") Integer replacementStart,
       @Optional @ParamName("replacementEnd") Integer replacementEnd);
+
+  /**
+   * This method sets the current candidate text for IME. Use imeCommitComposition to commit the
+   * final text. Use imeSetComposition with empty string as text to cancel composition.
+   */
+  @Experimental
+  void imeSetComposition(@ParamObject ImeSetCompositionParameters parameters);
 
   /**
    * Dispatches a mouse event to the page.
@@ -233,6 +257,9 @@ public interface Input {
       @Optional @ParamName("deltaY") Double deltaY,
       @Optional @ParamName("pointerType") DispatchMouseEventPointerType pointerType);
 
+  /** Dispatches a mouse event to the page. */
+  void dispatchMouseEvent(@ParamObject DispatchMouseEventParameters parameters);
+
   /**
    * Dispatches a touch event to the page.
    *
@@ -263,6 +290,9 @@ public interface Input {
       @ParamName("touchPoints") List<TouchPoint> touchPoints,
       @Optional @ParamName("modifiers") Integer modifiers,
       @Optional @ParamName("timestamp") Double timestamp);
+
+  /** Dispatches a touch event to the page. */
+  void dispatchTouchEvent(@ParamObject DispatchTouchEventParameters parameters);
 
   /** Cancels any active dragging in the page. */
   void cancelDragging();
@@ -307,6 +337,10 @@ public interface Input {
       @Optional @ParamName("deltaY") Double deltaY,
       @Optional @ParamName("modifiers") Integer modifiers,
       @Optional @ParamName("clickCount") Integer clickCount);
+
+  /** Emulates touch event from the mouse event parameters. */
+  @Experimental
+  void emulateTouchFromMouseEvent(@ParamObject EmulateTouchFromMouseEventParameters parameters);
 
   /**
    * Ignores input events (useful while auditing page).
@@ -355,6 +389,10 @@ public interface Input {
       @Optional @ParamName("relativeSpeed") Integer relativeSpeed,
       @Optional @ParamName("gestureSourceType") GestureSourceType gestureSourceType);
 
+  /** Synthesizes a pinch gesture over a time period by issuing appropriate touch events. */
+  @Experimental
+  void synthesizePinchGesture(@ParamObject SynthesizePinchGestureParameters parameters);
+
   /**
    * Synthesizes a scroll gesture over a time period by issuing appropriate touch events.
    *
@@ -399,6 +437,10 @@ public interface Input {
       @Optional @ParamName("repeatDelayMs") Integer repeatDelayMs,
       @Optional @ParamName("interactionMarkerName") String interactionMarkerName);
 
+  /** Synthesizes a scroll gesture over a time period by issuing appropriate touch events. */
+  @Experimental
+  void synthesizeScrollGesture(@ParamObject SynthesizeScrollGestureParameters parameters);
+
   /**
    * Synthesizes a tap gesture over a time period by issuing appropriate touch events.
    *
@@ -425,6 +467,10 @@ public interface Input {
       @Optional @ParamName("duration") Integer duration,
       @Optional @ParamName("tapCount") Integer tapCount,
       @Optional @ParamName("gestureSourceType") GestureSourceType gestureSourceType);
+
+  /** Synthesizes a tap gesture over a time period by issuing appropriate touch events. */
+  @Experimental
+  void synthesizeTapGesture(@ParamObject SynthesizeTapGestureParameters parameters);
 
   /**
    * Emitted only when `Input.setInterceptDrags` is enabled. Use this data with

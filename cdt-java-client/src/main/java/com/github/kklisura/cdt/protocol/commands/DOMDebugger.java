@@ -23,11 +23,15 @@ package com.github.kklisura.cdt.protocol.commands;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.types.domdebugger.CSPViolationType;
 import com.github.kklisura.cdt.protocol.types.domdebugger.DOMBreakpointType;
 import com.github.kklisura.cdt.protocol.types.domdebugger.EventListener;
+import com.github.kklisura.cdt.protocol.types.domdebugger.GetEventListenersParameters;
+import com.github.kklisura.cdt.protocol.types.domdebugger.RemoveEventListenerBreakpointParameters;
+import com.github.kklisura.cdt.protocol.types.domdebugger.SetEventListenerBreakpointParameters;
 import java.util.List;
 
 /**
@@ -61,6 +65,11 @@ public interface DOMDebugger {
       @Optional @ParamName("depth") Integer depth,
       @Optional @ParamName("pierce") Boolean pierce);
 
+  /** Returns event listeners of the given object. */
+  @Returns("listeners")
+  @ReturnTypeParameter(EventListener.class)
+  List<EventListener> getEventListeners(@ParamObject GetEventListenersParameters parameters);
+
   /**
    * Removes DOM breakpoint that was set using `setDOMBreakpoint`.
    *
@@ -86,6 +95,10 @@ public interface DOMDebugger {
   void removeEventListenerBreakpoint(
       @ParamName("eventName") String eventName,
       @Experimental @Optional @ParamName("targetName") String targetName);
+
+  /** Removes breakpoint on particular DOM event. */
+  void removeEventListenerBreakpoint(
+      @ParamObject RemoveEventListenerBreakpointParameters parameters);
 
   /**
    * Removes breakpoint from XMLHttpRequest.
@@ -128,6 +141,9 @@ public interface DOMDebugger {
   void setEventListenerBreakpoint(
       @ParamName("eventName") String eventName,
       @Experimental @Optional @ParamName("targetName") String targetName);
+
+  /** Sets breakpoint on particular DOM event. */
+  void setEventListenerBreakpoint(@ParamObject SetEventListenerBreakpointParameters parameters);
 
   /**
    * Sets breakpoint on XMLHttpRequest.

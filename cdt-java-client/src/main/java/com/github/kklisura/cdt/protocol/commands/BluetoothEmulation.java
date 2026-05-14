@@ -27,6 +27,7 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
@@ -37,6 +38,8 @@ import com.github.kklisura.cdt.protocol.types.bluetoothemulation.DescriptorOpera
 import com.github.kklisura.cdt.protocol.types.bluetoothemulation.GATTOperationType;
 import com.github.kklisura.cdt.protocol.types.bluetoothemulation.ManufacturerData;
 import com.github.kklisura.cdt.protocol.types.bluetoothemulation.ScanEntry;
+import com.github.kklisura.cdt.protocol.types.bluetoothemulation.SimulateCharacteristicOperationResponseParameters;
+import com.github.kklisura.cdt.protocol.types.bluetoothemulation.SimulateDescriptorOperationResponseParameters;
 import java.util.List;
 
 /** This domain allows configuring virtual Bluetooth devices to test the web-bluetooth API. */
@@ -131,6 +134,15 @@ public interface BluetoothEmulation {
       @Optional @ParamName("data") String data);
 
   /**
+   * Simulates the response from the characteristic with |characteristicId| for a characteristic
+   * operation of |type|. The |code| value follows the Error Codes from Bluetooth Core Specification
+   * Vol 3 Part F 3.4.1.1 Error Response. The |data| is expected to exist when simulating a
+   * successful read operation response.
+   */
+  void simulateCharacteristicOperationResponse(
+      @ParamObject SimulateCharacteristicOperationResponseParameters parameters);
+
+  /**
    * Simulates the response from the descriptor with |descriptorId| for a descriptor operation of
    * |type|. The |code| value follows the Error Codes from Bluetooth Core Specification Vol 3 Part F
    * 3.4.1.1 Error Response. The |data| is expected to exist when simulating a successful read
@@ -161,6 +173,15 @@ public interface BluetoothEmulation {
       @ParamName("type") DescriptorOperationType type,
       @ParamName("code") Integer code,
       @Optional @ParamName("data") String data);
+
+  /**
+   * Simulates the response from the descriptor with |descriptorId| for a descriptor operation of
+   * |type|. The |code| value follows the Error Codes from Bluetooth Core Specification Vol 3 Part F
+   * 3.4.1.1 Error Response. The |data| is expected to exist when simulating a successful read
+   * operation response.
+   */
+  void simulateDescriptorOperationResponse(
+      @ParamObject SimulateDescriptorOperationResponseParameters parameters);
 
   /**
    * Adds a service with |serviceUuid| to the peripheral with |address|.

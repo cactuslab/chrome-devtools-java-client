@@ -68,6 +68,7 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
@@ -75,24 +76,37 @@ import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.debugger.SearchMatch;
 import com.github.kklisura.cdt.protocol.types.network.AuthChallengeResponse;
 import com.github.kklisura.cdt.protocol.types.network.BlockPattern;
+import com.github.kklisura.cdt.protocol.types.network.ConfigureDurableMessagesParameters;
 import com.github.kklisura.cdt.protocol.types.network.ConnectionType;
 import com.github.kklisura.cdt.protocol.types.network.ContentEncoding;
+import com.github.kklisura.cdt.protocol.types.network.ContinueInterceptedRequestParameters;
 import com.github.kklisura.cdt.protocol.types.network.Cookie;
 import com.github.kklisura.cdt.protocol.types.network.CookieParam;
 import com.github.kklisura.cdt.protocol.types.network.CookiePartitionKey;
 import com.github.kklisura.cdt.protocol.types.network.CookiePriority;
 import com.github.kklisura.cdt.protocol.types.network.CookieSameSite;
 import com.github.kklisura.cdt.protocol.types.network.CookieSourceScheme;
+import com.github.kklisura.cdt.protocol.types.network.DeleteCookiesParameters;
 import com.github.kklisura.cdt.protocol.types.network.DeviceBoundSessionKey;
+import com.github.kklisura.cdt.protocol.types.network.EmulateNetworkConditionsByRuleParameters;
+import com.github.kklisura.cdt.protocol.types.network.EmulateNetworkConditionsParameters;
+import com.github.kklisura.cdt.protocol.types.network.EnableParameters;
 import com.github.kklisura.cdt.protocol.types.network.ErrorReason;
+import com.github.kklisura.cdt.protocol.types.network.GetCookiesParameters;
+import com.github.kklisura.cdt.protocol.types.network.GetSecurityIsolationStatusParameters;
 import com.github.kklisura.cdt.protocol.types.network.LoadNetworkResourceOptions;
 import com.github.kklisura.cdt.protocol.types.network.LoadNetworkResourcePageResult;
+import com.github.kklisura.cdt.protocol.types.network.LoadNetworkResourceParameters;
 import com.github.kklisura.cdt.protocol.types.network.NetworkConditions;
+import com.github.kklisura.cdt.protocol.types.network.OverrideNetworkStateParameters;
 import com.github.kklisura.cdt.protocol.types.network.RequestPattern;
 import com.github.kklisura.cdt.protocol.types.network.RequestPostData;
 import com.github.kklisura.cdt.protocol.types.network.ResponseBody;
 import com.github.kklisura.cdt.protocol.types.network.ResponseBodyForInterception;
+import com.github.kklisura.cdt.protocol.types.network.SearchInResponseBodyParameters;
 import com.github.kklisura.cdt.protocol.types.network.SecurityIsolationStatus;
+import com.github.kklisura.cdt.protocol.types.network.SetBlockedURLsParameters;
+import com.github.kklisura.cdt.protocol.types.network.SetCookieParameters;
 import java.util.List;
 import java.util.Map;
 
@@ -187,6 +201,17 @@ public interface Network {
       @Optional @ParamName("authChallengeResponse") AuthChallengeResponse authChallengeResponse);
 
   /**
+   * Response to Network.requestIntercepted which either modifies the request to continue with any
+   * modifications, or blocks it, or completes it with the provided response bytes. If a network
+   * fetch occurs as a result which encounters a redirect an additional Network.requestIntercepted
+   * event will be sent with the same InterceptionId. Deprecated, use Fetch.continueRequest,
+   * Fetch.fulfillRequest and Fetch.failRequest instead.
+   */
+  @Deprecated
+  @Experimental
+  void continueInterceptedRequest(@ParamObject ContinueInterceptedRequestParameters parameters);
+
+  /**
    * Deletes browser cookies with matching name and url or domain/path/partitionKey pair.
    *
    * @param name Name of the cookies to remove.
@@ -210,6 +235,9 @@ public interface Network {
       @Optional @ParamName("domain") String domain,
       @Optional @ParamName("path") String path,
       @Experimental @Optional @ParamName("partitionKey") CookiePartitionKey partitionKey);
+
+  /** Deletes browser cookies with matching name and url or domain/path/partitionKey pair. */
+  void deleteCookies(@ParamObject DeleteCookiesParameters parameters);
 
   /** Disables network tracking, prevents network events from being sent to the client. */
   void disable();
@@ -263,6 +291,14 @@ public interface Network {
       @Experimental @Optional @ParamName("packetReordering") Boolean packetReordering);
 
   /**
+   * Activates emulation of network conditions. This command is deprecated in favor of the
+   * emulateNetworkConditionsByRule and overrideNetworkState commands, which can be used together to
+   * the same effect.
+   */
+  @Deprecated
+  void emulateNetworkConditions(@ParamObject EmulateNetworkConditionsParameters parameters);
+
+  /**
    * Activates emulation of network conditions for individual requests using URL match patterns.
    * Unlike the deprecated Network.emulateNetworkConditions this method does not affect `navigator`
    * state. Use Network.overrideNetworkState to explicitly modify `navigator` behavior.
@@ -300,6 +336,17 @@ public interface Network {
       @ParamName("matchedNetworkConditions") List<NetworkConditions> matchedNetworkConditions);
 
   /**
+   * Activates emulation of network conditions for individual requests using URL match patterns.
+   * Unlike the deprecated Network.emulateNetworkConditions this method does not affect `navigator`
+   * state. Use Network.overrideNetworkState to explicitly modify `navigator` behavior.
+   */
+  @Experimental
+  @Returns("ruleIds")
+  @ReturnTypeParameter(String.class)
+  List<String> emulateNetworkConditionsByRule(
+      @ParamObject EmulateNetworkConditionsByRuleParameters parameters);
+
+  /**
    * Override the state of navigator.onLine and navigator.connection.
    *
    * @param offline True to emulate internet disconnection.
@@ -335,6 +382,10 @@ public interface Network {
       @ParamName("uploadThroughput") Double uploadThroughput,
       @Optional @ParamName("connectionType") ConnectionType connectionType);
 
+  /** Override the state of navigator.onLine and navigator.connection. */
+  @Experimental
+  void overrideNetworkState(@ParamObject OverrideNetworkStateParameters parameters);
+
   /** Enables network tracking, network events will now be delivered to the client. */
   void enable();
 
@@ -363,6 +414,9 @@ public interface Network {
           Boolean reportDirectSocketTraffic,
       @Experimental @Optional @ParamName("enableDurableMessages") Boolean enableDurableMessages);
 
+  /** Enables network tracking, network events will now be delivered to the client. */
+  void enable(@ParamObject EnableParameters parameters);
+
   /**
    * Configures storing response bodies outside of renderer, so that these survive a cross-process
    * navigation. If maxTotalBufferSize is not set, durable messages are disabled.
@@ -383,6 +437,13 @@ public interface Network {
   void configureDurableMessages(
       @Optional @ParamName("maxTotalBufferSize") Integer maxTotalBufferSize,
       @Optional @ParamName("maxResourceBufferSize") Integer maxResourceBufferSize);
+
+  /**
+   * Configures storing response bodies outside of renderer, so that these survive a cross-process
+   * navigation. If maxTotalBufferSize is not set, durable messages are disabled.
+   */
+  @Experimental
+  void configureDurableMessages(@ParamObject ConfigureDurableMessagesParameters parameters);
 
   /**
    * Returns all browser cookies. Depending on the backend support, will return detailed cookie
@@ -422,6 +483,14 @@ public interface Network {
   @Returns("cookies")
   @ReturnTypeParameter(Cookie.class)
   List<Cookie> getCookies(@Optional @ParamName("urls") List<String> urls);
+
+  /**
+   * Returns all browser cookies for the current URL. Depending on the backend support, will return
+   * detailed cookie information in the `cookies` field.
+   */
+  @Returns("cookies")
+  @ReturnTypeParameter(Cookie.class)
+  List<Cookie> getCookies(@ParamObject GetCookiesParameters parameters);
 
   /**
    * Returns content served for the given request.
@@ -499,6 +568,12 @@ public interface Network {
       @Optional @ParamName("caseSensitive") Boolean caseSensitive,
       @Optional @ParamName("isRegex") Boolean isRegex);
 
+  /** Searches for given string in response content. */
+  @Experimental
+  @Returns("result")
+  @ReturnTypeParameter(SearchMatch.class)
+  List<SearchMatch> searchInResponseBody(@ParamObject SearchInResponseBodyParameters parameters);
+
   /** Blocks URLs from loading. */
   @Experimental
   void setBlockedURLs();
@@ -514,6 +589,10 @@ public interface Network {
   void setBlockedURLs(
       @Optional @ParamName("urlPatterns") List<BlockPattern> urlPatterns,
       @Deprecated @Optional @ParamName("urls") List<String> urls);
+
+  /** Blocks URLs from loading. */
+  @Experimental
+  void setBlockedURLs(@ParamObject SetBlockedURLsParameters parameters);
 
   /**
    * Toggles ignoring of service worker for each request.
@@ -576,6 +655,10 @@ public interface Network {
       @Experimental @Optional @ParamName("sourcePort") Integer sourcePort,
       @Experimental @Optional @ParamName("partitionKey") CookiePartitionKey partitionKey);
 
+  /** Sets a cookie with the given cookie data; may overwrite equivalent cookies if they exist. */
+  @Returns("success")
+  Boolean setCookie(@ParamObject SetCookieParameters parameters);
+
   /**
    * Sets given cookies.
    *
@@ -633,6 +716,12 @@ public interface Network {
   @Returns("status")
   SecurityIsolationStatus getSecurityIsolationStatus(
       @Optional @ParamName("frameId") String frameId);
+
+  /** Returns information about the COEP/COOP isolation status. */
+  @Experimental
+  @Returns("status")
+  SecurityIsolationStatus getSecurityIsolationStatus(
+      @ParamObject GetSecurityIsolationStatusParameters parameters);
 
   /**
    * Enables tracking for the Reporting API, events generated by the Reporting API will now be
@@ -693,6 +782,12 @@ public interface Network {
       @Optional @ParamName("frameId") String frameId,
       @ParamName("url") String url,
       @ParamName("options") LoadNetworkResourceOptions options);
+
+  /** Fetches the resource and returns the content. */
+  @Experimental
+  @Returns("resource")
+  LoadNetworkResourcePageResult loadNetworkResource(
+      @ParamObject LoadNetworkResourceParameters parameters);
 
   /**
    * Sets Controls for third-party cookie access Page reload is required before the new cookie

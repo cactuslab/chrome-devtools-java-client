@@ -22,8 +22,10 @@ package com.github.kklisura.cdt.protocol.commands;
 
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.types.io.Read;
+import com.github.kklisura.cdt.protocol.types.io.ReadParameters;
 
 /** Input/Output operations for streams produced by DevTools. */
 public interface IO {
@@ -54,6 +56,9 @@ public interface IO {
       @ParamName("handle") String handle,
       @Optional @ParamName("offset") Integer offset,
       @Optional @ParamName("size") Integer size);
+
+  /** Read a chunk of the stream */
+  Read read(@ParamObject ReadParameters parameters);
 
   /**
    * Return UUID of Blob object specified by a remote object id.

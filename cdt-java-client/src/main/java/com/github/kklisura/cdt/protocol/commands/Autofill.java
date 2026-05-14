@@ -25,10 +25,12 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.autofill.Address;
 import com.github.kklisura.cdt.protocol.types.autofill.CreditCard;
+import com.github.kklisura.cdt.protocol.types.autofill.TriggerParameters;
 import java.util.List;
 
 /** Defines commands and events for Autofill. */
@@ -59,6 +61,12 @@ public interface Autofill {
       @Optional @ParamName("frameId") String frameId,
       @Optional @ParamName("card") CreditCard card,
       @Optional @ParamName("address") Address address);
+
+  /**
+   * Trigger autofill on a form identified by the fieldId. If the field and related form cannot be
+   * autofilled, returns an error.
+   */
+  void trigger(@ParamObject TriggerParameters parameters);
 
   /**
    * Set addresses so that developers can verify their forms implementation.

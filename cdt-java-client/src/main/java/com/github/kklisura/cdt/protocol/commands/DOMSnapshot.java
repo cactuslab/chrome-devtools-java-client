@@ -23,7 +23,10 @@ package com.github.kklisura.cdt.protocol.commands;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.types.domsnapshot.CaptureSnapshot;
+import com.github.kklisura.cdt.protocol.types.domsnapshot.CaptureSnapshotParameters;
+import com.github.kklisura.cdt.protocol.types.domsnapshot.GetSnapshotParameters;
 import com.github.kklisura.cdt.protocol.types.domsnapshot.Snapshot;
 import java.util.List;
 
@@ -74,6 +77,15 @@ public interface DOMSnapshot {
    * template contents, and imported documents) in a flattened array, as well as layout and
    * white-listed computed style information for the nodes. Shadow DOM in the returned DOM tree is
    * flattened.
+   */
+  @Deprecated
+  Snapshot getSnapshot(@ParamObject GetSnapshotParameters parameters);
+
+  /**
+   * Returns a document snapshot, including the full DOM tree of the root node (including iframes,
+   * template contents, and imported documents) in a flattened array, as well as layout and
+   * white-listed computed style information for the nodes. Shadow DOM in the returned DOM tree is
+   * flattened.
    *
    * @param computedStyles Whitelist of computed styles to return.
    */
@@ -105,4 +117,12 @@ public interface DOMSnapshot {
           Boolean includeBlendedBackgroundColors,
       @Experimental @Optional @ParamName("includeTextColorOpacities")
           Boolean includeTextColorOpacities);
+
+  /**
+   * Returns a document snapshot, including the full DOM tree of the root node (including iframes,
+   * template contents, and imported documents) in a flattened array, as well as layout and
+   * white-listed computed style information for the nodes. Shadow DOM in the returned DOM tree is
+   * flattened.
+   */
+  CaptureSnapshot captureSnapshot(@ParamObject CaptureSnapshotParameters parameters);
 }

@@ -26,8 +26,10 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
+import com.github.kklisura.cdt.protocol.types.cast.EnableParameters;
 
 /**
  * A domain for interacting with Cast, Presentation API, and Remote Playback API functionalities.
@@ -52,6 +54,14 @@ public interface Cast {
    * @param presentationUrl
    */
   void enable(@Optional @ParamName("presentationUrl") String presentationUrl);
+
+  /**
+   * Starts observing for sinks that can be used for tab mirroring, and if set, sinks compatible
+   * with |presentationUrl| as well. When sinks are found, a |sinksUpdated| event is fired. Also
+   * starts observing for issue messages. When an issue is added or removed, an |issueUpdated| event
+   * is fired.
+   */
+  void enable(@ParamObject EnableParameters parameters);
 
   /** Stops observing for sinks and issues. */
   void disable();

@@ -23,9 +23,13 @@ package com.github.kklisura.cdt.protocol.commands;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
+import com.github.kklisura.cdt.protocol.types.pwa.ChangeAppUserSettingsParameters;
 import com.github.kklisura.cdt.protocol.types.pwa.DisplayMode;
+import com.github.kklisura.cdt.protocol.types.pwa.InstallParameters;
+import com.github.kklisura.cdt.protocol.types.pwa.LaunchParameters;
 import com.github.kklisura.cdt.protocol.types.pwa.OsAppState;
 import java.util.List;
 
@@ -102,6 +106,32 @@ public interface PWA {
       @Optional @ParamName("installUrlOrBundleUrl") String installUrlOrBundleUrl);
 
   /**
+   * Installs the given manifest identity, optionally using the given installUrlOrBundleUrl
+   *
+   * <p>IWA-specific install description: manifestId corresponds to isolated-app:// +
+   * web_package::SignedWebBundleId
+   *
+   * <p>File installation mode: The installUrlOrBundleUrl can be either file:// or http(s)://
+   * pointing to a signed web bundle (.swbn). In this case SignedWebBundleId must correspond to The
+   * .swbn file's signing key.
+   *
+   * <p>Dev proxy installation mode: installUrlOrBundleUrl must be http(s):// that serves dev mode
+   * IWA. web_package::SignedWebBundleId must be of type dev proxy.
+   *
+   * <p>The advantage of dev proxy mode is that all changes to IWA automatically will be reflected
+   * in the running app without reinstallation.
+   *
+   * <p>To generate bundle id for proxy mode: 1. Generate 32 random bytes. 2. Add a specific suffix
+   * at the end following the documentation
+   * https://github.com/WICG/isolated-web-apps/blob/main/Scheme.md#suffix 3. Encode the entire
+   * sequence using Base32 without padding.
+   *
+   * <p>If Chrome is not in IWA dev mode, the installation will fail, regardless of the state of the
+   * allowlist.
+   */
+  void install(@ParamObject InstallParameters parameters);
+
+  /**
    * Uninstalls the given manifest_id and closes any opened app windows.
    *
    * @param manifestId
@@ -128,6 +158,14 @@ public interface PWA {
    */
   @Returns("targetId")
   String launch(@ParamName("manifestId") String manifestId, @Optional @ParamName("url") String url);
+
+  /**
+   * Launches the installed web app, or an url in the same web app instead of the default start url
+   * if it is provided. Returns a page Target.TargetID which can be used to attach to via
+   * Target.attachToTarget or similar APIs.
+   */
+  @Returns("targetId")
+  String launch(@ParamObject LaunchParameters parameters);
 
   /**
    * Opens one or more local files from an installed web app identified by its manifestId. The web
@@ -199,4 +237,17 @@ public interface PWA {
       @ParamName("manifestId") String manifestId,
       @Optional @ParamName("linkCapturing") Boolean linkCapturing,
       @Optional @ParamName("displayMode") DisplayMode displayMode);
+
+  /**
+   * Changes user settings of the web app identified by its manifestId. If the app was not
+   * installed, this command returns an error. Unset parameters will be ignored; unrecognized values
+   * will cause an error.
+   *
+   * <p>Unlike the ones defined in the manifest files of the web apps, these settings are provided
+   * by the browser and controlled by the users, they impact the way the browser handling the web
+   * apps.
+   *
+   * <p>See the comment of each parameter.
+   */
+  void changeAppUserSettings(@ParamObject ChangeAppUserSettingsParameters parameters);
 }

@@ -27,12 +27,15 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.tracing.MemoryDumpLevelOfDetail;
 import com.github.kklisura.cdt.protocol.types.tracing.RequestMemoryDump;
+import com.github.kklisura.cdt.protocol.types.tracing.RequestMemoryDumpParameters;
+import com.github.kklisura.cdt.protocol.types.tracing.StartParameters;
 import com.github.kklisura.cdt.protocol.types.tracing.StartTransferMode;
 import com.github.kklisura.cdt.protocol.types.tracing.StreamCompression;
 import com.github.kklisura.cdt.protocol.types.tracing.StreamFormat;
@@ -79,6 +82,10 @@ public interface Tracing {
       @Optional @ParamName("deterministic") Boolean deterministic,
       @Optional @ParamName("levelOfDetail") MemoryDumpLevelOfDetail levelOfDetail);
 
+  /** Request a global memory dump. */
+  @Experimental
+  RequestMemoryDump requestMemoryDump(@ParamObject RequestMemoryDumpParameters parameters);
+
   /** Start trace events collection. */
   void start();
 
@@ -112,6 +119,9 @@ public interface Tracing {
       @Optional @ParamName("traceConfig") TraceConfig traceConfig,
       @Experimental @Optional @ParamName("perfettoConfig") String perfettoConfig,
       @Experimental @Optional @ParamName("tracingBackend") TracingBackend tracingBackend);
+
+  /** Start trace events collection. */
+  void start(@ParamObject StartParameters parameters);
 
   @EventName("bufferUsage")
   @Experimental

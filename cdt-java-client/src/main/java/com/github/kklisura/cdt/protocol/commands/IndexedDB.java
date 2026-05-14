@@ -23,12 +23,20 @@ package com.github.kklisura.cdt.protocol.commands;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
+import com.github.kklisura.cdt.protocol.types.indexeddb.ClearObjectStoreParameters;
 import com.github.kklisura.cdt.protocol.types.indexeddb.DatabaseWithObjectStores;
+import com.github.kklisura.cdt.protocol.types.indexeddb.DeleteDatabaseParameters;
+import com.github.kklisura.cdt.protocol.types.indexeddb.DeleteObjectStoreEntriesParameters;
+import com.github.kklisura.cdt.protocol.types.indexeddb.GetMetadataParameters;
 import com.github.kklisura.cdt.protocol.types.indexeddb.KeyRange;
 import com.github.kklisura.cdt.protocol.types.indexeddb.Metadata;
 import com.github.kklisura.cdt.protocol.types.indexeddb.RequestData;
+import com.github.kklisura.cdt.protocol.types.indexeddb.RequestDataParameters;
+import com.github.kklisura.cdt.protocol.types.indexeddb.RequestDatabaseNamesParameters;
+import com.github.kklisura.cdt.protocol.types.indexeddb.RequestDatabaseParameters;
 import com.github.kklisura.cdt.protocol.types.storage.StorageBucket;
 import java.util.List;
 
@@ -62,6 +70,9 @@ public interface IndexedDB {
       @ParamName("databaseName") String databaseName,
       @ParamName("objectStoreName") String objectStoreName);
 
+  /** Clears all entries from an object store. */
+  void clearObjectStore(@ParamObject ClearObjectStoreParameters parameters);
+
   /**
    * Deletes a database.
    *
@@ -84,6 +95,9 @@ public interface IndexedDB {
       @Optional @ParamName("storageBucket") StorageBucket storageBucket,
       @ParamName("databaseName") String databaseName);
 
+  /** Deletes a database. */
+  void deleteDatabase(@ParamObject DeleteDatabaseParameters parameters);
+
   /**
    * Delete a range of entries from an object store
    *
@@ -114,6 +128,9 @@ public interface IndexedDB {
       @ParamName("databaseName") String databaseName,
       @ParamName("objectStoreName") String objectStoreName,
       @ParamName("keyRange") KeyRange keyRange);
+
+  /** Delete a range of entries from an object store */
+  void deleteObjectStoreEntries(@ParamObject DeleteObjectStoreEntriesParameters parameters);
 
   /** Disables events from backend. */
   void disable();
@@ -160,6 +177,9 @@ public interface IndexedDB {
       @ParamName("pageSize") Integer pageSize,
       @Optional @ParamName("keyRange") KeyRange keyRange);
 
+  /** Requests data from object store or index. */
+  RequestData requestData(@ParamObject RequestDataParameters parameters);
+
   /**
    * Gets metadata of an object store.
    *
@@ -186,6 +206,9 @@ public interface IndexedDB {
       @Optional @ParamName("storageBucket") StorageBucket storageBucket,
       @ParamName("databaseName") String databaseName,
       @ParamName("objectStoreName") String objectStoreName);
+
+  /** Gets metadata of an object store. */
+  Metadata getMetadata(@ParamObject GetMetadataParameters parameters);
 
   /**
    * Requests database with given name in given frame.
@@ -211,6 +234,10 @@ public interface IndexedDB {
       @Optional @ParamName("storageBucket") StorageBucket storageBucket,
       @ParamName("databaseName") String databaseName);
 
+  /** Requests database with given name in given frame. */
+  @Returns("databaseWithObjectStores")
+  DatabaseWithObjectStores requestDatabase(@ParamObject RequestDatabaseParameters parameters);
+
   /** Requests database names for given security origin. */
   @Returns("databaseNames")
   @ReturnTypeParameter(String.class)
@@ -230,4 +257,9 @@ public interface IndexedDB {
       @Optional @ParamName("securityOrigin") String securityOrigin,
       @Optional @ParamName("storageKey") String storageKey,
       @Optional @ParamName("storageBucket") StorageBucket storageBucket);
+
+  /** Requests database names for given security origin. */
+  @Returns("databaseNames")
+  @ReturnTypeParameter(String.class)
+  List<String> requestDatabaseNames(@ParamObject RequestDatabaseNamesParameters parameters);
 }

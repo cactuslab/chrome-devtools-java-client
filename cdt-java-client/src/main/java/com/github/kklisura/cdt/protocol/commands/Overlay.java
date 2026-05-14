@@ -30,6 +30,7 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
@@ -37,13 +38,23 @@ import com.github.kklisura.cdt.protocol.types.dom.RGBA;
 import com.github.kklisura.cdt.protocol.types.overlay.ColorFormat;
 import com.github.kklisura.cdt.protocol.types.overlay.ContainerQueryHighlightConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.FlexNodeHighlightConfig;
+import com.github.kklisura.cdt.protocol.types.overlay.GetHighlightObjectForTestParameters;
 import com.github.kklisura.cdt.protocol.types.overlay.GridNodeHighlightConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.HighlightConfig;
+import com.github.kklisura.cdt.protocol.types.overlay.HighlightFrameParameters;
+import com.github.kklisura.cdt.protocol.types.overlay.HighlightNodeParameters;
+import com.github.kklisura.cdt.protocol.types.overlay.HighlightQuadParameters;
+import com.github.kklisura.cdt.protocol.types.overlay.HighlightRectParameters;
+import com.github.kklisura.cdt.protocol.types.overlay.HighlightSourceOrderParameters;
 import com.github.kklisura.cdt.protocol.types.overlay.HingeConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.InspectMode;
 import com.github.kklisura.cdt.protocol.types.overlay.InspectedElementAnchorConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.IsolatedElementHighlightConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.ScrollSnapHighlightConfig;
+import com.github.kklisura.cdt.protocol.types.overlay.SetInspectModeParameters;
+import com.github.kklisura.cdt.protocol.types.overlay.SetPausedInDebuggerMessageParameters;
+import com.github.kklisura.cdt.protocol.types.overlay.SetShowHingeParameters;
+import com.github.kklisura.cdt.protocol.types.overlay.SetShowWindowControlsOverlayParameters;
 import com.github.kklisura.cdt.protocol.types.overlay.SourceOrderConfig;
 import com.github.kklisura.cdt.protocol.types.overlay.WindowControlsOverlayConfig;
 import java.util.List;
@@ -83,6 +94,11 @@ public interface Overlay {
       @Optional @ParamName("includeStyle") Boolean includeStyle,
       @Optional @ParamName("colorFormat") ColorFormat colorFormat,
       @Optional @ParamName("showAccessibilityInfo") Boolean showAccessibilityInfo);
+
+  /** For testing. */
+  @Returns("highlight")
+  Map<String, Object> getHighlightObjectForTest(
+      @ParamObject GetHighlightObjectForTestParameters parameters);
 
   /**
    * For Persistent Grid testing.
@@ -129,6 +145,14 @@ public interface Overlay {
       @Optional @ParamName("contentOutlineColor") RGBA contentOutlineColor);
 
   /**
+   * Highlights owner element of the frame with given id. Deprecated: Doesn't work reliably and
+   * cannot be fixed due to process separation (the owner node might be in a different process).
+   * Determine the owner node in the client and use highlightNode.
+   */
+  @Deprecated
+  void highlightFrame(@ParamObject HighlightFrameParameters parameters);
+
+  /**
    * Highlights DOM node with given id or with the given JavaScript object wrapper. Either nodeId or
    * objectId must be specified.
    *
@@ -154,6 +178,12 @@ public interface Overlay {
       @Optional @ParamName("selector") String selector);
 
   /**
+   * Highlights DOM node with given id or with the given JavaScript object wrapper. Either nodeId or
+   * objectId must be specified.
+   */
+  void highlightNode(@ParamObject HighlightNodeParameters parameters);
+
+  /**
    * Highlights given quad. Coordinates are absolute with respect to the main frame viewport.
    *
    * @param quad Quad to highlight
@@ -171,6 +201,9 @@ public interface Overlay {
       @ParamName("quad") List<Double> quad,
       @Optional @ParamName("color") RGBA color,
       @Optional @ParamName("outlineColor") RGBA outlineColor);
+
+  /** Highlights given quad. Coordinates are absolute with respect to the main frame viewport. */
+  void highlightQuad(@ParamObject HighlightQuadParameters parameters);
 
   /**
    * Highlights given rectangle. Coordinates are absolute with respect to the main frame viewport.
@@ -209,6 +242,13 @@ public interface Overlay {
       @Optional @ParamName("outlineColor") RGBA outlineColor);
 
   /**
+   * Highlights given rectangle. Coordinates are absolute with respect to the main frame viewport.
+   * Issue: the method does not handle device pixel ratio (DPR) correctly. The coordinates currently
+   * have to be adjusted by the client if DPR is not 1 (see crbug.com/437807128).
+   */
+  void highlightRect(@ParamObject HighlightRectParameters parameters);
+
+  /**
    * Highlights the source order of the children of the DOM node with given id or with the given
    * JavaScript object wrapper. Either nodeId or objectId must be specified.
    *
@@ -232,6 +272,12 @@ public interface Overlay {
       @Optional @ParamName("objectId") String objectId);
 
   /**
+   * Highlights the source order of the children of the DOM node with given id or with the given
+   * JavaScript object wrapper. Either nodeId or objectId must be specified.
+   */
+  void highlightSourceOrder(@ParamObject HighlightSourceOrderParameters parameters);
+
+  /**
    * Enters the 'inspect' mode. In this mode, elements that user is hovering over are highlighted.
    * Backend then generates 'inspectNodeRequested' event upon element selection.
    *
@@ -252,6 +298,12 @@ public interface Overlay {
       @Optional @ParamName("highlightConfig") HighlightConfig highlightConfig);
 
   /**
+   * Enters the 'inspect' mode. In this mode, elements that user is hovering over are highlighted.
+   * Backend then generates 'inspectNodeRequested' event upon element selection.
+   */
+  void setInspectMode(@ParamObject SetInspectModeParameters parameters);
+
+  /**
    * Highlights owner element of all frames detected to be ads.
    *
    * @param show True for showing ad highlights
@@ -262,6 +314,8 @@ public interface Overlay {
 
   /** @param message The message to display, also triggers resume and step over controls. */
   void setPausedInDebuggerMessage(@Optional @ParamName("message") String message);
+
+  void setPausedInDebuggerMessage(@ParamObject SetPausedInDebuggerMessageParameters parameters);
 
   /**
    * Requests that backend shows debug borders on layers
@@ -370,6 +424,9 @@ public interface Overlay {
    */
   void setShowHinge(@Optional @ParamName("hingeConfig") HingeConfig hingeConfig);
 
+  /** Add a dual screen device hinge */
+  void setShowHinge(@ParamObject SetShowHingeParameters parameters);
+
   /**
    * Show elements in isolation mode with overlays.
    *
@@ -392,6 +449,9 @@ public interface Overlay {
   void setShowWindowControlsOverlay(
       @Optional @ParamName("windowControlsOverlayConfig")
           WindowControlsOverlayConfig windowControlsOverlayConfig);
+
+  /** Show Window Controls Overlay for PWA */
+  void setShowWindowControlsOverlay(@ParamObject SetShowWindowControlsOverlayParameters parameters);
 
   /**
    * Fired when the node should be inspected. This happens after call to `setInspectMode` or when

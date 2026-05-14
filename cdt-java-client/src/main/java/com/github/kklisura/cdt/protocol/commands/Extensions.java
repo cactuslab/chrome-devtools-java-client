@@ -23,9 +23,12 @@ package com.github.kklisura.cdt.protocol.commands;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.types.extensions.ExtensionInfo;
+import com.github.kklisura.cdt.protocol.types.extensions.GetStorageItemsParameters;
+import com.github.kklisura.cdt.protocol.types.extensions.LoadUnpackedParameters;
 import com.github.kklisura.cdt.protocol.types.extensions.StorageArea;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +66,13 @@ public interface Extensions {
       @ParamName("path") String path,
       @Optional @ParamName("enableInIncognito") Boolean enableInIncognito);
 
+  /**
+   * Installs an unpacked extension from the filesystem similar to --load-extension CLI flags.
+   * Returns extension ID once the extension has been installed.
+   */
+  @Returns("id")
+  String loadUnpacked(@ParamObject LoadUnpackedParameters parameters);
+
   /** Gets a list of all unpacked extensions. */
   @Returns("extensions")
   @ReturnTypeParameter(ExtensionInfo.class)
@@ -99,6 +109,13 @@ public interface Extensions {
       @ParamName("id") String id,
       @ParamName("storageArea") StorageArea storageArea,
       @Optional @ParamName("keys") List<String> keys);
+
+  /**
+   * Gets data from extension storage in the given `storageArea`. If `keys` is specified, these are
+   * used to filter the result.
+   */
+  @Returns("data")
+  Map<String, Object> getStorageItems(@ParamObject GetStorageItemsParameters parameters);
 
   /**
    * Removes `keys` from extension storage in the given `storageArea`.

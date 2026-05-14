@@ -29,26 +29,41 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.debugger.BreakLocation;
+import com.github.kklisura.cdt.protocol.types.debugger.ContinueToLocationParameters;
 import com.github.kklisura.cdt.protocol.types.debugger.ContinueToLocationTargetCallFrames;
 import com.github.kklisura.cdt.protocol.types.debugger.DisassembleWasmModule;
+import com.github.kklisura.cdt.protocol.types.debugger.EnableParameters;
 import com.github.kklisura.cdt.protocol.types.debugger.EvaluateOnCallFrame;
+import com.github.kklisura.cdt.protocol.types.debugger.EvaluateOnCallFrameParameters;
+import com.github.kklisura.cdt.protocol.types.debugger.GetPossibleBreakpointsParameters;
 import com.github.kklisura.cdt.protocol.types.debugger.Location;
 import com.github.kklisura.cdt.protocol.types.debugger.LocationRange;
 import com.github.kklisura.cdt.protocol.types.debugger.RestartFrame;
 import com.github.kklisura.cdt.protocol.types.debugger.RestartFrameMode;
+import com.github.kklisura.cdt.protocol.types.debugger.RestartFrameParameters;
+import com.github.kklisura.cdt.protocol.types.debugger.ResumeParameters;
 import com.github.kklisura.cdt.protocol.types.debugger.ScriptPosition;
 import com.github.kklisura.cdt.protocol.types.debugger.ScriptSource;
+import com.github.kklisura.cdt.protocol.types.debugger.SearchInContentParameters;
 import com.github.kklisura.cdt.protocol.types.debugger.SearchMatch;
+import com.github.kklisura.cdt.protocol.types.debugger.SetBlackboxPatternsParameters;
 import com.github.kklisura.cdt.protocol.types.debugger.SetBreakpoint;
 import com.github.kklisura.cdt.protocol.types.debugger.SetBreakpointByUrl;
+import com.github.kklisura.cdt.protocol.types.debugger.SetBreakpointByUrlParameters;
+import com.github.kklisura.cdt.protocol.types.debugger.SetBreakpointOnFunctionCallParameters;
+import com.github.kklisura.cdt.protocol.types.debugger.SetBreakpointParameters;
 import com.github.kklisura.cdt.protocol.types.debugger.SetInstrumentationBreakpointInstrumentation;
 import com.github.kklisura.cdt.protocol.types.debugger.SetPauseOnExceptionsState;
 import com.github.kklisura.cdt.protocol.types.debugger.SetScriptSource;
+import com.github.kklisura.cdt.protocol.types.debugger.SetScriptSourceParameters;
+import com.github.kklisura.cdt.protocol.types.debugger.StepIntoParameters;
+import com.github.kklisura.cdt.protocol.types.debugger.StepOverParameters;
 import com.github.kklisura.cdt.protocol.types.debugger.WasmDisassemblyChunk;
 import com.github.kklisura.cdt.protocol.types.runtime.CallArgument;
 import com.github.kklisura.cdt.protocol.types.runtime.StackTrace;
@@ -78,6 +93,9 @@ public interface Debugger {
       @ParamName("location") Location location,
       @Optional @ParamName("targetCallFrames") ContinueToLocationTargetCallFrames targetCallFrames);
 
+  /** Continues execution until specific location is reached. */
+  void continueToLocation(@ParamObject ContinueToLocationParameters parameters);
+
   /** Disables debugger for given page. */
   void disable();
 
@@ -98,6 +116,13 @@ public interface Debugger {
   @Returns("debuggerId")
   String enable(
       @Experimental @Optional @ParamName("maxScriptsCacheSize") Double maxScriptsCacheSize);
+
+  /**
+   * Enables debugger for the given page. Clients should not assume that the debugging has been
+   * enabled until the result for this command is received.
+   */
+  @Returns("debuggerId")
+  String enable(@ParamObject EnableParameters parameters);
 
   /**
    * Evaluates expression on a given call frame.
@@ -137,6 +162,9 @@ public interface Debugger {
       @Optional @ParamName("throwOnSideEffect") Boolean throwOnSideEffect,
       @Experimental @Optional @ParamName("timeout") Double timeout);
 
+  /** Evaluates expression on a given call frame. */
+  EvaluateOnCallFrame evaluateOnCallFrame(@ParamObject EvaluateOnCallFrameParameters parameters);
+
   /**
    * Returns possible locations for breakpoint. scriptId in start and end range locations should be
    * the same.
@@ -163,6 +191,15 @@ public interface Debugger {
       @ParamName("start") Location start,
       @Optional @ParamName("end") Location end,
       @Optional @ParamName("restrictToFunction") Boolean restrictToFunction);
+
+  /**
+   * Returns possible locations for breakpoint. scriptId in start and end range locations should be
+   * the same.
+   */
+  @Returns("locations")
+  @ReturnTypeParameter(BreakLocation.class)
+  List<BreakLocation> getPossibleBreakpoints(
+      @ParamObject GetPossibleBreakpointsParameters parameters);
 
   /**
    * Returns source for the script with given id.
@@ -260,6 +297,21 @@ public interface Debugger {
       @ParamName("callFrameId") String callFrameId,
       @Experimental @Optional @ParamName("mode") RestartFrameMode mode);
 
+  /**
+   * Restarts particular call frame from the beginning. The old, deprecated behavior of
+   * `restartFrame` is to stay paused and allow further CDP commands after a restart was scheduled.
+   * This can cause problems with restarting, so we now continue execution immediatly after it has
+   * been scheduled until we reach the beginning of the restarted frame.
+   *
+   * <p>To stay back-wards compatible, `restartFrame` now expects a `mode` parameter to be present.
+   * If the `mode` parameter is missing, `restartFrame` errors out.
+   *
+   * <p>The various return values are deprecated and `callFrames` is always empty. Use the call
+   * frames from the `Debugger#paused` events instead, that fires once V8 pauses at the beginning of
+   * the restarted function.
+   */
+  RestartFrame restartFrame(@ParamObject RestartFrameParameters parameters);
+
   /** Resumes JavaScript execution. */
   void resume();
 
@@ -273,6 +325,9 @@ public interface Debugger {
    *     effect.
    */
   void resume(@Optional @ParamName("terminateOnResume") Boolean terminateOnResume);
+
+  /** Resumes JavaScript execution. */
+  void resume(@ParamObject ResumeParameters parameters);
 
   /**
    * Searches for given string in script content.
@@ -300,6 +355,11 @@ public interface Debugger {
       @ParamName("query") String query,
       @Optional @ParamName("caseSensitive") Boolean caseSensitive,
       @Optional @ParamName("isRegex") Boolean isRegex);
+
+  /** Searches for given string in script content. */
+  @Returns("result")
+  @ReturnTypeParameter(SearchMatch.class)
+  List<SearchMatch> searchInContent(@ParamObject SearchInContentParameters parameters);
 
   /**
    * Enables or disables async call stacks tracking.
@@ -343,6 +403,14 @@ public interface Debugger {
       @Optional @ParamName("skipAnonymous") Boolean skipAnonymous);
 
   /**
+   * Replace previous blackbox patterns with passed ones. Forces backend to skip stepping/pausing in
+   * scripts with url matching one of the patterns. VM will try to leave blackboxed script by
+   * performing 'step in' several times, finally resorting to 'step out' if unsuccessful.
+   */
+  @Experimental
+  void setBlackboxPatterns(@ParamObject SetBlackboxPatternsParameters parameters);
+
+  /**
    * Makes backend skip steps in the script in blackboxed ranges. VM will try leave blacklisted
    * scripts by performing 'step in' several times, finally resorting to 'step out' if unsuccessful.
    * Positions array contains positions where blackbox state is changed. First interval isn't
@@ -372,6 +440,9 @@ public interface Debugger {
    */
   SetBreakpoint setBreakpoint(
       @ParamName("location") Location location, @Optional @ParamName("condition") String condition);
+
+  /** Sets JavaScript breakpoint at a given location. */
+  SetBreakpoint setBreakpoint(@ParamObject SetBreakpointParameters parameters);
 
   /**
    * Sets instrumentation breakpoint.
@@ -416,6 +487,14 @@ public interface Debugger {
       @Optional @ParamName("condition") String condition);
 
   /**
+   * Sets JavaScript breakpoint at given location specified either by URL or URL regex. Once this
+   * command is issued, all existing parsed scripts will have breakpoints resolved and returned in
+   * `locations` property. Further matching script parsing will result in subsequent
+   * `breakpointResolved` events issued. This logical breakpoint will survive page reloads.
+   */
+  SetBreakpointByUrl setBreakpointByUrl(@ParamObject SetBreakpointByUrlParameters parameters);
+
+  /**
    * Sets JavaScript breakpoint before each call to the given function. If another function was
    * created from the same source as a given one, calling it will also trigger the breakpoint.
    *
@@ -437,6 +516,14 @@ public interface Debugger {
   @Returns("breakpointId")
   String setBreakpointOnFunctionCall(
       @ParamName("objectId") String objectId, @Optional @ParamName("condition") String condition);
+
+  /**
+   * Sets JavaScript breakpoint before each call to the given function. If another function was
+   * created from the same source as a given one, calling it will also trigger the breakpoint.
+   */
+  @Experimental
+  @Returns("breakpointId")
+  String setBreakpointOnFunctionCall(@ParamObject SetBreakpointOnFunctionCallParameters parameters);
 
   /**
    * Activates / deactivates all breakpoints on the page.
@@ -498,6 +585,16 @@ public interface Debugger {
       @Experimental @Optional @ParamName("allowTopFrameEditing") Boolean allowTopFrameEditing);
 
   /**
+   * Edits JavaScript source live.
+   *
+   * <p>In general, functions that are currently on the stack can not be edited with a single
+   * exception: If the edited function is the top-most stack frame and that is the only activation
+   * of that function on the stack. In this case the live edit will be successful and a
+   * `Debugger.restartFrame` for the top-most function is automatically triggered.
+   */
+  SetScriptSource setScriptSource(@ParamObject SetScriptSourceParameters parameters);
+
+  /**
    * Makes page not interrupt on any pauses (breakpoint, exception, dom exception etc).
    *
    * @param skip New value for skip pauses state.
@@ -534,6 +631,9 @@ public interface Debugger {
       @Experimental @Optional @ParamName("breakOnAsyncCall") Boolean breakOnAsyncCall,
       @Experimental @Optional @ParamName("skipList") List<LocationRange> skipList);
 
+  /** Steps into the function call. */
+  void stepInto(@ParamObject StepIntoParameters parameters);
+
   /** Steps out of the function call. */
   void stepOut();
 
@@ -546,6 +646,9 @@ public interface Debugger {
    * @param skipList The skipList specifies location ranges that should be skipped on step over.
    */
   void stepOver(@Experimental @Optional @ParamName("skipList") List<LocationRange> skipList);
+
+  /** Steps over the statement. */
+  void stepOver(@ParamObject StepOverParameters parameters);
 
   /**
    * Fired when breakpoint is resolved to an actual script and location. Deprecated in favor of

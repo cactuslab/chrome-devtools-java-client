@@ -26,11 +26,13 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.dom.RGBA;
+import com.github.kklisura.cdt.protocol.types.emulation.AddScreenParameters;
 import com.github.kklisura.cdt.protocol.types.emulation.DevicePosture;
 import com.github.kklisura.cdt.protocol.types.emulation.DisabledImageType;
 import com.github.kklisura.cdt.protocol.types.emulation.DisplayFeature;
@@ -44,9 +46,25 @@ import com.github.kklisura.cdt.protocol.types.emulation.ScreenOrientation;
 import com.github.kklisura.cdt.protocol.types.emulation.SensorMetadata;
 import com.github.kklisura.cdt.protocol.types.emulation.SensorReading;
 import com.github.kklisura.cdt.protocol.types.emulation.SensorType;
+import com.github.kklisura.cdt.protocol.types.emulation.SetAutoDarkModeOverrideParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.SetDataSaverOverrideParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.SetDefaultBackgroundColorOverrideParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.SetDeviceMetricsOverrideParameters;
 import com.github.kklisura.cdt.protocol.types.emulation.SetDeviceMetricsOverrideScrollbarType;
 import com.github.kklisura.cdt.protocol.types.emulation.SetEmitTouchEventsForMouseConfiguration;
+import com.github.kklisura.cdt.protocol.types.emulation.SetEmitTouchEventsForMouseParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.SetEmulatedMediaParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.SetEmulatedOSTextScaleParameters;
 import com.github.kklisura.cdt.protocol.types.emulation.SetEmulatedVisionDeficiencyType;
+import com.github.kklisura.cdt.protocol.types.emulation.SetGeolocationOverrideParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.SetLocaleOverrideParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.SetPressureDataOverrideParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.SetPressureSourceOverrideEnabledParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.SetSensorOverrideEnabledParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.SetTouchEmulationEnabledParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.SetUserAgentOverrideParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.SetVirtualTimePolicyParameters;
+import com.github.kklisura.cdt.protocol.types.emulation.UpdateScreenParameters;
 import com.github.kklisura.cdt.protocol.types.emulation.UserAgentMetadata;
 import com.github.kklisura.cdt.protocol.types.emulation.VirtualTimePolicy;
 import com.github.kklisura.cdt.protocol.types.emulation.WorkAreaInsets;
@@ -92,6 +110,10 @@ public interface Emulation {
   @Experimental
   void setAutoDarkModeOverride(@Optional @ParamName("enabled") Boolean enabled);
 
+  /** Automatically render all web contents using a dark theme. */
+  @Experimental
+  void setAutoDarkModeOverride(@ParamObject SetAutoDarkModeOverrideParameters parameters);
+
   /**
    * Enables CPU throttling to emulate slow CPUs.
    *
@@ -113,6 +135,13 @@ public interface Emulation {
    *     be cleared.
    */
   void setDefaultBackgroundColorOverride(@Optional @ParamName("color") RGBA color);
+
+  /**
+   * Sets or clears an override of the default background color of the frame. This override is used
+   * if the content does not specify one.
+   */
+  void setDefaultBackgroundColorOverride(
+      @ParamObject SetDefaultBackgroundColorOverrideParameters parameters);
 
   /**
    * Overrides the values for env(safe-area-inset-*) and env(safe-area-max-inset-*). Unset values
@@ -196,6 +225,13 @@ public interface Emulation {
           Boolean screenOrientationLockEmulation);
 
   /**
+   * Overrides the values of device screen dimensions (window.screen.width, window.screen.height,
+   * window.innerWidth, window.innerHeight, and "device-width"/"device-height"-related CSS media
+   * query results).
+   */
+  void setDeviceMetricsOverride(@ParamObject SetDeviceMetricsOverrideParameters parameters);
+
+  /**
    * Start reporting the given posture value to the Device Posture API. This override can also be
    * set in setDeviceMetricsOverride().
    *
@@ -250,6 +286,9 @@ public interface Emulation {
       @ParamName("enabled") Boolean enabled,
       @Optional @ParamName("configuration") SetEmitTouchEventsForMouseConfiguration configuration);
 
+  @Experimental
+  void setEmitTouchEventsForMouse(@ParamObject SetEmitTouchEventsForMouseParameters parameters);
+
   /** Emulates the given media type or media feature for CSS media queries. */
   void setEmulatedMedia();
 
@@ -262,6 +301,9 @@ public interface Emulation {
   void setEmulatedMedia(
       @Optional @ParamName("media") String media,
       @Optional @ParamName("features") List<MediaFeature> features);
+
+  /** Emulates the given media type or media feature for CSS media queries. */
+  void setEmulatedMedia(@ParamObject SetEmulatedMediaParameters parameters);
 
   /**
    * Emulates the given vision deficiency.
@@ -280,6 +322,9 @@ public interface Emulation {
    * @param scale
    */
   void setEmulatedOSTextScale(@Optional @ParamName("scale") Double scale);
+
+  /** Emulates the given OS text scale. */
+  void setEmulatedOSTextScale(@ParamObject SetEmulatedOSTextScaleParameters parameters);
 
   /**
    * Overrides the Geolocation Position or Error. Omitting latitude, longitude or accuracy emulates
@@ -307,6 +352,12 @@ public interface Emulation {
       @Optional @ParamName("altitudeAccuracy") Double altitudeAccuracy,
       @Optional @ParamName("heading") Double heading,
       @Optional @ParamName("speed") Double speed);
+
+  /**
+   * Overrides the Geolocation Position or Error. Omitting latitude, longitude or accuracy emulates
+   * position unavailable.
+   */
+  void setGeolocationOverride(@ParamObject SetGeolocationOverrideParameters parameters);
 
   /** @param type */
   @Experimental
@@ -341,6 +392,15 @@ public interface Emulation {
       @ParamName("enabled") Boolean enabled,
       @ParamName("type") SensorType type,
       @Optional @ParamName("metadata") SensorMetadata metadata);
+
+  /**
+   * Overrides a platform sensor of a given type. If |enabled| is true, calls to Sensor.start() will
+   * use a virtual sensor as backend rather than fetching data from a real hardware sensor.
+   * Otherwise, existing virtual sensor-backend Sensor objects will fire an error event and new
+   * calls to Sensor.start() will attempt to use a real sensor instead.
+   */
+  @Experimental
+  void setSensorOverrideEnabled(@ParamObject SetSensorOverrideEnabledParameters parameters);
 
   /**
    * Updates the sensor readings reported by a sensor type previously overridden by
@@ -381,6 +441,15 @@ public interface Emulation {
       @Optional @ParamName("metadata") PressureMetadata metadata);
 
   /**
+   * Overrides a pressure source of a given type, as used by the Compute Pressure API, so that
+   * updates to PressureObserver.observe() are provided via setPressureStateOverride instead of
+   * being retrieved from platform-provided telemetry data.
+   */
+  @Experimental
+  void setPressureSourceOverrideEnabled(
+      @ParamObject SetPressureSourceOverrideEnabledParameters parameters);
+
+  /**
    * TODO: OBSOLETE: To remove when setPressureDataOverride is merged. Provides a given pressure
    * state that will be processed and eventually be delivered to PressureObserver users. |source|
    * must have been previously overridden by setPressureSourceOverrideEnabled.
@@ -418,6 +487,14 @@ public interface Emulation {
       @ParamName("source") PressureSource source,
       @ParamName("state") PressureState state,
       @Optional @ParamName("ownContributionEstimate") Double ownContributionEstimate);
+
+  /**
+   * Provides a given pressure data set that will be processed and eventually be delivered to
+   * PressureObserver users. |source| must have been previously overridden by
+   * setPressureSourceOverrideEnabled.
+   */
+  @Experimental
+  void setPressureDataOverride(@ParamObject SetPressureDataOverrideParameters parameters);
 
   /**
    * Overrides the Idle state.
@@ -473,6 +550,9 @@ public interface Emulation {
       @ParamName("enabled") Boolean enabled,
       @Optional @ParamName("maxTouchPoints") Integer maxTouchPoints);
 
+  /** Enables touch on platforms which do not support them. */
+  void setTouchEmulationEnabled(@ParamObject SetTouchEmulationEnabledParameters parameters);
+
   /**
    * Turns on virtual time for all frames (replacing real-time with a synthetic time source) and
    * sets the current virtual time policy. Note this supersedes any previous time budget.
@@ -504,6 +584,14 @@ public interface Emulation {
           Integer maxVirtualTimeTaskStarvationCount,
       @Optional @ParamName("initialVirtualTime") Double initialVirtualTime);
 
+  /**
+   * Turns on virtual time for all frames (replacing real-time with a synthetic time source) and
+   * sets the current virtual time policy. Note this supersedes any previous time budget.
+   */
+  @Experimental
+  @Returns("virtualTimeTicksBase")
+  Double setVirtualTimePolicy(@ParamObject SetVirtualTimePolicyParameters parameters);
+
   /** Overrides default host system locale with the specified one. */
   @Experimental
   void setLocaleOverride();
@@ -516,6 +604,10 @@ public interface Emulation {
    */
   @Experimental
   void setLocaleOverride(@Optional @ParamName("locale") String locale);
+
+  /** Overrides default host system locale with the specified one. */
+  @Experimental
+  void setLocaleOverride(@ParamObject SetLocaleOverrideParameters parameters);
 
   /**
    * Overrides default host system timezone with the specified one.
@@ -554,6 +646,10 @@ public interface Emulation {
   @Experimental
   void setDataSaverOverride(@Optional @ParamName("dataSaverEnabled") Boolean dataSaverEnabled);
 
+  /** Override the value of navigator.connection.saveData */
+  @Experimental
+  void setDataSaverOverride(@ParamObject SetDataSaverOverrideParameters parameters);
+
   /** @param hardwareConcurrency Hardware concurrency to report */
   @Experimental
   void setHardwareConcurrencyOverride(
@@ -582,6 +678,12 @@ public interface Emulation {
       @Optional @ParamName("acceptLanguage") String acceptLanguage,
       @Optional @ParamName("platform") String platform,
       @Experimental @Optional @ParamName("userAgentMetadata") UserAgentMetadata userAgentMetadata);
+
+  /**
+   * Allows overriding user agent with the given string. `userAgentMetadata` must be set for Client
+   * Hint headers to be sent.
+   */
+  void setUserAgentOverride(@ParamObject SetUserAgentOverrideParameters parameters);
 
   /**
    * Allows overriding the automation flag.
@@ -657,6 +759,11 @@ public interface Emulation {
       @Optional @ParamName("label") String label,
       @Optional @ParamName("isInternal") Boolean isInternal);
 
+  /** Add a new screen to the device. Only supported in headless mode. */
+  @Experimental
+  @Returns("screenInfo")
+  ScreenInfo addScreen(@ParamObject AddScreenParameters parameters);
+
   /**
    * Updates specified screen parameters. Only supported in headless mode.
    *
@@ -696,6 +803,11 @@ public interface Emulation {
       @Optional @ParamName("colorDepth") Integer colorDepth,
       @Optional @ParamName("label") String label,
       @Optional @ParamName("isInternal") Boolean isInternal);
+
+  /** Updates specified screen parameters. Only supported in headless mode. */
+  @Experimental
+  @Returns("screenInfo")
+  ScreenInfo updateScreen(@ParamObject UpdateScreenParameters parameters);
 
   /**
    * Remove screen from the device. Only supported in headless mode.

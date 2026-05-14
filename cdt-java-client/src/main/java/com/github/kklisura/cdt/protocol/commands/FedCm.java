@@ -26,10 +26,13 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
 import com.github.kklisura.cdt.protocol.types.fedcm.AccountUrlType;
 import com.github.kklisura.cdt.protocol.types.fedcm.DialogButton;
+import com.github.kklisura.cdt.protocol.types.fedcm.DismissDialogParameters;
+import com.github.kklisura.cdt.protocol.types.fedcm.EnableParameters;
 
 /** This domain allows interacting with the FedCM dialog. */
 @Experimental
@@ -43,6 +46,8 @@ public interface FedCm {
    *     https://fedidcg.github.io/FedCM/#browser-api-rp-sign-in)
    */
   void enable(@Optional @ParamName("disableRejectionDelay") Boolean disableRejectionDelay);
+
+  void enable(@ParamObject EnableParameters parameters);
 
   void disable();
 
@@ -80,6 +85,8 @@ public interface FedCm {
   void dismissDialog(
       @ParamName("dialogId") String dialogId,
       @Optional @ParamName("triggerCooldown") Boolean triggerCooldown);
+
+  void dismissDialog(@ParamObject DismissDialogParameters parameters);
 
   /**
    * Resets the cooldown time, if any, to allow the next FedCM call to show a dialog even if one was

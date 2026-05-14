@@ -31,13 +31,26 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
+import com.github.kklisura.cdt.protocol.types.target.AttachToTargetParameters;
+import com.github.kklisura.cdt.protocol.types.target.AutoAttachRelatedParameters;
 import com.github.kklisura.cdt.protocol.types.target.BrowserContexts;
+import com.github.kklisura.cdt.protocol.types.target.CreateBrowserContextParameters;
+import com.github.kklisura.cdt.protocol.types.target.CreateTargetParameters;
+import com.github.kklisura.cdt.protocol.types.target.DetachFromTargetParameters;
+import com.github.kklisura.cdt.protocol.types.target.ExposeDevToolsProtocolParameters;
 import com.github.kklisura.cdt.protocol.types.target.FilterEntry;
+import com.github.kklisura.cdt.protocol.types.target.GetTargetInfoParameters;
+import com.github.kklisura.cdt.protocol.types.target.GetTargetsParameters;
+import com.github.kklisura.cdt.protocol.types.target.OpenDevToolsParameters;
 import com.github.kklisura.cdt.protocol.types.target.RemoteLocation;
+import com.github.kklisura.cdt.protocol.types.target.SendMessageToTargetParameters;
+import com.github.kklisura.cdt.protocol.types.target.SetAutoAttachParameters;
+import com.github.kklisura.cdt.protocol.types.target.SetDiscoverTargetsParameters;
 import com.github.kklisura.cdt.protocol.types.target.TargetInfo;
 import com.github.kklisura.cdt.protocol.types.target.WindowState;
 import java.util.List;
@@ -71,6 +84,10 @@ public interface Target {
   @Returns("sessionId")
   String attachToTarget(
       @ParamName("targetId") String targetId, @Optional @ParamName("flatten") Boolean flatten);
+
+  /** Attaches to the target with given id. */
+  @Returns("sessionId")
+  String attachToTarget(@ParamObject AttachToTargetParameters parameters);
 
   /** Attaches to the browser target, only uses flat sessionId mode. */
   @Experimental
@@ -122,6 +139,19 @@ public interface Target {
       @Optional @ParamName("inheritPermissions") Boolean inheritPermissions);
 
   /**
+   * Inject object to the target's main frame that provides a communication channel with browser
+   * target.
+   *
+   * <p>Injected object will be available as `window[bindingName]`.
+   *
+   * <p>The object has the following API: - `binding.send(json)` - a method to send messages over
+   * the remote debugging protocol - `binding.onmessage = json => handleMessage(json)` - a callback
+   * that will be called for the protocol notifications and command responses.
+   */
+  @Experimental
+  void exposeDevToolsProtocol(@ParamObject ExposeDevToolsProtocolParameters parameters);
+
+  /**
    * Creates a new empty BrowserContext. Similar to an incognito profile but you can have more than
    * one.
    */
@@ -145,6 +175,13 @@ public interface Target {
       @Experimental @Optional @ParamName("proxyBypassList") String proxyBypassList,
       @Experimental @Optional @ParamName("originsWithUniversalNetworkAccess")
           List<String> originsWithUniversalNetworkAccess);
+
+  /**
+   * Creates a new empty BrowserContext. Similar to an incognito profile but you can have more than
+   * one.
+   */
+  @Returns("browserContextId")
+  String createBrowserContext(@ParamObject CreateBrowserContextParameters parameters);
 
   /** Returns all browser contexts created with `Target.createBrowserContext` method. */
   BrowserContexts getBrowserContexts();
@@ -205,6 +242,10 @@ public interface Target {
       @Experimental @Optional @ParamName("hidden") Boolean hidden,
       @Experimental @Optional @ParamName("focus") Boolean focus);
 
+  /** Creates a new page. */
+  @Returns("targetId")
+  String createTarget(@ParamObject CreateTargetParameters parameters);
+
   /** Detaches session with given id. */
   void detachFromTarget();
 
@@ -217,6 +258,9 @@ public interface Target {
   void detachFromTarget(
       @Optional @ParamName("sessionId") String sessionId,
       @Deprecated @Optional @ParamName("targetId") String targetId);
+
+  /** Detaches session with given id. */
+  void detachFromTarget(@ParamObject DetachFromTargetParameters parameters);
 
   /**
    * Deletes a BrowserContext. All the belonging pages will be closed without calling their
@@ -240,6 +284,11 @@ public interface Target {
   @Returns("targetInfo")
   TargetInfo getTargetInfo(@Optional @ParamName("targetId") String targetId);
 
+  /** Returns information about a target. */
+  @Experimental
+  @Returns("targetInfo")
+  TargetInfo getTargetInfo(@ParamObject GetTargetInfoParameters parameters);
+
   /** Retrieves a list of available targets. */
   @Returns("targetInfos")
   @ReturnTypeParameter(TargetInfo.class)
@@ -256,6 +305,11 @@ public interface Target {
   @ReturnTypeParameter(TargetInfo.class)
   List<TargetInfo> getTargets(
       @Experimental @Optional @ParamName("filter") List<FilterEntry> filter);
+
+  /** Retrieves a list of available targets. */
+  @Returns("targetInfos")
+  @ReturnTypeParameter(TargetInfo.class)
+  List<TargetInfo> getTargets(@ParamObject GetTargetsParameters parameters);
 
   /**
    * Sends protocol message over session with given id. Consider using flat mode instead; see
@@ -279,6 +333,13 @@ public interface Target {
       @ParamName("message") String message,
       @Optional @ParamName("sessionId") String sessionId,
       @Deprecated @Optional @ParamName("targetId") String targetId);
+
+  /**
+   * Sends protocol message over session with given id. Consider using flat mode instead; see
+   * commands attachToTarget, setAutoAttach, and crbug.com/991325.
+   */
+  @Deprecated
+  void sendMessageToTarget(@ParamObject SendMessageToTargetParameters parameters);
 
   /**
    * Controls whether to automatically attach to new targets which are considered to be directly
@@ -319,6 +380,16 @@ public interface Target {
       @Experimental @Optional @ParamName("filter") List<FilterEntry> filter);
 
   /**
+   * Controls whether to automatically attach to new targets which are considered to be directly
+   * related to this one (for example, iframes or workers). When turned on, attaches to all existing
+   * related targets as well. When turned off, automatically detaches from all currently attached
+   * targets. This also clears all targets added by `autoAttachRelated` from the list of targets to
+   * watch for creation of related targets. You might want to call this recursively for
+   * auto-attached targets to attach to all available targets.
+   */
+  void setAutoAttach(@ParamObject SetAutoAttachParameters parameters);
+
+  /**
    * Adds the specified target to the list of targets that will be monitored for any related target
    * creation (such as child frames, child workers and new versions of service worker) and reported
    * through `attachedToTarget`. The specified target is also auto-attached. This cancels the effect
@@ -353,6 +424,16 @@ public interface Target {
       @Experimental @Optional @ParamName("filter") List<FilterEntry> filter);
 
   /**
+   * Adds the specified target to the list of targets that will be monitored for any related target
+   * creation (such as child frames, child workers and new versions of service worker) and reported
+   * through `attachedToTarget`. The specified target is also auto-attached. This cancels the effect
+   * of any previous `setAutoAttach` and is also cancelled by subsequent `setAutoAttach`. Only
+   * available at the Browser target.
+   */
+  @Experimental
+  void autoAttachRelated(@ParamObject AutoAttachRelatedParameters parameters);
+
+  /**
    * Controls whether to discover available targets and notify via
    * `targetCreated/targetInfoChanged/targetDestroyed` events.
    *
@@ -371,6 +452,12 @@ public interface Target {
   void setDiscoverTargets(
       @ParamName("discover") Boolean discover,
       @Experimental @Optional @ParamName("filter") List<FilterEntry> filter);
+
+  /**
+   * Controls whether to discover available targets and notify via
+   * `targetCreated/targetInfoChanged/targetDestroyed` events.
+   */
+  void setDiscoverTargets(@ParamObject SetDiscoverTargetsParameters parameters);
 
   /**
    * Enables target discovery for the specified locations, when `setDiscoverTargets` was set to
@@ -410,6 +497,11 @@ public interface Target {
   @Returns("targetId")
   String openDevTools(
       @ParamName("targetId") String targetId, @Optional @ParamName("panelId") String panelId);
+
+  /** Opens a DevTools window for the target. */
+  @Experimental
+  @Returns("targetId")
+  String openDevTools(@ParamObject OpenDevToolsParameters parameters);
 
   /** Issued when attached to target because of auto-attach or `attachToTarget` command. */
   @EventName("attachedToTarget")

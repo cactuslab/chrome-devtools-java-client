@@ -23,7 +23,9 @@ package com.github.kklisura.cdt.protocol.commands;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.types.headlessexperimental.BeginFrame;
+import com.github.kklisura.cdt.protocol.types.headlessexperimental.BeginFrameParameters;
 import com.github.kklisura.cdt.protocol.types.headlessexperimental.ScreenshotParams;
 
 /** This domain provides experimental commands only supported in headless mode. */
@@ -61,6 +63,14 @@ public interface HeadlessExperimental {
       @Optional @ParamName("interval") Double interval,
       @Optional @ParamName("noDisplayUpdates") Boolean noDisplayUpdates,
       @Optional @ParamName("screenshot") ScreenshotParams screenshot);
+
+  /**
+   * Sends a BeginFrame to the target and returns when the frame was completed. Optionally captures
+   * a screenshot from the resulting frame. Requires that the target was created with enabled
+   * BeginFrameControl. Designed for use with --run-all-compositor-stages-before-draw, see also
+   * https://goo.gle/chrome-headless-rendering for more background.
+   */
+  BeginFrame beginFrame(@ParamObject BeginFrameParameters parameters);
 
   /** Disables headless events for the target. */
   @Deprecated

@@ -30,10 +30,12 @@ import com.github.kklisura.cdt.protocol.support.annotations.EventName;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
+import com.github.kklisura.cdt.protocol.types.css.AddRuleParameters;
 import com.github.kklisura.cdt.protocol.types.css.AnimatedStylesForNode;
 import com.github.kklisura.cdt.protocol.types.css.BackgroundColors;
 import com.github.kklisura.cdt.protocol.types.css.CSSComputedStyleProperty;
@@ -47,14 +49,18 @@ import com.github.kklisura.cdt.protocol.types.css.CSSScope;
 import com.github.kklisura.cdt.protocol.types.css.CSSStyle;
 import com.github.kklisura.cdt.protocol.types.css.CSSSupports;
 import com.github.kklisura.cdt.protocol.types.css.ComputedStyleForNode;
+import com.github.kklisura.cdt.protocol.types.css.CreateStyleSheetParameters;
 import com.github.kklisura.cdt.protocol.types.css.InlineStylesForNode;
 import com.github.kklisura.cdt.protocol.types.css.MatchedStylesForNode;
 import com.github.kklisura.cdt.protocol.types.css.PlatformFontUsage;
+import com.github.kklisura.cdt.protocol.types.css.ResolveValuesParameters;
 import com.github.kklisura.cdt.protocol.types.css.RuleUsage;
 import com.github.kklisura.cdt.protocol.types.css.SelectorList;
+import com.github.kklisura.cdt.protocol.types.css.SetStyleTextsParameters;
 import com.github.kklisura.cdt.protocol.types.css.SourceRange;
 import com.github.kklisura.cdt.protocol.types.css.StyleDeclarationEdit;
 import com.github.kklisura.cdt.protocol.types.css.TakeCoverageDelta;
+import com.github.kklisura.cdt.protocol.types.css.TrackComputedStyleUpdatesForNodeParameters;
 import com.github.kklisura.cdt.protocol.types.css.Value;
 import com.github.kklisura.cdt.protocol.types.dom.PseudoType;
 import java.util.List;
@@ -106,6 +112,13 @@ public interface CSS {
           Integer nodeForPropertySyntaxValidation);
 
   /**
+   * Inserts a new rule with the given `ruleText` in a stylesheet with given `styleSheetId`, at the
+   * position specified by `location`.
+   */
+  @Returns("rule")
+  CSSRule addRule(@ParamObject AddRuleParameters parameters);
+
+  /**
    * Returns all class names from specified stylesheet.
    *
    * @param styleSheetId
@@ -133,6 +146,10 @@ public interface CSS {
   @Returns("styleSheetId")
   String createStyleSheet(
       @ParamName("frameId") String frameId, @Optional @ParamName("force") Boolean force);
+
+  /** Creates a new special "via-inspector" stylesheet in the frame with given `frameId`. */
+  @Returns("styleSheetId")
+  String createStyleSheet(@ParamObject CreateStyleSheetParameters parameters);
 
   /** Disables the CSS agent for the given page. */
   void disable();
@@ -217,6 +234,21 @@ public interface CSS {
       @Optional @ParamName("propertyName") String propertyName,
       @Optional @ParamName("pseudoType") PseudoType pseudoType,
       @Optional @ParamName("pseudoIdentifier") String pseudoIdentifier);
+
+  /**
+   * Resolve the specified values in the context of the provided element. For example, a value of
+   * '1em' is evaluated according to the computed 'font-size' of the element and a value 'calc(1px +
+   * 2px)' will be resolved to '3px'. If the `propertyName` was specified the `values` are resolved
+   * as if they were property's declaration. If a value cannot be parsed according to the provided
+   * property syntax, the value is parsed using combined syntax as if null `propertyName` was
+   * provided. If the value cannot be resolved even then, return the provided value without any
+   * changes. Note: this function currently does not resolve CSS random() function, it returns
+   * unmodified random() function parts.`
+   */
+  @Experimental
+  @Returns("results")
+  @ReturnTypeParameter(String.class)
+  List<String> resolveValues(@ParamObject ResolveValuesParameters parameters);
 
   /**
    * @param shorthandName
@@ -325,6 +357,16 @@ public interface CSS {
    */
   @Experimental
   void trackComputedStyleUpdatesForNode(@Optional @ParamName("nodeId") Integer nodeId);
+
+  /**
+   * Starts tracking the given node for the computed style updates and whenever the computed style
+   * is updated for node, it queues a `computedStyleUpdated` event with throttling. There can only
+   * be 1 node tracked for computed style updates so passing a new node id removes tracking from the
+   * previous node. Pass `undefined` to disable tracking.
+   */
+  @Experimental
+  void trackComputedStyleUpdatesForNode(
+      @ParamObject TrackComputedStyleUpdatesForNodeParameters parameters);
 
   /**
    * Starts tracking the given computed styles for updates. The specified array of properties
@@ -515,6 +557,11 @@ public interface CSS {
       @ParamName("edits") List<StyleDeclarationEdit> edits,
       @Experimental @Optional @ParamName("nodeForPropertySyntaxValidation")
           Integer nodeForPropertySyntaxValidation);
+
+  /** Applies specified style edits one after another in the given order. */
+  @Returns("styles")
+  @ReturnTypeParameter(CSSStyle.class)
+  List<CSSStyle> setStyleTexts(@ParamObject SetStyleTextsParameters parameters);
 
   /** Enables the selector recording. */
   void startRuleUsageTracking();

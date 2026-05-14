@@ -23,12 +23,14 @@ package com.github.kklisura.cdt.protocol.commands;
 import com.github.kklisura.cdt.protocol.support.annotations.Experimental;
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 import com.github.kklisura.cdt.protocol.support.annotations.ParamName;
+import com.github.kklisura.cdt.protocol.support.annotations.ParamObject;
 import com.github.kklisura.cdt.protocol.support.annotations.ReturnTypeParameter;
 import com.github.kklisura.cdt.protocol.support.annotations.Returns;
 import com.github.kklisura.cdt.protocol.types.memory.DOMCounter;
 import com.github.kklisura.cdt.protocol.types.memory.DOMCounters;
 import com.github.kklisura.cdt.protocol.types.memory.PressureLevel;
 import com.github.kklisura.cdt.protocol.types.memory.SamplingProfile;
+import com.github.kklisura.cdt.protocol.types.memory.StartSamplingParameters;
 import java.util.List;
 
 @Experimental
@@ -77,6 +79,9 @@ public interface Memory {
   void startSampling(
       @Optional @ParamName("samplingInterval") Integer samplingInterval,
       @Optional @ParamName("suppressRandomness") Boolean suppressRandomness);
+
+  /** Start collecting native memory profile. */
+  void startSampling(@ParamObject StartSamplingParameters parameters);
 
   /** Stop collecting native memory profile. */
   void stopSampling();
