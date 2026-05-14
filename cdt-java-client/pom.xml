@@ -59,15 +59,15 @@
         <project.inceptionYear>2018</project.inceptionYear>
         <argLine></argLine>
 
-        <jackson.version>2.11.3</jackson.version>
+        <jackson.version>2.19.4</jackson.version>
         <websocket.api.version>1.1</websocket.api.version>
-        <tyrus.version>1.13.1</tyrus.version>
-        <javassist.version>3.24.1-GA</javassist.version>
-        <slf4j.version>1.7.25</slf4j.version>
+        <tyrus.version>1.22</tyrus.version>
+        <javassist.version>3.31.0-GA</javassist.version>
+        <slf4j.version>1.7.36</slf4j.version>
 
-        <logback.version>1.2.3</logback.version>
-        <jacoco.version>0.8.0</jacoco.version>
-        <jsonassert.version>1.5.0</jsonassert.version>
+        <logback.version>1.2.13</logback.version>
+        <jacoco.version>0.8.14</jacoco.version>
+        <jsonassert.version>1.5.3</jsonassert.version>
         <mockwebserver.version>2.7.5</mockwebserver.version>
         <junit.jupiter.version>5.11.4</junit.jupiter.version>
         <mockito.version>5.14.2</mockito.version>
