@@ -40,7 +40,6 @@ import com.github.kklisura.cdt.services.config.ChromeDevToolsServiceConfiguratio
 import com.github.kklisura.cdt.services.exceptions.ChromeDevToolsInvocationException;
 import com.github.kklisura.cdt.services.exceptions.WebSocketServiceException;
 import com.github.kklisura.cdt.services.executors.EventExecutorService;
-import com.github.kklisura.cdt.services.types.ChromeTab;
 import com.github.kklisura.cdt.services.types.EventListenerImpl;
 import com.github.kklisura.cdt.services.types.MethodInvocation;
 import com.github.kklisura.cdt.services.utils.ProxyUtils;
@@ -392,15 +391,12 @@ public class ChromeDevToolsServiceImplTest {
 
   @Test
   public void testCloseRemovesDevToolsServiceCache() {
-    ChromeTab chromeTab = new ChromeTab();
-
     ChromeServiceImpl chromeService = mock(ChromeServiceImpl.class);
-    service.setChromeService(chromeService);
-    service.setChromeTab(chromeTab);
+    service.attachToChromeService(chromeService, "session-id");
 
     service.close();
 
-    verify(chromeService).clearChromeDevToolsServiceCache(chromeTab);
+    verify(chromeService).removeChromeDevToolsServiceFromCache("session-id");
     verify(webSocketService).close();
     verify(eventExecutorService).shutdown();
   }

@@ -72,7 +72,7 @@ public abstract class ChromeDevToolsServiceImpl
 
   private Map<Long, InvocationResult> invocationResultMap = new ConcurrentHashMap<>();
 
-  private ChromeTab chromeTab;
+  private String sessionId;
   private ChromeServiceImpl chromeService;
 
   private ChromeDevToolsServiceConfiguration configuration;
@@ -107,21 +107,15 @@ public abstract class ChromeDevToolsServiceImpl
   }
 
   /**
-   * Sets the chrome service container.
+   * Attaches this service to the chrome service that created it, so that {@link #close()} can
+   * remove itself from that service's cache.
    *
-   * @param chromeService Chrome service.
+   * @param chromeService Chrome service that owns this service.
+   * @param sessionId Cache key under which this service is held.
    */
-  public void setChromeService(ChromeServiceImpl chromeService) {
+  void attachToChromeService(ChromeServiceImpl chromeService, String sessionId) {
     this.chromeService = chromeService;
-  }
-
-  /**
-   * Sets the chrome tab for this service.
-   *
-   * @param chromeTab the tab
-   */
-  public void setChromeTab(ChromeTab chromeTab) {
-    this.chromeTab = chromeTab;
+    this.sessionId = sessionId;
   }
 
   @Override
@@ -183,11 +177,13 @@ public abstract class ChromeDevToolsServiceImpl
   @Override
   public void close() {
     if (!isClosed()) {
-      webSocketService.close();
-
+      // Evict from the owning service's cache first, so a concurrent createDevToolsService for
+      // the same session sees a miss and builds a fresh service rather than this closing one.
       if (chromeService != null) {
-        chromeService.clearChromeDevToolsServiceCache(chromeTab);
+        chromeService.removeChromeDevToolsServiceFromCache(sessionId);
       }
+
+      webSocketService.close();
 
       eventExecutorService.shutdown();
 

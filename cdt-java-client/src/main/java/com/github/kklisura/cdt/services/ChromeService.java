@@ -99,4 +99,24 @@ public interface ChromeService {
    * @return Dev tools.
    */
   ChromeDevToolsService createDevToolsService(ChromeTab tab) throws ChromeServiceException;
+
+  /**
+   * Creates a dev tools service connected to the browser endpoint rather than a tab. Use this to
+   * access browser-level commands such as {@code Target.createBrowserContext}.
+   *
+   * @return Dev tools.
+   * @throws ChromeServiceException If creation fails for any reason.
+   */
+  ChromeDevToolsService createBrowserDevToolsService() throws ChromeServiceException;
+
+  /**
+   * Creates a dev tools service attached directly to a target given its id, for example a target
+   * created via {@code Target.createTarget}. Useful when there is no {@link ChromeTab} from {@code
+   * /json/list} to attach to.
+   *
+   * @param targetId Target id.
+   * @return Dev tools.
+   * @throws ChromeServiceException If creation fails for any reason.
+   */
+  ChromeDevToolsService createDevToolsService(String targetId) throws ChromeServiceException;
 }

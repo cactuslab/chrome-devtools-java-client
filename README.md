@@ -95,6 +95,46 @@ public class LogRequestsExample {
 
 For more examples, see [examples](cdt-examples/src/main/java/com/github/kklisura/cdt/examples).
 
+## Isolating cookies between tabs (browser contexts)
+
+By default every tab you open — whether via `chromeService.createTab()` or `Target.createTarget(...)` — lives in Chrome's *default browser context*. All tabs in the default context share a single cookie jar, local storage, cache and so on, so a cookie set in one tab is visible to every other tab. When a single Chrome instance is reused to run unrelated jobs (for example a print service running many jobs as tabs), that state leaks between them.
+
+To isolate a job, give it its own *browser context* — the headless equivalent of an incognito profile — and create its tab inside that context:
+
+```java
+final ChromeService chromeService = launcher.launch(true);
+
+// A dev tools service connected to the browser endpoint (not a tab), for
+// browser-level commands such as Target.createBrowserContext.
+final ChromeDevToolsService browserDevToolsService =
+    chromeService.createBrowserDevToolsService();
+final Target target = browserDevToolsService.getTarget();
+
+// Create an isolated browser context and a page (target) inside it.
+final String browserContextId = target.createBrowserContext();
+final String targetId =
+    target.createTarget(
+        new CreateTargetParameters()
+            .setUrl("about:blank")
+            .setBrowserContextId(browserContextId));
+
+// Attach a dev tools service directly to that target by its id.
+try (ChromeDevToolsService devToolsService =
+    chromeService.createDevToolsService(targetId)) {
+  final Page page = devToolsService.getPage();
+  final Network network = devToolsService.getNetwork();
+
+  // ...drive the page; cookies set here are confined to browserContextId...
+}
+
+// Disposing the context discards its cookies and storage, and closes its target.
+target.disposeBrowserContext(browserContextId);
+```
+
+`createDevToolsService(String targetId)` attaches to a target created over the protocol, for which there is no `ChromeTab` entry in `/json/list`. `createBrowserDevToolsService()` connects to the browser endpoint itself rather than to a tab.
+
+Each `ChromeDevToolsService` is `AutoCloseable`: closing it shuts the WebSocket and removes itself from the `ChromeService` cache, so per-job services don't accumulate. Use try-with-resources as above, or call `close()` when the job is done.
+
 ## Known-issues
 
 ### API hangs (ie when printing PDFs)

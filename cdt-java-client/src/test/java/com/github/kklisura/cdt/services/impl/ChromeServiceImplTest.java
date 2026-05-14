@@ -24,6 +24,7 @@ import static com.github.kklisura.cdt.services.impl.utils.TestUtils.getFixture;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kklisura.cdt.protocol.ChromeDevTools;
 import com.github.kklisura.cdt.protocol.commands.Network;
+import com.github.kklisura.cdt.services.ChromeDevToolsService;
 import com.github.kklisura.cdt.services.WebSocketService;
 import com.github.kklisura.cdt.services.exceptions.ChromeServiceException;
 import com.github.kklisura.cdt.services.exceptions.WebSocketServiceException;
@@ -416,9 +418,109 @@ public class ChromeServiceImplTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testClearChromeDevToolsServiceCache() throws IOException {
     ChromeServiceImpl service = new ChromeServiceImpl(9222, webSocketServiceFactory);
     service.clearChromeDevToolsServiceCache(createChromeTab("UNUSED"));
+  }
+
+  @Test
+  public void testCreateBrowserDevToolsService()
+      throws IOException, ChromeServiceException, InterruptedException, WebSocketServiceException {
+    MockWebServer server = new MockWebServer();
+
+    InputStream fixture = getFixture("chrome/version.json");
+    server.enqueue(new MockResponse().setBody(ChromeServiceImpl.inputStreamToString(fixture)));
+    server.start();
+
+    when(webSocketServiceFactory.createWebSocketService(
+            "ws://localhost:9222/devtools/browser/63318df0-09e4-4143-910e-f89525dda26b"))
+        .thenReturn(webSocketService);
+
+    ChromeServiceImpl service =
+        new ChromeServiceImpl(server.getHostName(), server.getPort(), webSocketServiceFactory);
+
+    ChromeDevToolsService devTools = service.createBrowserDevToolsService();
+
+    RecordedRequest request = server.takeRequest();
+    assertEquals(1, server.getRequestCount());
+    assertEquals("PUT /json/version HTTP/1.1", request.getRequestLine());
+
+    assertNotNull(devTools);
+    verify(webSocketService).addMessageHandler(org.mockito.ArgumentMatchers.any());
+
+    server.shutdown();
+  }
+
+  @Test
+  public void testCreateBrowserDevToolsServiceIsCached()
+      throws IOException, ChromeServiceException, WebSocketServiceException {
+    MockWebServer server = new MockWebServer();
+
+    InputStream fixture = getFixture("chrome/version.json");
+    server.enqueue(new MockResponse().setBody(ChromeServiceImpl.inputStreamToString(fixture)));
+    server.start();
+
+    when(webSocketServiceFactory.createWebSocketService(
+            "ws://localhost:9222/devtools/browser/63318df0-09e4-4143-910e-f89525dda26b"))
+        .thenReturn(webSocketService);
+
+    ChromeServiceImpl service =
+        new ChromeServiceImpl(server.getHostName(), server.getPort(), webSocketServiceFactory);
+
+    ChromeDevToolsService devTools = service.createBrowserDevToolsService();
+
+    // Subsequent calls return the cached service without another json/version round-trip.
+    assertSame(devTools, service.createBrowserDevToolsService());
+    assertEquals(1, server.getRequestCount());
+
+    server.shutdown();
+  }
+
+  @Test
+  public void testCreateDevToolsServiceByTargetId()
+      throws IOException, ChromeServiceException, WebSocketServiceException {
+    ChromeServiceImpl service = new ChromeServiceImpl(9222, webSocketServiceFactory);
+
+    when(webSocketServiceFactory.createWebSocketService(
+            "ws://localhost:9222/devtools/page/TARGET-ID"))
+        .thenReturn(webSocketService);
+
+    ChromeDevToolsService devTools = service.createDevToolsService("TARGET-ID");
+
+    assertNotNull(devTools);
+    verify(webSocketService).addMessageHandler(org.mockito.ArgumentMatchers.any());
+  }
+
+  @Test
+  public void testCreateDevToolsServiceByTargetIdIsCached()
+      throws IOException, ChromeServiceException, WebSocketServiceException {
+    ChromeServiceImpl service = new ChromeServiceImpl(9222, webSocketServiceFactory);
+
+    when(webSocketServiceFactory.createWebSocketService(
+            "ws://localhost:9222/devtools/page/TARGET-ID"))
+        .thenReturn(webSocketService);
+
+    ChromeDevToolsService devTools = service.createDevToolsService("TARGET-ID");
+    assertSame(devTools, service.createDevToolsService("TARGET-ID"));
+  }
+
+  @Test
+  public void testCloseEvictsDevToolsServiceFromCache()
+      throws IOException, ChromeServiceException, WebSocketServiceException {
+    ChromeServiceImpl service = new ChromeServiceImpl(9222, webSocketServiceFactory);
+
+    when(webSocketServiceFactory.createWebSocketService(
+            "ws://localhost:9222/devtools/page/TARGET-ID"))
+        .thenReturn(webSocketService);
+
+    ChromeDevToolsService devTools = service.createDevToolsService("TARGET-ID");
+
+    // Closing the service evicts it from the cache, so a subsequent create builds a fresh one.
+    devTools.close();
+    verify(webSocketService).close();
+
+    assertNotSame(devTools, service.createDevToolsService("TARGET-ID"));
   }
 
   private static ChromeTab createChromeTab(String id) throws IOException {

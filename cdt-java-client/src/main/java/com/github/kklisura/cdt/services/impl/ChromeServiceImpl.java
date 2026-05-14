@@ -65,6 +65,9 @@ public class ChromeServiceImpl implements ChromeService {
   private static final String CLOSE_TAB = "json/close";
   private static final String VERSION = "json/version";
 
+  /** Cache key for the browser-level dev tools service. */
+  private static final String BROWSER_SESSION_ID = "browser";
+
   private String host;
   private int port;
 
@@ -146,8 +149,8 @@ public class ChromeServiceImpl implements ChromeService {
   public void closeTab(ChromeTab tab) throws ChromeServiceException {
     request(Void.class, "http://%s:%d/%s/%s", host, port, CLOSE_TAB, tab.getId());
 
-    // Remove dev tools from cache.
-    clearChromeDevToolsServiceCache(tab);
+    // Close and evict the dev tools service for this tab, if any.
+    closeChromeDevToolsService(tab.getId());
   }
 
   @Override
@@ -165,13 +168,57 @@ public class ChromeServiceImpl implements ChromeService {
   public synchronized ChromeDevToolsService createDevToolsService(
       ChromeTab tab, ChromeDevToolsServiceConfiguration chromeDevToolsServiceConfiguration)
       throws ChromeServiceException {
+    return createDevToolsService(
+        tab.getId(), tab.getWebSocketDebuggerUrl(), chromeDevToolsServiceConfiguration);
+  }
+
+  @Override
+  public synchronized ChromeDevToolsService createBrowserDevToolsService()
+      throws ChromeServiceException {
+    // Avoid the json/version round-trip when the browser session is already cached.
+    ChromeDevToolsService cachedChromeDevToolsService =
+        chromeDevToolServiceCache.get(BROWSER_SESSION_ID);
+    if (cachedChromeDevToolsService != null) {
+      return cachedChromeDevToolsService;
+    }
+
+    return createDevToolsService(
+        BROWSER_SESSION_ID,
+        getVersion().getWebSocketDebuggerUrl(),
+        new ChromeDevToolsServiceConfiguration());
+  }
+
+  @Override
+  public synchronized ChromeDevToolsService createDevToolsService(String targetId)
+      throws ChromeServiceException {
+    String webSocketDebuggerUrl =
+        String.format("ws://%s:%d/devtools/page/%s", host, port, targetId);
+    return createDevToolsService(
+        targetId, webSocketDebuggerUrl, new ChromeDevToolsServiceConfiguration());
+  }
+
+  /**
+   * Creates (or returns the cached) dev tools service for a session identified by sessionId and
+   * connected to the given web socket debugger url.
+   *
+   * @param sessionId Cache key for this dev tools service.
+   * @param webSocketDebuggerUrl Web socket debugger url to connect to.
+   * @param chromeDevToolsServiceConfiguration Service configuration.
+   * @return Dev tools service.
+   * @throws ChromeServiceException If connecting to the web socket fails.
+   */
+  private ChromeDevToolsService createDevToolsService(
+      String sessionId,
+      String webSocketDebuggerUrl,
+      ChromeDevToolsServiceConfiguration chromeDevToolsServiceConfiguration)
+      throws ChromeServiceException {
     try {
-      if (isChromeDevToolsServiceCached(tab)) {
-        return getCachedChromeDevToolsService(tab);
+      ChromeDevToolsService cachedChromeDevToolsService = chromeDevToolServiceCache.get(sessionId);
+      if (cachedChromeDevToolsService != null) {
+        return cachedChromeDevToolsService;
       }
 
-      // Connect to a tab via web socket
-      String webSocketDebuggerUrl = tab.getWebSocketDebuggerUrl();
+      // Connect via web socket
       WebSocketService webSocketService =
           webSocketServiceFactory.createWebSocketService(webSocketDebuggerUrl);
 
@@ -198,12 +245,15 @@ public class ChromeServiceImpl implements ChromeService {
       // Register dev tools service with invocation handler.
       commandInvocationHandler.setChromeDevToolsService(chromeDevToolsService);
 
+      // Attach to this service so that close() evicts it from the cache.
+      chromeDevToolsService.attachToChromeService(this, sessionId);
+
       // Cache it up.
-      cacheChromeDevToolsService(tab, chromeDevToolsService);
+      chromeDevToolServiceCache.put(sessionId, chromeDevToolsService);
 
       return chromeDevToolsService;
     } catch (WebSocketServiceException ex) {
-      throw new ChromeServiceException("Failed connecting to tab web socket.", ex);
+      throw new ChromeServiceException("Failed connecting to web socket.", ex);
     }
   }
 
@@ -226,29 +276,39 @@ public class ChromeServiceImpl implements ChromeService {
   }
 
   /**
-   * Clears the chrome dev tool service cache given a tab.
+   * Clears the chrome dev tool service cache given a tab, closing the cached service if present.
    *
    * @param tab Chrome tab.
+   * @deprecated Close the {@link ChromeDevToolsService} directly instead; it removes itself from
+   *     the cache. This is kept only for backwards compatibility.
    */
+  @Deprecated
   public void clearChromeDevToolsServiceCache(ChromeTab tab) {
-    ChromeDevToolsService chromeDevToolsService = chromeDevToolServiceCache.remove(tab.getId());
+    closeChromeDevToolsService(tab.getId());
+  }
+
+  /**
+   * Closes the cached dev tools service for a session id, if present. Closing it evicts it from the
+   * cache.
+   *
+   * @param sessionId Session id (tab/target id, or {@value #BROWSER_SESSION_ID}).
+   */
+  private void closeChromeDevToolsService(String sessionId) {
+    ChromeDevToolsService chromeDevToolsService = chromeDevToolServiceCache.get(sessionId);
 
     if (chromeDevToolsService != null) {
       chromeDevToolsService.close();
     }
   }
 
-  private boolean isChromeDevToolsServiceCached(ChromeTab tab) {
-    return chromeDevToolServiceCache.get(tab.getId()) != null;
-  }
-
-  private ChromeDevToolsService getCachedChromeDevToolsService(ChromeTab tab) {
-    return chromeDevToolServiceCache.get(tab.getId());
-  }
-
-  private void cacheChromeDevToolsService(
-      ChromeTab tab, ChromeDevToolsService chromeDevToolsService) {
-    chromeDevToolServiceCache.put(tab.getId(), chromeDevToolsService);
+  /**
+   * Removes a dev tools service from the cache without closing it. Called by {@link
+   * ChromeDevToolsServiceImpl#close()} when a service closes itself.
+   *
+   * @param sessionId Session id.
+   */
+  void removeChromeDevToolsServiceFromCache(String sessionId) {
+    chromeDevToolServiceCache.remove(sessionId);
   }
 
   /**
