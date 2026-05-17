@@ -49,20 +49,20 @@ public class CSSMedia {
   }
 
   /**
-   * Source of the media query: "mediaRule" if specified by a @media rule, "importRule" if specified
-   * by an @import rule, "linkedSheet" if specified by a "media" attribute in a linked stylesheet's
-   * LINK tag, "inlineSheet" if specified by a "media" attribute in an inline stylesheet's STYLE
-   * tag.
+   * Source of the media query: "mediaRule" if specified by a &#64;media rule, "importRule" if
+   * specified by an &#64;import rule, "linkedSheet" if specified by a "media" attribute in a linked
+   * stylesheet's LINK tag, "inlineSheet" if specified by a "media" attribute in an inline
+   * stylesheet's STYLE tag.
    */
   public CSSMediaSource getSource() {
     return source;
   }
 
   /**
-   * Source of the media query: "mediaRule" if specified by a @media rule, "importRule" if specified
-   * by an @import rule, "linkedSheet" if specified by a "media" attribute in a linked stylesheet's
-   * LINK tag, "inlineSheet" if specified by a "media" attribute in an inline stylesheet's STYLE
-   * tag.
+   * Source of the media query: "mediaRule" if specified by a &#64;media rule, "importRule" if
+   * specified by an &#64;import rule, "linkedSheet" if specified by a "media" attribute in a linked
+   * stylesheet's LINK tag, "inlineSheet" if specified by a "media" attribute in an inline
+   * stylesheet's STYLE tag.
    */
   public void setSource(CSSMediaSource source) {
     this.source = source;
@@ -79,7 +79,7 @@ public class CSSMedia {
   }
 
   /**
-   * The associated rule (@media or @import) header range in the enclosing stylesheet (if
+   * The associated rule (&#64;media or &#64;import) header range in the enclosing stylesheet (if
    * available).
    */
   public SourceRange getRange() {
@@ -87,7 +87,7 @@ public class CSSMedia {
   }
 
   /**
-   * The associated rule (@media or @import) header range in the enclosing stylesheet (if
+   * The associated rule (&#64;media or &#64;import) header range in the enclosing stylesheet (if
    * available).
    */
   public void setRange(SourceRange range) {

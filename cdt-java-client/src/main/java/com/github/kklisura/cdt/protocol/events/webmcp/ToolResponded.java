@@ -85,12 +85,12 @@ public class ToolResponded {
     this.errorText = errorText;
   }
 
-  /** The exception object, if the javascript tool threw an error> */
+  /** The exception object, if the javascript tool threw an error&gt; */
   public RemoteObject getException() {
     return exception;
   }
 
-  /** The exception object, if the javascript tool threw an error> */
+  /** The exception object, if the javascript tool threw an error&gt; */
   public void setException(RemoteObject exception) {
     this.exception = exception;
   }

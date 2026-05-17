@@ -49,7 +49,7 @@ public class CSSContainerQuery {
 
   /**
    * Container query text. Contains the query part without the container name for a single query.
-   * Deprecated in favor of conditionText which contains the full prelude after @container.
+   * Deprecated in favor of conditionText which contains the full prelude after &#64;container.
    */
   public String getText() {
     return text;
@@ -57,7 +57,7 @@ public class CSSContainerQuery {
 
   /**
    * Container query text. Contains the query part without the container name for a single query.
-   * Deprecated in favor of conditionText which contains the full prelude after @container.
+   * Deprecated in favor of conditionText which contains the full prelude after &#64;container.
    */
   public void setText(String text) {
     this.text = text;

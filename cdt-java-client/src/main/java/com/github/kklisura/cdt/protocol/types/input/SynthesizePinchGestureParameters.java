@@ -65,12 +65,12 @@ public class SynthesizePinchGestureParameters {
     return this;
   }
 
-  /** Relative scale factor after zooming (>1.0 zooms in, <1.0 zooms out). */
+  /** Relative scale factor after zooming (&gt;1.0 zooms in, &lt;1.0 zooms out). */
   public Double getScaleFactor() {
     return scaleFactor;
   }
 
-  /** Relative scale factor after zooming (>1.0 zooms in, <1.0 zooms out). */
+  /** Relative scale factor after zooming (&gt;1.0 zooms in, &lt;1.0 zooms out). */
   public SynthesizePinchGestureParameters setScaleFactor(Double scaleFactor) {
     this.scaleFactor = scaleFactor;
     return this;

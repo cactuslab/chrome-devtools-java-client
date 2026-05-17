@@ -109,8 +109,8 @@ public interface Target {
    * <p>Injected object will be available as `window[bindingName]`.
    *
    * <p>The object has the following API: - `binding.send(json)` - a method to send messages over
-   * the remote debugging protocol - `binding.onmessage = json => handleMessage(json)` - a callback
-   * that will be called for the protocol notifications and command responses.
+   * the remote debugging protocol - `binding.onmessage = json =&gt; handleMessage(json)` - a
+   * callback that will be called for the protocol notifications and command responses.
    *
    * @param targetId
    */
@@ -124,8 +124,8 @@ public interface Target {
    * <p>Injected object will be available as `window[bindingName]`.
    *
    * <p>The object has the following API: - `binding.send(json)` - a method to send messages over
-   * the remote debugging protocol - `binding.onmessage = json => handleMessage(json)` - a callback
-   * that will be called for the protocol notifications and command responses.
+   * the remote debugging protocol - `binding.onmessage = json =&gt; handleMessage(json)` - a
+   * callback that will be called for the protocol notifications and command responses.
    *
    * @param targetId
    * @param bindingName Binding name, 'cdp' if not specified.
@@ -145,8 +145,8 @@ public interface Target {
    * <p>Injected object will be available as `window[bindingName]`.
    *
    * <p>The object has the following API: - `binding.send(json)` - a method to send messages over
-   * the remote debugging protocol - `binding.onmessage = json => handleMessage(json)` - a callback
-   * that will be called for the protocol notifications and command responses.
+   * the remote debugging protocol - `binding.onmessage = json =&gt; handleMessage(json)` - a
+   * callback that will be called for the protocol notifications and command responses.
    */
   @Experimental
   void exposeDevToolsProtocol(@ParamObject ExposeDevToolsProtocolParameters parameters);

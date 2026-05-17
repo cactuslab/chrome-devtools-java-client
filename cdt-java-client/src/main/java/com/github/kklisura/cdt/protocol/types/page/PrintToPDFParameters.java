@@ -239,7 +239,8 @@ public class PrintToPDFParameters {
    * `url`: document location - `pageNumber`: current page number - `totalPages`: total pages in the
    * document
    *
-   * <p>For example, `<span class=title></span>` would generate span containing the title.
+   * <p>For example, `&lt;span class=title&gt;&lt;/span&gt;` would generate span containing the
+   * title.
    */
   public String getHeaderTemplate() {
     return headerTemplate;
@@ -251,7 +252,8 @@ public class PrintToPDFParameters {
    * `url`: document location - `pageNumber`: current page number - `totalPages`: total pages in the
    * document
    *
-   * <p>For example, `<span class=title></span>` would generate span containing the title.
+   * <p>For example, `&lt;span class=title&gt;&lt;/span&gt;` would generate span containing the
+   * title.
    */
   public PrintToPDFParameters setHeaderTemplate(String headerTemplate) {
     this.headerTemplate = headerTemplate;

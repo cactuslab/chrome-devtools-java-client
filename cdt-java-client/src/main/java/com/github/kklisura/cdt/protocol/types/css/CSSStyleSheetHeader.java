@@ -178,8 +178,9 @@ public class CSSStyleSheetHeader {
 
   /**
    * Whether this stylesheet is mutable. Inline stylesheets become mutable after they have been
-   * modified via CSSOM API. `<link>` element's stylesheets become mutable only if DevTools modifies
-   * them. Constructed stylesheets (new CSSStyleSheet()) are mutable immediately after creation.
+   * modified via CSSOM API. `&lt;link&gt;` element's stylesheets become mutable only if DevTools
+   * modifies them. Constructed stylesheets (new CSSStyleSheet()) are mutable immediately after
+   * creation.
    */
   public Boolean getIsMutable() {
     return isMutable;
@@ -187,8 +188,9 @@ public class CSSStyleSheetHeader {
 
   /**
    * Whether this stylesheet is mutable. Inline stylesheets become mutable after they have been
-   * modified via CSSOM API. `<link>` element's stylesheets become mutable only if DevTools modifies
-   * them. Constructed stylesheets (new CSSStyleSheet()) are mutable immediately after creation.
+   * modified via CSSOM API. `&lt;link&gt;` element's stylesheets become mutable only if DevTools
+   * modifies them. Constructed stylesheets (new CSSStyleSheet()) are mutable immediately after
+   * creation.
    */
   public void setIsMutable(Boolean isMutable) {
     this.isMutable = isMutable;

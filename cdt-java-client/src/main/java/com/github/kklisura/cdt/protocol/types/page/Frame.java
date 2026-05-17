@@ -119,8 +119,8 @@ public class Frame {
 
   /**
    * Frame document's registered domain, taking the public suffixes list into account. Extracted
-   * from the Frame's url. Example URLs: http://www.google.com/file.html -> "google.com"
-   * http://a.b.co.uk/file.html -> "b.co.uk"
+   * from the Frame's url. Example URLs: http://www.google.com/file.html -&gt; "google.com"
+   * http://a.b.co.uk/file.html -&gt; "b.co.uk"
    */
   public String getDomainAndRegistry() {
     return domainAndRegistry;
@@ -128,8 +128,8 @@ public class Frame {
 
   /**
    * Frame document's registered domain, taking the public suffixes list into account. Extracted
-   * from the Frame's url. Example URLs: http://www.google.com/file.html -> "google.com"
-   * http://a.b.co.uk/file.html -> "b.co.uk"
+   * from the Frame's url. Example URLs: http://www.google.com/file.html -&gt; "google.com"
+   * http://a.b.co.uk/file.html -&gt; "b.co.uk"
    */
   public void setDomainAndRegistry(String domainAndRegistry) {
     this.domainAndRegistry = domainAndRegistry;

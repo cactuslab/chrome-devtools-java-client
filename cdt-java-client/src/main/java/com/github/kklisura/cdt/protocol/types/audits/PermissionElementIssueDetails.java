@@ -22,7 +22,7 @@ package com.github.kklisura.cdt.protocol.types.audits;
 
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 
-/** This issue warns about improper usage of the <permission> element. */
+/** This issue warns about improper usage of the &lt;permission&gt; element. */
 public class PermissionElementIssueDetails {
 
   private PermissionElementIssueType issueType;
@@ -59,12 +59,12 @@ public class PermissionElementIssueDetails {
     this.type = type;
   }
 
-  /** The node ID of the <permission> element. */
+  /** The node ID of the &lt;permission&gt; element. */
   public Integer getNodeId() {
     return nodeId;
   }
 
-  /** The node ID of the <permission> element. */
+  /** The node ID of the &lt;permission&gt; element. */
   public void setNodeId(Integer nodeId) {
     this.nodeId = nodeId;
   }

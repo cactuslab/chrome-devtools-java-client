@@ -58,22 +58,22 @@ public class CSSFunctionConditionNode {
     this.containerQueries = containerQueries;
   }
 
-  /** @supports CSS at-rule condition. Only one type of condition should be set. */
+  /** &#64;supports CSS at-rule condition. Only one type of condition should be set. */
   public CSSSupports getSupports() {
     return supports;
   }
 
-  /** @supports CSS at-rule condition. Only one type of condition should be set. */
+  /** &#64;supports CSS at-rule condition. Only one type of condition should be set. */
   public void setSupports(CSSSupports supports) {
     this.supports = supports;
   }
 
-  /** @navigation condition. Only one type of condition should be set. */
+  /** &#64;navigation condition. Only one type of condition should be set. */
   public CSSNavigation getNavigation() {
     return navigation;
   }
 
-  /** @navigation condition. Only one type of condition should be set. */
+  /** &#64;navigation condition. Only one type of condition should be set. */
   public void setNavigation(CSSNavigation navigation) {
     this.navigation = navigation;
   }

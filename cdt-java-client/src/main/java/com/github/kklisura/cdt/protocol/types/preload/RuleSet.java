@@ -62,7 +62,7 @@ public class RuleSet {
   }
 
   /**
-   * Source text of JSON representing the rule set. If it comes from `<script>` tag, it is the
+   * Source text of JSON representing the rule set. If it comes from `&lt;script&gt;` tag, it is the
    * textContent of the node. Note that it is a JSON for valid case.
    *
    * <p>See also: - https://wicg.github.io/nav-speculation/speculation-rules.html -
@@ -73,7 +73,7 @@ public class RuleSet {
   }
 
   /**
-   * Source text of JSON representing the rule set. If it comes from `<script>` tag, it is the
+   * Source text of JSON representing the rule set. If it comes from `&lt;script&gt;` tag, it is the
    * textContent of the node. Note that it is a JSON for valid case.
    *
    * <p>See also: - https://wicg.github.io/nav-speculation/speculation-rules.html -
@@ -84,10 +84,11 @@ public class RuleSet {
   }
 
   /**
-   * A speculation rule set is either added through an inline `<script>` tag or through an external
-   * resource via the 'Speculation-Rules' HTTP header. For the first case, we include the
-   * BackendNodeId of the relevant `<script>` tag. For the second case, we include the external URL
-   * where the rule set was loaded from, and also RequestId if Network domain is enabled.
+   * A speculation rule set is either added through an inline `&lt;script&gt;` tag or through an
+   * external resource via the 'Speculation-Rules' HTTP header. For the first case, we include the
+   * BackendNodeId of the relevant `&lt;script&gt;` tag. For the second case, we include the
+   * external URL where the rule set was loaded from, and also RequestId if Network domain is
+   * enabled.
    *
    * <p>See also: -
    * https://wicg.github.io/nav-speculation/speculation-rules.html#speculation-rules-script -
@@ -98,10 +99,11 @@ public class RuleSet {
   }
 
   /**
-   * A speculation rule set is either added through an inline `<script>` tag or through an external
-   * resource via the 'Speculation-Rules' HTTP header. For the first case, we include the
-   * BackendNodeId of the relevant `<script>` tag. For the second case, we include the external URL
-   * where the rule set was loaded from, and also RequestId if Network domain is enabled.
+   * A speculation rule set is either added through an inline `&lt;script&gt;` tag or through an
+   * external resource via the 'Speculation-Rules' HTTP header. For the first case, we include the
+   * BackendNodeId of the relevant `&lt;script&gt;` tag. For the second case, we include the
+   * external URL where the rule set was loaded from, and also RequestId if Network domain is
+   * enabled.
    *
    * <p>See also: -
    * https://wicg.github.io/nav-speculation/speculation-rules.html#speculation-rules-script -

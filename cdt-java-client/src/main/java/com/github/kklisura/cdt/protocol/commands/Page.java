@@ -412,7 +412,8 @@ public interface Page {
    *     following classes used to inject printing values into them: - `date`: formatted print date
    *     - `title`: document title - `url`: document location - `pageNumber`: current page number -
    *     `totalPages`: total pages in the document
-   *     <p>For example, `<span class=title></span>` would generate span containing the title.
+   *     <p>For example, `&lt;span class=title&gt;&lt;/span&gt;` would generate span containing the
+   *     title.
    * @param footerTemplate HTML template for the print footer. Should use the same format as the
    *     `headerTemplate`.
    * @param preferCSSPageSize Whether or not to prefer page size as defined by css. Defaults to

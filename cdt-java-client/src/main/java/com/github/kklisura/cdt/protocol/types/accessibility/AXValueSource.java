@@ -93,12 +93,12 @@ public class AXValueSource {
     this.superseded = superseded;
   }
 
-  /** The native markup source for this value, e.g. a `<label>` element. */
+  /** The native markup source for this value, e.g. a `&lt;label&gt;` element. */
   public AXValueNativeSourceType getNativeSource() {
     return nativeSource;
   }
 
-  /** The native markup source for this value, e.g. a `<label>` element. */
+  /** The native markup source for this value, e.g. a `&lt;label&gt;` element. */
   public void setNativeSource(AXValueNativeSourceType nativeSource) {
     this.nativeSource = nativeSource;
   }

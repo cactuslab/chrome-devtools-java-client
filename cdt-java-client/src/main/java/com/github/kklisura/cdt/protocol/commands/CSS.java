@@ -269,8 +269,8 @@ public interface CSS {
   InlineStylesForNode getInlineStylesForNode(@ParamName("nodeId") Integer nodeId);
 
   /**
-   * Returns the styles coming from animations & transitions including the animation & transition
-   * styles coming from inheritance chain.
+   * Returns the styles coming from animations &amp; transitions including the animation &amp;
+   * transition styles coming from inheritance chain.
    *
    * @param nodeId
    */

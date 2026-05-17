@@ -22,7 +22,7 @@ package com.github.kklisura.cdt.protocol.types.css;
 
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 
-/** CSS @position-try rule representation. */
+/** CSS &#64;position-try rule representation. */
 public class CSSPositionTryRule {
 
   private Value name;

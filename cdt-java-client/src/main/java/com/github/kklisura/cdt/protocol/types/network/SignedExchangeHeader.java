@@ -81,12 +81,12 @@ public class SignedExchangeHeader {
     this.signatures = signatures;
   }
 
-  /** Signed exchange header integrity hash in the form of `sha256-<base64-hash-value>`. */
+  /** Signed exchange header integrity hash in the form of `sha256-&lt;base64-hash-value&gt;`. */
   public String getHeaderIntegrity() {
     return headerIntegrity;
   }
 
-  /** Signed exchange header integrity hash in the form of `sha256-<base64-hash-value>`. */
+  /** Signed exchange header integrity hash in the form of `sha256-&lt;base64-hash-value&gt;`. */
   public void setHeaderIntegrity(String headerIntegrity) {
     this.headerIntegrity = headerIntegrity;
   }

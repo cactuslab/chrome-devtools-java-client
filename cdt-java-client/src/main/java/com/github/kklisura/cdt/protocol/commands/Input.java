@@ -363,7 +363,7 @@ public interface Input {
    *
    * @param x X coordinate of the start of the gesture in CSS pixels.
    * @param y Y coordinate of the start of the gesture in CSS pixels.
-   * @param scaleFactor Relative scale factor after zooming (>1.0 zooms in, <1.0 zooms out).
+   * @param scaleFactor Relative scale factor after zooming (&gt;1.0 zooms in, &lt;1.0 zooms out).
    */
   @Experimental
   void synthesizePinchGesture(
@@ -376,7 +376,7 @@ public interface Input {
    *
    * @param x X coordinate of the start of the gesture in CSS pixels.
    * @param y Y coordinate of the start of the gesture in CSS pixels.
-   * @param scaleFactor Relative scale factor after zooming (>1.0 zooms in, <1.0 zooms out).
+   * @param scaleFactor Relative scale factor after zooming (&gt;1.0 zooms in, &lt;1.0 zooms out).
    * @param relativeSpeed Relative pointer speed in pixels per second (default: 800).
    * @param gestureSourceType Which type of input events to be generated (default: 'default', which
    *     queries the platform for the preferred input type).

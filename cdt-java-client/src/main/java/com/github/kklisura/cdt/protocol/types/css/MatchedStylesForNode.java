@@ -132,7 +132,7 @@ public class MatchedStylesForNode {
   }
 
   /**
-   * A list of CSS @position-try rules matching this node, based on the position-try-fallbacks
+   * A list of CSS &#64;position-try rules matching this node, based on the position-try-fallbacks
    * property.
    */
   public List<CSSPositionTryRule> getCssPositionTryRules() {
@@ -140,7 +140,7 @@ public class MatchedStylesForNode {
   }
 
   /**
-   * A list of CSS @position-try rules matching this node, based on the position-try-fallbacks
+   * A list of CSS &#64;position-try rules matching this node, based on the position-try-fallbacks
    * property.
    */
   public void setCssPositionTryRules(List<CSSPositionTryRule> cssPositionTryRules) {
@@ -183,12 +183,12 @@ public class MatchedStylesForNode {
     this.cssPropertyRegistrations = cssPropertyRegistrations;
   }
 
-  /** A list of simple @rules matching this node or its pseudo-elements. */
+  /** A list of simple &#64;rules matching this node or its pseudo-elements. */
   public List<CSSAtRule> getCssAtRules() {
     return cssAtRules;
   }
 
-  /** A list of simple @rules matching this node or its pseudo-elements. */
+  /** A list of simple &#64;rules matching this node or its pseudo-elements. */
   public void setCssAtRules(List<CSSAtRule> cssAtRules) {
     this.cssAtRules = cssAtRules;
   }

@@ -52,12 +52,18 @@ public class FileChooserOpened {
     this.mode = mode;
   }
 
-  /** Input node id. Only present for file choosers opened via an `<input type="file">` element. */
+  /**
+   * Input node id. Only present for file choosers opened via an `&lt;input type="file"&gt;`
+   * element.
+   */
   public Integer getBackendNodeId() {
     return backendNodeId;
   }
 
-  /** Input node id. Only present for file choosers opened via an `<input type="file">` element. */
+  /**
+   * Input node id. Only present for file choosers opened via an `&lt;input type="file"&gt;`
+   * element.
+   */
   public void setBackendNodeId(Integer backendNodeId) {
     this.backendNodeId = backendNodeId;
   }

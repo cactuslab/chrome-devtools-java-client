@@ -23,9 +23,10 @@ package com.github.kklisura.cdt.protocol.types.css;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Source of the media query: "mediaRule" if specified by a @media rule, "importRule" if specified
- * by an @import rule, "linkedSheet" if specified by a "media" attribute in a linked stylesheet's
- * LINK tag, "inlineSheet" if specified by a "media" attribute in an inline stylesheet's STYLE tag.
+ * Source of the media query: "mediaRule" if specified by a &#64;media rule, "importRule" if
+ * specified by an &#64;import rule, "linkedSheet" if specified by a "media" attribute in a linked
+ * stylesheet's LINK tag, "inlineSheet" if specified by a "media" attribute in an inline
+ * stylesheet's STYLE tag.
  */
 public enum CSSMediaSource {
   @JsonProperty("mediaRule")

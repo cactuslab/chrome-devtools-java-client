@@ -34,7 +34,7 @@ public class RequestPattern {
   @Optional private InterceptionStage interceptionStage;
 
   /**
-   * Wildcards (`'*'` -> zero or more, `'?'` -> exactly one) are allowed. Escape character is
+   * Wildcards (`'*'` -&gt; zero or more, `'?'` -&gt; exactly one) are allowed. Escape character is
    * backslash. Omitting is equivalent to `"*"`.
    */
   public String getUrlPattern() {
@@ -42,7 +42,7 @@ public class RequestPattern {
   }
 
   /**
-   * Wildcards (`'*'` -> zero or more, `'?'` -> exactly one) are allowed. Escape character is
+   * Wildcards (`'*'` -&gt; zero or more, `'?'` -&gt; exactly one) are allowed. Escape character is
    * backslash. Omitting is equivalent to `"*"`.
    */
   public void setUrlPattern(String urlPattern) {

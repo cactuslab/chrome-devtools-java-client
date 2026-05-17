@@ -154,16 +154,16 @@ public class CSSRule {
   }
 
   /**
-   * @supports CSS at-rule array. The array enumerates @supports at-rules starting with the
-   *     innermost one, going outwards.
+   * &#64;supports CSS at-rule array. The array enumerates &#64;supports at-rules starting with the
+   * innermost one, going outwards.
    */
   public List<CSSSupports> getSupports() {
     return supports;
   }
 
   /**
-   * @supports CSS at-rule array. The array enumerates @supports at-rules starting with the
-   *     innermost one, going outwards.
+   * &#64;supports CSS at-rule array. The array enumerates &#64;supports at-rules starting with the
+   * innermost one, going outwards.
    */
   public void setSupports(List<CSSSupports> supports) {
     this.supports = supports;
@@ -186,16 +186,16 @@ public class CSSRule {
   }
 
   /**
-   * @scope CSS at-rule array. The array enumerates @scope at-rules starting with the innermost one,
-   *     going outwards.
+   * &#64;scope CSS at-rule array. The array enumerates &#64;scope at-rules starting with the
+   * innermost one, going outwards.
    */
   public List<CSSScope> getScopes() {
     return scopes;
   }
 
   /**
-   * @scope CSS at-rule array. The array enumerates @scope at-rules starting with the innermost one,
-   *     going outwards.
+   * &#64;scope CSS at-rule array. The array enumerates &#64;scope at-rules starting with the
+   * innermost one, going outwards.
    */
   public void setScopes(List<CSSScope> scopes) {
     this.scopes = scopes;
@@ -212,32 +212,32 @@ public class CSSRule {
   }
 
   /**
-   * @starting-style CSS at-rule array. The array enumerates @starting-style at-rules starting with
-   *     the innermost one, going outwards.
+   * &#64;starting-style CSS at-rule array. The array enumerates &#64;starting-style at-rules
+   * starting with the innermost one, going outwards.
    */
   public List<CSSStartingStyle> getStartingStyles() {
     return startingStyles;
   }
 
   /**
-   * @starting-style CSS at-rule array. The array enumerates @starting-style at-rules starting with
-   *     the innermost one, going outwards.
+   * &#64;starting-style CSS at-rule array. The array enumerates &#64;starting-style at-rules
+   * starting with the innermost one, going outwards.
    */
   public void setStartingStyles(List<CSSStartingStyle> startingStyles) {
     this.startingStyles = startingStyles;
   }
 
   /**
-   * @navigation CSS at-rule array. The array enumerates @navigation at-rules starting with the
-   *     innermost one, going outwards.
+   * &#64;navigation CSS at-rule array. The array enumerates &#64;navigation at-rules starting with
+   * the innermost one, going outwards.
    */
   public List<CSSNavigation> getNavigations() {
     return navigations;
   }
 
   /**
-   * @navigation CSS at-rule array. The array enumerates @navigation at-rules starting with the
-   *     innermost one, going outwards.
+   * &#64;navigation CSS at-rule array. The array enumerates &#64;navigation at-rules starting with
+   * the innermost one, going outwards.
    */
   public void setNavigations(List<CSSNavigation> navigations) {
     this.navigations = navigations;

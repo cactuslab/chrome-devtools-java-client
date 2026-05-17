@@ -22,7 +22,7 @@ package com.github.kklisura.cdt.protocol.types.css;
 
 import com.github.kklisura.cdt.protocol.support.annotations.Optional;
 
-/** CSS generic @rule representation. */
+/** CSS generic &#64;rule representation. */
 public class CSSAtRule {
 
   private CSSAtRuleType type;
