@@ -119,4 +119,14 @@ public interface ChromeService {
    * @throws ChromeServiceException If creation fails for any reason.
    */
   ChromeDevToolsService createDevToolsService(String targetId) throws ChromeServiceException;
+
+  /**
+   * Creates a tab running in its own browser context, isolated from every other tab on this Chrome
+   * instance: no shared cookies, storage or cache. {@link IsolatedTab#close()} disposes the tab and
+   * its browser context, so the returned tab is intended to be used in a try-with-resources block.
+   *
+   * @return Isolated tab.
+   * @throws ChromeServiceException If creation fails for any reason.
+   */
+  IsolatedTab createIsolatedTab() throws ChromeServiceException;
 }

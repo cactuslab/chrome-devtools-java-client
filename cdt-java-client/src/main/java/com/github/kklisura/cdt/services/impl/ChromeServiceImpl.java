@@ -21,8 +21,11 @@ package com.github.kklisura.cdt.services.impl;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.kklisura.cdt.protocol.commands.Target;
+import com.github.kklisura.cdt.protocol.types.target.CreateTargetParameters;
 import com.github.kklisura.cdt.services.ChromeDevToolsService;
 import com.github.kklisura.cdt.services.ChromeService;
+import com.github.kklisura.cdt.services.IsolatedTab;
 import com.github.kklisura.cdt.services.WebSocketService;
 import com.github.kklisura.cdt.services.config.ChromeDevToolsServiceConfiguration;
 import com.github.kklisura.cdt.services.exceptions.ChromeServiceException;
@@ -195,6 +198,23 @@ public class ChromeServiceImpl implements ChromeService {
         String.format("ws://%s:%d/devtools/page/%s", host, port, targetId);
     return createDevToolsService(
         targetId, webSocketDebuggerUrl, new ChromeDevToolsServiceConfiguration());
+  }
+
+  @Override
+  public IsolatedTab createIsolatedTab() throws ChromeServiceException {
+    Target target = createBrowserDevToolsService().getTarget();
+    String browserContextId = target.createBrowserContext();
+    try {
+      CreateTargetParameters params = new CreateTargetParameters();
+      params.setUrl(ABOUT_BLANK_PAGE);
+      params.setBrowserContextId(browserContextId);
+      String targetId = target.createTarget(params);
+      return new IsolatedTab(target, browserContextId, targetId, createDevToolsService(targetId));
+    } catch (RuntimeException e) {
+      // Don't leak the browser context if creating the target or its dev tools service fails.
+      target.disposeBrowserContext(browserContextId);
+      throw e;
+    }
   }
 
   /**

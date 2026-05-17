@@ -28,14 +28,21 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kklisura.cdt.protocol.ChromeDevTools;
 import com.github.kklisura.cdt.protocol.commands.Network;
+import com.github.kklisura.cdt.protocol.commands.Target;
+import com.github.kklisura.cdt.protocol.types.target.CreateTargetParameters;
 import com.github.kklisura.cdt.services.ChromeDevToolsService;
+import com.github.kklisura.cdt.services.IsolatedTab;
 import com.github.kklisura.cdt.services.WebSocketService;
 import com.github.kklisura.cdt.services.exceptions.ChromeServiceException;
 import com.github.kklisura.cdt.services.exceptions.WebSocketServiceException;
@@ -51,6 +58,7 @@ import java.net.HttpURLConnection;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -521,6 +529,54 @@ public class ChromeServiceImplTest {
     verify(webSocketService).close();
 
     assertNotSame(devTools, service.createDevToolsService("TARGET-ID"));
+  }
+
+  @Test
+  public void testCreateIsolatedTab() throws ChromeServiceException {
+    ChromeServiceImpl service = spy(new ChromeServiceImpl(9222, webSocketServiceFactory));
+
+    ChromeDevToolsService browserDevTools = mock(ChromeDevToolsService.class);
+    Target target = mock(Target.class);
+    ChromeDevToolsService tabDevTools = mock(ChromeDevToolsService.class);
+
+    doReturn(browserDevTools).when(service).createBrowserDevToolsService();
+    when(browserDevTools.getTarget()).thenReturn(target);
+    when(target.createBrowserContext()).thenReturn("browser-context-id");
+    when(target.createTarget(any(CreateTargetParameters.class))).thenReturn("target-id");
+    doReturn(tabDevTools).when(service).createDevToolsService("target-id");
+
+    IsolatedTab isolatedTab = service.createIsolatedTab();
+
+    assertEquals("browser-context-id", isolatedTab.getBrowserContextId());
+    assertEquals("target-id", isolatedTab.getTargetId());
+    assertSame(tabDevTools, isolatedTab.getDevToolsService());
+
+    ArgumentCaptor<CreateTargetParameters> paramsCaptor =
+        ArgumentCaptor.forClass(CreateTargetParameters.class);
+    verify(target).createTarget(paramsCaptor.capture());
+    assertEquals(ChromeServiceImpl.ABOUT_BLANK_PAGE, paramsCaptor.getValue().getUrl());
+    assertEquals("browser-context-id", paramsCaptor.getValue().getBrowserContextId());
+  }
+
+  @Test
+  public void testCreateIsolatedTabDisposesBrowserContextOnFailure() {
+    ChromeServiceImpl service = spy(new ChromeServiceImpl(9222, webSocketServiceFactory));
+
+    ChromeDevToolsService browserDevTools = mock(ChromeDevToolsService.class);
+    Target target = mock(Target.class);
+
+    doReturn(browserDevTools).when(service).createBrowserDevToolsService();
+    when(browserDevTools.getTarget()).thenReturn(target);
+    when(target.createBrowserContext()).thenReturn("browser-context-id");
+
+    RuntimeException failure = new RuntimeException("createTarget failed");
+    when(target.createTarget(any(CreateTargetParameters.class))).thenThrow(failure);
+
+    RuntimeException thrown = assertThrows(RuntimeException.class, service::createIsolatedTab);
+    assertSame(failure, thrown);
+
+    // The browser context must not be leaked when target creation fails.
+    verify(target).disposeBrowserContext("browser-context-id");
   }
 
   private static ChromeTab createChromeTab(String id) throws IOException {

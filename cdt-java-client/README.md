@@ -90,7 +90,40 @@ public class LogRequestsExample {
 ```
 
 For more examples, see `cdt-examples`.
- 
+
+## Isolated tabs
+
+When running many jobs on a single shared Chrome instance, use `createIsolatedTab()` to give each job its own browser context. Tabs in different browser contexts share no cookies, storage, or cache, so jobs cannot interfere with each other.
+
+`IsolatedTab` is `AutoCloseable`: closing it disposes the dev tools session, the tab target and the browser context in one step.
+
+```java
+try (IsolatedTab tab = chromeService.createIsolatedTab()) {
+    ChromeDevToolsService devToolsService = tab.getDevToolsService();
+    // ... drive the tab ...
+}
+// tab, its target, and its browser context are all disposed here
+```
+
+Without `IsolatedTab`, the equivalent cleanup requires a three-level try/finally:
+
+```java
+Target target = chromeService.createBrowserDevToolsService().getTarget();
+String browserContextId = target.createBrowserContext();
+try {
+    String targetId = target.createTarget(/* url=about:blank, browserContextId */);
+    ChromeDevToolsService devToolsService = chromeService.createDevToolsService(targetId);
+    try {
+        // ... drive the tab ...
+    } finally {
+        devToolsService.close();
+        target.closeTarget(targetId);
+    }
+} finally {
+    target.disposeBrowserContext(browserContextId);
+}
+```
+
 ## Running unit tests
 
 `make verify`
