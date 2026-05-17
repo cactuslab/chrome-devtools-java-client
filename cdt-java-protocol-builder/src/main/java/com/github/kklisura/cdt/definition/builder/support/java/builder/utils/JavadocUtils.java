@@ -58,8 +58,19 @@ public class JavadocUtils {
   }
 
   private static String escapeJavadoc(String comment) {
-    // "*/" terminates a Javadoc block; escape the slash so the source stays valid Java while the
-    // rendered Javadoc still shows "*/".
-    return comment.replace("*/", "*&#47;");
+    return comment
+        // "&" first, before other replacements introduce "&"
+        .replace("&", "&amp;")
+        // "<script>" and other HTML tags would trigger Javadoc's "JavaScript found" error
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        // "@" at line-start is interpreted as a Javadoc block tag; CSS at-rules (e.g. @supports,
+        // @scope) must be escaped, but standard Javadoc block tags (@param, @return, etc.) must
+        // not.
+        .replaceAll(
+            "@(?!(param|return|throws|exception|deprecated|see|since|version|author|serial|serialData|serialField)\\b)",
+            "&#64;")
+        // "*/" terminates a Javadoc block
+        .replace("*/", "*&#47;");
   }
 }
