@@ -20,6 +20,7 @@ package com.github.kklisura.cdt.services.impl;
  * #L%
  */
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kklisura.cdt.protocol.commands.Target;
 import com.github.kklisura.cdt.protocol.types.target.CreateTargetParameters;
@@ -56,7 +57,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChromeServiceImpl implements ChromeService {
   public static final String ABOUT_BLANK_PAGE = "about:blank";
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER =
+      new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
   private static final String EMPTY_STRING = "";
 

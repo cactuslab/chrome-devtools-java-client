@@ -66,7 +66,8 @@ public abstract class ChromeDevToolsServiceImpl
   private static final ObjectMapper OBJECT_MAPPER =
       new ObjectMapper()
           .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+          .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
 
   private WebSocketService webSocketService;
 
