@@ -32,6 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kklisura.cdt.protocol.support.types.EventHandler;
 import com.github.kklisura.cdt.protocol.support.types.EventListener;
@@ -531,6 +532,31 @@ public class ChromeDevToolsServiceImplTest {
     assertEquals("testValue", capturedMessage[0].getTestProperty());
   }
 
+  @Test
+  public void testEventReceivedWithUnknownEnumValue() {
+    final TestEnumMessage[] capturedMessage = new TestEnumMessage[1];
+
+    EventHandler<TestEnumMessage> eventHandler = msg -> capturedMessage[0] = msg;
+    service.addEventListener("Domain", "name", eventHandler, TestEnumMessage.class);
+
+    expectEventExecutorCall();
+
+    service.accept(
+        "{\"method\":\"Domain.name\",\"params\":{\"testEnum\":\"known\",\"testProperty\":\"testValue\"}}");
+
+    assertNotNull(capturedMessage[0]);
+    assertEquals(TestEnum.KNOWN, capturedMessage[0].getTestEnum());
+
+    capturedMessage[0] = null;
+
+    service.accept(
+        "{\"method\":\"Domain.name\",\"params\":{\"testEnum\":\"addedByNewerChrome\",\"testProperty\":\"testValue\"}}");
+
+    assertNotNull(capturedMessage[0]);
+    assertNull(capturedMessage[0].getTestEnum());
+    assertEquals("testValue", capturedMessage[0].getTestProperty());
+  }
+
   private MethodInvocation newMethodInvocation() {
     MethodInvocation methodInvocation = new MethodInvocation();
     methodInvocation.setId(1L);
@@ -587,6 +613,32 @@ public class ChromeDevToolsServiceImplTest {
 
     public void setTestProperty2(String testProperty2) {
       this.testProperty2 = testProperty2;
+    }
+  }
+
+  public enum TestEnum {
+    @JsonProperty("known")
+    KNOWN
+  }
+
+  public static class TestEnumMessage {
+    private TestEnum testEnum;
+    private String testProperty;
+
+    public TestEnum getTestEnum() {
+      return testEnum;
+    }
+
+    public void setTestEnum(TestEnum testEnum) {
+      this.testEnum = testEnum;
+    }
+
+    public String getTestProperty() {
+      return testProperty;
+    }
+
+    public void setTestProperty(String testProperty) {
+      this.testProperty = testProperty;
     }
   }
 

@@ -339,6 +339,44 @@ public class ChromeServiceImplTest {
   }
 
   @Test
+  public void testGetTabsWithUnknownProperties()
+      throws IOException, ChromeServiceException, InterruptedException {
+    MockWebServer server = new MockWebServer();
+    server.enqueue(
+        new MockResponse()
+            .setBody("[{\"id\":\"ABC\",\"type\":\"page\",\"unknownProperty\":{\"nested\":true}}]"));
+    server.start();
+
+    ChromeServiceImpl service = new ChromeServiceImpl(server.getHostName(), server.getPort());
+
+    List<ChromeTab> tabs = service.getTabs();
+
+    assertEquals(1, tabs.size());
+    assertEquals("ABC", tabs.get(0).getId());
+    assertTrue(tabs.get(0).isPageType());
+
+    server.shutdown();
+  }
+
+  @Test
+  public void testVersionWithUnknownProperties()
+      throws IOException, ChromeServiceException, InterruptedException {
+    MockWebServer server = new MockWebServer();
+    server.enqueue(
+        new MockResponse()
+            .setBody("{\"Browser\":\"Chrome/141.0.0.0\",\"Android-Package\":\"unknown\"}"));
+    server.start();
+
+    ChromeServiceImpl service = new ChromeServiceImpl(server.getHostName(), server.getPort());
+
+    ChromeVersion version = service.getVersion();
+
+    assertEquals("Chrome/141.0.0.0", version.getBrowser());
+
+    server.shutdown();
+  }
+
+  @Test
   public void testGetDevTools()
       throws IOException, ChromeServiceException, WebSocketServiceException {
     ChromeServiceImpl service = new ChromeServiceImpl(9222, webSocketServiceFactory);
